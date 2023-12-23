@@ -13,6 +13,7 @@ class InstructionSet():
                 "S_ABSDIFF_I32": self.s_absdiff_i32, 
                 "S_LSHL_B32": self.s_lshl_b32, 
                 "S_LSHL_B64": self.s_lshl_b64, 
+                "S_LSHR_B32": self.s_lshr_b32, 
             },
         }
         # Register file 8-bit adressable array, register size imposed by the ISA interface.
