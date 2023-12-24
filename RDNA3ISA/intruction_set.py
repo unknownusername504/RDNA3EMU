@@ -678,35 +678,44 @@ class InstructionSet():
         tmp = utils.rev_b32(reg_s0_val)
         self.set_register_value(reg_d, tmp, signed=False, size=32)
 
-        
+    # Reverse the order of bits in a scalar input and store the result into a scalar register.
     def s_brev_b64(self, reg_d, reg_s0):
         reg_s0_val = self.get_register_value(reg_s0, signed=False, size=64)
         tmp = utils.rev_b64(reg_s0_val)
         self.set_register_value(reg_d, tmp, signed=False, size=64)
 
-    def s_ctz_i32_b32(self):
-        # Implementation for S_CTZ_I32_B32
-        pass
+    # Count the number of trailing "0" bits before the first "1" in a scalar input and store the result into a scalar
+    # register. Store -1 if there are no "1" bits in the input.
+    def s_ctz_i32_b32(self, reg_d, reg_s0):
+        reg_s0_val = self.get_register_value(reg_s0, signed=False, size=32) 
+        tmp = utils.ctz(reg_s0_val, 32) 
+        self.set_register_value(reg_d, tmp, signed=True, size=32)
 
-    def s_ctz_i32_b64(self):
-        # Implementation for S_CTZ_I32_B64
-        pass
+    def s_ctz_i32_b64(self, reg_d, reg_s0):
+        reg_s0_val = self.get_register_value(reg_s0, signed=False, size=64) 
+        tmp = utils.ctz(reg_s0_val, 64) 
+        self.set_register_value(reg_d, tmp, signed=True, size=32)
 
-    def s_clz_i32_u32(self):
-        # Implementation for S_CLZ_I32_U32
-        pass
+    def s_clz_i32_u32(self, reg_d, reg_s0):
+        reg_s0_val = self.get_register_value(reg_s0, signed=False, size=32) 
+        tmp = utils.clz(reg_s0_val, 32) 
+        self.set_register_value(reg_d, tmp, signed=True, size=32)
 
-    def s_clz_i32_u64(self):
-        # Implementation for S_CLZ_I32_U64
-        pass
 
-    def s_cls_i32(self):
-        # Implementation for S_CLS_I32
-        pass
+    def s_clz_i32_u64(self, reg_d, reg_s0):
+        reg_s0_val = self.get_register_value(reg_s0, signed=False, size=64) 
+        tmp = utils.clz(reg_s0_val, 64) 
+        self.set_register_value(reg_d, tmp, signed=True, size=32)
 
-    def s_cls_i32_i64(self):
-        # Implementation for S_CLS_I32_I64
-        pass
+    def s_cls_i32(self, reg_d, reg_s0):
+        reg_s0_val = self.get_register_value(reg_s0, signed=False, size=32) 
+        tmp = utils.cls(reg_s0_val, 32) 
+        self.set_register_value(reg_d, tmp, signed=True, size=32)
+
+    def s_cls_i32_i64(self, reg_d, reg_s0):
+        reg_s0_val = self.get_register_value(reg_s0, signed=False, size=64) 
+        tmp = utils.cls(reg_s0_val, 64) 
+        self.set_register_value(reg_d, tmp, signed=True, size=32)
 
     def s_sext_i32_i8(self):
         # Implementation for S_SEXT_I32_I8

@@ -30,11 +30,41 @@ def rev_b64(x):
     
     return x
 
-# Example usage:
-input_value_32 = 0b11011010101010101110100101010101  # Replace with your 32-bit integer
-result_32 = rev_b32(input_value_32)
-print(bin(result_32))
+def ctz(x, size=32):
+    tmp = -1
+    for i in range(0,size):
+        if x & 1:
+            tmp = i
+            break
+        x >>= 1
+    return tmp
 
-input_value_64 = 0b1101101010101010111010010101010110101010101010111101001010101010  # Replace with your 64-bit integer
-result_64 = rev_b64(input_value_64)
-print(bin(result_64))
+
+def clz(x, size=32):
+    tmp = -1
+    m = 1 << size
+    for i in range(size,-1,-1):
+        if x & m:
+            tmp = (size-1) - i 
+            break
+        x <<= 1
+    return tmp 
+
+def cls(x, size=32):
+    tmp = -1
+    sign_bit = (x>>(size-1)) & 1 
+    for i in range(1, size):
+        next_bit = (x & (1<<(size-2))) >> (size-2)
+        if sign_bit != next_bit: 
+            tmp = i 
+            break
+        x <<= 1
+    return tmp
+
+
+print(cls(0, 32))
+print(cls(0x0000cccc, 32))
+print(cls(0xffff3333, 32))
+print(cls(0x7fffffff, 32))
+print(cls(0x80000000, 32))
+print(cls(0xffffffff, 32))
