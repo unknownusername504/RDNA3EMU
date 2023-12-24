@@ -68,3 +68,44 @@ print(cls(0xffff3333, 32))
 print(cls(0x7fffffff, 32))
 print(cls(0x80000000, 32))
 print(cls(0xffffffff, 32))
+
+def sext_i32(x, in_sz=8):
+    m = 1 << (in_sz-1)
+    if m & x:
+        return x | 0xFFFFFF00
+    return x
+
+x = 0b1100_1011
+print(format(x, '08b'))
+print(format(sext_i32(x), '032b'))
+x = 0b0100_1111
+print(format(sext_i32(x), '032b'))
+x = 0b0100_1111_1111_0000
+print(format(sext_i32(x,16), '032b'))
+x = 0b1100_1111_1111_0000
+print(format(sext_i32(x,16), '032b'))
+
+def bitset0(x, offset):
+    return x & (~(1 << offset))
+
+def bitset1(x, offset):
+    return x | (1 << offset)
+
+print(bin(bitset0(0b1111,3)))
+print(bin(bitset1(0b0000,3)))
+
+def bitreplicate(x):
+    tmp = x
+    r = 0
+    for i in range(0,32):
+        if tmp & 1: 
+            r = bitset1(r, i*2)
+            r = bitset1(r, i*2 + 1)
+        else:
+            r = bitset0(r, i*2)
+            r = bitset0(r, i*2 + 1)
+        tmp >>= 1
+    return r
+
+x=0b0101_0101_0101_0101_0101_0101_0101_0101
+print(format(bitreplicate(x), '064b'))
