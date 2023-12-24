@@ -728,13 +728,13 @@ class InstructionSet():
     # SOP1
     # Move scalar input into a scalar register. (32-bit)
     def s_move_b32(self, reg_d, reg_s0):
-        reg_s0_val = self.get_register_value(reg_s0, signed=False, size=32, reg_type="SGPR")
-        self.set_register_value(reg_d, reg_s0_val, signed=False, size=32, reg_type="SGPR")
+        reg_s0_val = self.get_register_value(reg_s0, signed=False, size=32)
+        self.set_register_value(reg_d, reg_s0_val, signed=False, size=32)
 
     # Move scalar input into a scalar register. (64-bit)
     def s_move_b64(self, reg_d, reg_s0):
-        reg_s0_val = self.get_register_value(reg_s0, signed=False, size=64, reg_type="SGPR")
-        self.set_register_value(reg_d, reg_s0_val, signed=False, size=64, reg_type="SGPR")
+        reg_s0_val = self.get_register_value(reg_s0, signed=False, size=64)
+        self.set_register_value(reg_d, reg_s0_val, signed=False, size=64)
 
     # Move scalar input into a scalar register iff SCC is nonzero.
     def c_move_b32(self, reg_d, reg_s0):
@@ -747,71 +747,100 @@ class InstructionSet():
 
     # Reverse the order of bits in a scalar input and store the result into a scalar register.
     def s_brev_b32(self, reg_d, reg_s0):
-        reg_s0_val = self.get_register_value(reg_s0, signed=False, size=32, reg_type="SGPR")
+        reg_s0_val = self.get_register_value(reg_s0, signed=False, size=32)
         tmp = utils.rev_b32(reg_s0_val)
-        self.set_register_value(reg_d, tmp, signed=False, size=32, reg_type="SGPR")
+        self.set_register_value(reg_d, tmp, signed=False, size=32)
 
-        
+    # Reverse the order of bits in a scalar input and store the result into a scalar register.
     def s_brev_b64(self, reg_d, reg_s0):
-        reg_s0_val = self.get_register_value(reg_s0, signed=False, size=64, reg_type="SGPR")
+        reg_s0_val = self.get_register_value(reg_s0, signed=False, size=64)
         tmp = utils.rev_b64(reg_s0_val)
-        self.set_register_value(reg_d, tmp, signed=False, size=64, reg_type="SGPR")
+        self.set_register_value(reg_d, tmp, signed=False, size=64)
 
-    def s_ctz_i32_b32(self):
-        # Implementation for S_CTZ_I32_B32
-        pass
+    # Count the number of trailing "0" bits before the first "1" in a scalar input and store the result into a scalar
+    # register. Store -1 if there are no "1" bits in the input.
+    def s_ctz_i32_b32(self, reg_d, reg_s0):
+        reg_s0_val = self.get_register_value(reg_s0, signed=False, size=32) 
+        tmp = utils.ctz(reg_s0_val, 32) 
+        self.set_register_value(reg_d, tmp, signed=True, size=32)
 
-    def s_ctz_i32_b64(self):
-        # Implementation for S_CTZ_I32_B64
-        pass
+    def s_ctz_i32_b64(self, reg_d, reg_s0):
+        reg_s0_val = self.get_register_value(reg_s0, signed=False, size=64) 
+        tmp = utils.ctz(reg_s0_val, 64) 
+        self.set_register_value(reg_d, tmp, signed=True, size=32)
 
-    def s_clz_i32_u32(self):
-        # Implementation for S_CLZ_I32_U32
-        pass
+    def s_clz_i32_u32(self, reg_d, reg_s0):
+        reg_s0_val = self.get_register_value(reg_s0, signed=False, size=32) 
+        tmp = utils.clz(reg_s0_val, 32) 
+        self.set_register_value(reg_d, tmp, signed=True, size=32)
 
-    def s_clz_i32_u64(self):
-        # Implementation for S_CLZ_I32_U64
-        pass
 
-    def s_cls_i32(self):
-        # Implementation for S_CLS_I32
-        pass
+    def s_clz_i32_u64(self, reg_d, reg_s0):
+        reg_s0_val = self.get_register_value(reg_s0, signed=False, size=64) 
+        tmp = utils.clz(reg_s0_val, 64) 
+        self.set_register_value(reg_d, tmp, signed=True, size=32)
 
-    def s_cls_i32_i64(self):
-        # Implementation for S_CLS_I32_I64
-        pass
+    def s_cls_i32(self, reg_d, reg_s0):
+        reg_s0_val = self.get_register_value(reg_s0, signed=False, size=32) 
+        tmp = utils.cls(reg_s0_val, 32) 
+        self.set_register_value(reg_d, tmp, signed=True, size=32)
 
-    def s_sext_i32_i8(self):
-        # Implementation for S_SEXT_I32_I8
-        pass
+    def s_cls_i32_i64(self, reg_d, reg_s0):
+        reg_s0_val = self.get_register_value(reg_s0, signed=False, size=64) 
+        tmp = utils.cls(reg_s0_val, 64) 
+        self.set_register_value(reg_d, tmp, signed=True, size=32)
 
-    def s_sext_i32_i16(self):
-        # Implementation for S_SEXT_I32_I16
-        pass
+    # Sign extend an 8-bit scalar value to 32-bits
+    def s_sext_i32_i8(self, reg_d, reg_s0):
+        reg_s0_val = self.get_register_value(reg_s0, signed=True, size=8) 
+        tmp = utils.sext_i32(reg_s0_val, 8) 
+        self.set_register_value(reg_d, tmp, signed=True, size=32)
 
-    def s_bitset0_b32(self):
-        # Implementation for S_BITSET0_B32
-        pass
+    # Sign extend an 16-bit scalar value to 32-bits
+    def s_sext_i32_i16(self, reg_d, reg_s0):
+        reg_s0_val = self.get_register_value(reg_s0, signed=True, size=16) 
+        tmp = utils.sext_i32(reg_s0_val, 16) 
+        self.set_register_value(reg_d, tmp, signed=True, size=32)
 
-    def s_bitset0_b64(self):
-        # Implementation for S_BITSET0_B64
-        pass
+    # Set bit to 0 at offset (reg_s0) in reg_d
+    def s_bitset0_b32(self, reg_d, reg_s0):
+        offset = self.get_register_value(reg_s0, signed=False, size=5) 
+        reg_d_val = self.get_register_value(reg_d, signed=False, size=32) 
+        tmp = utils.bitset0(reg_d_val, offset) 
+        self.set_register_value(reg_d, tmp, signed=False, size=32)
 
-    def s_bitset1_b32(self):
-        # Implementation for S_BITSET1_B32
-        pass
+    def s_bitset0_b64(self, reg_d, reg_s0):
+        offset = self.get_register_value(reg_s0, signed=False, size=6) 
+        reg_d_val = self.get_register_value(reg_d, signed=False, size=64) 
+        tmp = utils.bitset0(reg_d_val, offset) 
+        self.set_register_value(reg_d, tmp, signed=False, size=64)
 
-    def s_bitset1_b64(self):
-        # Implementation for S_BITSET1_B64
-        pass
+    def s_bitset1_b32(self, reg_d, reg_s0):
+        offset = self.get_register_value(reg_s0, signed=False, size=5) 
+        reg_d_val = self.get_register_value(reg_d, signed=False, size=32) 
+        tmp = utils.bitset1(reg_d_val, offset) 
+        self.set_register_value(reg_d, tmp, signed=False, size=32)
 
-    def s_bitreplicate_b64_b32(self):
-        # Implementation for S_BITREPLICATE_B64_B32
-        pass
+    def s_bitset1_b64(self, reg_d, reg_s0):
+        offset = self.get_register_value(reg_s0, signed=False, size=6) 
+        reg_d_val = self.get_register_value(reg_d, signed=False, size=64) 
+        tmp = utils.bitset1(reg_d_val, offset) 
+        self.set_register_value(reg_d, tmp, signed=False, size=64)
 
-    def s_abs_i32(self):
-        # Implementation for S_ABS_I32
-        pass
+    # Substitute each bit of a 32 bit scalar input with two instances of itself and store the result into a 64 bit scalar
+    # register.
+    def s_bitreplicate_b64_b32(self, reg_d, reg_s0):
+        reg_s0_val = self.get_register_value(reg_s0, signed=False, size=32) 
+        tmp = utils.bitreplicate(reg_s0_val) 
+        self.set_register_value(reg_d, tmp, signed=False, size=64)
+
+    # Compute the absolute value of a scalar input, store the result into a scalar register and set SCC iff the result is
+    # nonzero.
+    def s_abs_i32(self, reg_d, reg_s0):
+        reg_s0_val = self.get_register_value(reg_s0, signed=True, size=32) 
+        tmp = abs(reg_s0_val) 
+        self.set_register_value(reg_d, tmp, signed=True, size=32)
+        self.set_scc(0 if tmp != 0 else 1) 
 
     def s_bcnt0_i32_b32(self):
         # Implementation for S_BCNT0_I32_B32
