@@ -1,6 +1,4 @@
 # This file defines the instruction set for RNDA3.
-import utils
-from functools import partialmethod
 from scalar_ops import ScalarOps
 from vector_ops import VectorOps
 from registers import Registers
@@ -53,8 +51,8 @@ class InstructionSet:
                 "S_BFE_U32": self.scalar_ops.s_bfe_u32,  # 38
                 "S_BFE_I32": self.scalar_ops.s_bfe_i32,  # 39
                 "S_BFE_U64": self.scalar_ops.s_bfe_u64,  # 40
-                "S_BFE_I64": self.s_bfe_i64,  # 41
-                "S_BFM_B32": self.s_bfm_b32,  # 42
+                "S_BFE_I64": self.scalar_ops.s_bfe_i64,  # 41
+                "S_BFM_B32": self.scalar_ops.s_bfm_b32,  # 42
                 "S_BFM_B64": self.scalar_ops.s_bfm_b64,  # 43
                 "S_MUL_I32": self.scalar_ops.s_mul_i32,  # 44
                 "S_MUL_HI_U32": self.scalar_ops.s_mul_hi_u32,  # 45
