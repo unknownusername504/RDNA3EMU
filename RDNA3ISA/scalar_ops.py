@@ -625,153 +625,278 @@ class ScalarOps:
         self.registers.set_sgpr_i32(reg_d, count_of_one_bits)
         self.registers._status.set_scc(1 if count_of_one_bits != 0 else 0)
     
-    def s_quadmask_b32(self):
-        # Implementation for S_QUADMASK_B32
-        pass
+    def s_quadmask_b32(self, reg_d, reg_s0):
+        s0_val = self.registers.sgpr_u32(reg_s0)
+        tmp = 0
+        for i in range(32):
+            if s0_val & (0xF << (i & ~0x3)):
+                tmp |= 1 << i
+        self.registers.set_sgpr_u32(reg_d, tmp)
+        self.registers._status.set_scc(1 if tmp != 0 else 0)
 
-    def s_quadmask_b64(self):
-        # Implementation for S_QUADMASK_B64
-        pass
+    def s_quadmask_b64(self, reg_d, reg_s0):
+        s0_val = self.registers.sgpr_u64(reg_s0)
+        tmp = 0
+        for i in range(64):
+            if s0_val & (0xF << (i & ~0x3)):
+                tmp |= 1 << i
+        self.registers.set_sgpr_u64(reg_d, tmp)
+        self.registers._status.set_scc(1 if tmp != 0 else 0)
 
-    def s_wqm_b32(self):
-        # Implementation for S_WQM_B32
-        pass
+    def s_wqm_b32(self, reg_d, reg_s0):
+        s0_val = self.registers.sgpr_u32(reg_s0)
+        tmp = 0
+        for i in range(32):
+            if s0_val & (0xF << (i & ~0x3)):
+                tmp |= 1 << i
+        self.registers.set_sgpr_u32(reg_d, tmp)
+        self.registers._status.set_scc(1 if tmp != 0 else 0)
 
-    def s_wqm_b64(self):
-        # Implementation for S_WQM_B64
-        pass
+    def s_wqm_b64(self, reg_d, reg_s0):
+        s0_val = self.registers.sgpr_u64(reg_s0)
+        tmp = 0
+        for i in range(64):
+            if s0_val & (0xF << (i & ~0x3)):
+                tmp |= 1 << i
+        self.registers.set_sgpr_u64(reg_d, tmp)
+        self.registers._status.set_scc(1 if tmp != 0 else 0)
 
-    def s_not_b32(self):
-        # Implementation for S_NOT_B32
-        pass
+    def s_not_b32(self, reg_d, reg_s0):
+        s0_val = self.registers.sgpr_u32(reg_s0)
+        result = ~s0_val & 0xFFFFFFFF  
+        self.registers.set_sgpr_u32(reg_d, result)
+        self.registers._status.set_scc(1 if result != 0 else 0)
 
-    def s_not_b64(self):
-        # Implementation for S_NOT_B64
-        pass
+    def s_not_b64(self, reg_d, reg_s0):
+        s0_val = self.registers.sgpr_u64(reg_s0)
+        result = ~s0_val & 0xFFFFFFFFFFFFFFFF  
+        self.registers.set_sgpr_u64(reg_d, result)
+        self.registers._status.set_scc(1 if result != 0 else 0)
 
-    def s_and_saveexec_b32(self):
-        # Implementation for S_AND_SAVEEXEC_B32
-        pass
+    def s_and_saveexec_b32(self, reg_d, reg_s0):
+        original_exec = self.registers.exec
+        s0_val = self.registers.sgpr_u32(reg_s0)
+        new_exec = (original_exec & 0xFFFFFFFF00000000) | ((original_exec & 0xFFFFFFFF) & s0_val)
+        self.registers.exec = new_exec
+        self.registers.set_sgpr_u32(reg_d, original_exec & 0xFFFFFFFF)
+        self.registers._status.set_scc(1 if new_exec != 0 else 0)
 
-    def s_and_saveexec_b64(self):
-        # Implementation for S_AND_SAVEEXEC_B64
-        pass
+    def s_and_saveexec_b64(self, reg_d, reg_s0):
+        original_exec = self.registers.exec  
+        s0_val = self.registers.sgpr_u64(reg_s0)
+        new_exec = original_exec & s0_val
+        self.registers.exec = new_exec
+        self.registers.set_sgpr_u64(reg_d, original_exec)
+        self.registers._status.set_scc(1 if new_exec != 0 else 0)
 
-    def s_or_saveexec_b32(self):
-        # Implementation for S_OR_SAVEEXEC_B32
-        pass
+    def s_or_saveexec_b32(self, reg_d, reg_s0):
+        original_exec = self.registers.exec
+        s0_val = self.registers.sgpr_u32(reg_s0)
+        new_exec = (original_exec & 0xFFFFFFFF00000000) | ((original_exec & 0xFFFFFFFF) | s0_val)
+        self.registers.exec = new_exec
+        self.registers.set_sgpr_u32(reg_d, original_exec & 0xFFFFFFFF)
+        self.registers._status.set_scc(1 if new_exec != 0 else 0)
 
-    def s_or_saveexec_b64(self):
-        # Implementation for S_OR_SAVEEXEC_B64
-        pass
+    def s_or_saveexec_b64(self, reg_d, reg_s0):
+        original_exec = self.registers.exec  # 
+        s0_val = self.registers.sgpr_u64(reg_s0)
+        new_exec = original_exec | s0_val
+        self.registers.exec = new_exec
+        self.registers.set_sgpr_u64(reg_d, original_exec)
+        self.registers._status.set_scc(1 if new_exec != 0 else 0)
 
-    def s_xor_saveexec_b32(self):
-        # Implementation for S_XOR_SAVEEXEC_B32
-        pass
+    def s_xor_saveexec_b32(self, reg_d, reg_s0):
+        original_exec = self.registers.exec
+        s0_val = self.registers.sgpr_u32(reg_s0)
+        new_exec = (original_exec & 0xFFFFFFFF00000000) | ((original_exec & 0xFFFFFFFF) ^ s0_val)
+        self.registers.exec = new_exec
+        self.registers.set_sgpr_u32(reg_d, original_exec & 0xFFFFFFFF)
+        self.registers._status.set_scc(1 if new_exec != 0 else 0)
 
-    def s_xor_saveexec_b64(self):
-        # Implementation for S_XOR_SAVEEXEC_B64
-        pass
+    def s_xor_saveexec_b64(self, reg_d, reg_s0):
+        original_exec = self.registers.exec
+        s0_val = self.registers.sgpr_u64(reg_s0)
+        new_exec = original_exec ^ s0_val
+        self.registers.exec = new_exec
+        self.registers.set_sgpr_u64(reg_d, original_exec)
+        self.registers._status.set_scc(1 if new_exec != 0 else 0)
 
-    def s_nand_saveexec_b32(self):
-        # Implementation for S_NAND_SAVEEXEC_B32
-        pass
+    def s_nand_saveexec_b32(self, reg_d, reg_s0):
+        original_exec = self.registers.exec
+        s0_val = self.registers.sgpr_u32(reg_s0)
+        new_exec = (original_exec & 0xFFFFFFFF00000000) | (~(original_exec & 0xFFFFFFFF) & s0_val)
+        self.registers.exec = new_exec
+        self.registers.set_sgpr_u32(reg_d, original_exec & 0xFFFFFFFF)
+        self.registers._status.set_scc(1 if new_exec != 0 else 0)
 
-    def s_nand_saveexec_b64(self):
-        # Implementation for S_NAND_SAVEEXEC_B64
-        pass
+    def s_nand_saveexec_b64(self, reg_d, reg_s0):
+        original_exec = self.registers.exec
+        s0_val = self.registers.sgpr_u64(reg_s0)
+        new_exec = ~(original_exec & s0_val)
+        self.registers.exec = new_exec
+        self.registers.set_sgpr_u64(reg_d, original_exec)
+        self.registers._status.set_scc(1 if new_exec != 0 else 0)
 
-    def s_nor_saveexec_b32(self):
-        # Implementation for S_NOR_SAVEEXEC_B32
-        pass
+    def s_nor_saveexec_b32(self, reg_d, reg_s0):
+        original_exec = self.registers.exec
+        s0_val = self.registers.sgpr_u32(reg_s0)
+        new_exec = (original_exec & 0xFFFFFFFF00000000) | (~(original_exec | s0_val) & 0xFFFFFFFF)
+        self.registers.exec = new_exec
+        self.registers.set_sgpr_u32(reg_d, original_exec & 0xFFFFFFFF)
+        self.registers._status.set_scc(1 if new_exec != 0 else 0)
 
-    def s_nor_saveexec_b64(self):
-        # Implementation for S_NOR_SAVEEXEC_B64
-        pass
+    def s_nor_saveexec_b64(self, reg_d, reg_s0):
+        original_exec = self.registers.exec
+        s0_val = self.registers.sgpr_u64(reg_s0)
+        new_exec = ~(original_exec | s0_val)
+        self.registers.exec = new_exec
+        self.registers.set_sgpr_u64(reg_d, original_exec)
+        self.registers._status.set_scc(1 if new_exec != 0 else 0)
 
-    def s_xnor_saveexec_b32(self):
-        # Implementation for S_XNOR_SAVEEXEC_B32
-        pass
+    def s_xnor_saveexec_b32(self, reg_d, reg_s0):
+        original_exec = self.registers.exec
+        s0_val = self.registers.sgpr_u32(reg_s0)
+        new_exec = (original_exec & 0xFFFFFFFF00000000) | (~(original_exec ^ s0_val) & 0xFFFFFFFF)
+        self.registers.exec = new_exec
+        self.registers.set_sgpr_u32(reg_d, original_exec & 0xFFFFFFFF)
+        self.registers._status.set_scc(1 if new_exec != 0 else 0)
 
-    def s_xnor_saveexec_b64(self):
-        # Implementation for S_XNOR_SAVEEXEC_B64
-        pass
+    def s_xnor_saveexec_b64(self, reg_d, reg_s0):
+        original_exec = self.registers.exec
+        s0_val = self.registers.sgpr_u64(reg_s0)
+        new_exec = ~(original_exec ^ s0_val)
+        self.registers.exec = new_exec
+        self.registers.set_sgpr_u64(reg_d, original_exec)
+        self.registers._status.set_scc(1 if new_exec != 0 else 0)
 
-    def s_and_not0_saveexec_b32(self):
-        # Implementation for S_AND_NOT0_SAVEEXEC_B32
-        pass
+    def s_and_not0_saveexec_b32(self, reg_d, reg_s0):
+        original_exec = self.registers.exec
+        s0_val = ~self.registers.sgpr_u32(reg_s0) & 0xFFFFFFFF
+        new_exec = (original_exec & 0xFFFFFFFF00000000) | ((original_exec & 0xFFFFFFFF) & s0_val)
+        self.registers.exec = new_exec
+        self.registers.set_sgpr_u32(reg_d, original_exec & 0xFFFFFFFF)
+        self.registers._status.set_scc(1 if new_exec != 0 else 0)
 
-    def s_and_not0_saveexec_b64(self):
-        # Implementation for S_AND_NOT0_SAVEEXEC_B64
-        pass
+    def s_and_not0_saveexec_b64(self, reg_d, reg_s0):
+        original_exec = self.registers.exec
+        s0_val = ~self.registers.sgpr_u64(reg_s0)
+        new_exec = original_exec & s0_val
+        self.registers.exec = new_exec
+        self.registers.set_sgpr_u64(reg_d, original_exec)
+        self.registers._status.set_scc(1 if new_exec != 0 else 0)
 
-    def s_or_not0_saveexec_b32(self):
-        # Implementation for S_OR_NOT0_SAVEEXEC_B32
-        pass
+    def s_or_not0_saveexec_b32(self, reg_d, reg_s0):
+        original_exec = self.registers.exec
+        s0_val = ~self.registers.sgpr_u32(reg_s0) & 0xFFFFFFFF
+        new_exec = (original_exec & 0xFFFFFFFF00000000) | ((original_exec & 0xFFFFFFFF) | s0_val)
+        self.registers.exec = new_exec
+        self.registers.set_sgpr_u32(reg_d, original_exec & 0xFFFFFFFF)
+        self.registers._status.set_scc(1 if new_exec != 0 else 0)
 
-    def s_and_not1_saveexec_b32(self):
-        # Implementation for S_AND_NOT1_SAVEEXEC_B32
-        pass
+    def s_and_not1_saveexec_b32(self, reg_d, reg_s0):
+        original_exec = ~self.registers.exec & 0xFFFFFFFF00000000
+        s0_val = self.registers.sgpr_u32(reg_s0) & 0xFFFFFFFF
+        new_exec = original_exec | (s0_val & 0xFFFFFFFF)
+        self.registers.exec = new_exec
+        self.registers.set_sgpr_u32(reg_d, ~original_exec & 0xFFFFFFFF)
+        self.registers._status.set_scc(1 if new_exec != 0 else 0)
 
-    def s_and_not1_saveexec_b64(self):
-        # Implementation for S_AND_NOT1_SAVEEXEC_B64
-        pass
+    def s_and_not1_saveexec_b64(self, reg_d, reg_s0):
+        original_exec = ~self.registers.exec
+        s0_val = self.registers.sgpr_u64(reg_s0)
+        new_exec = original_exec & s0_val
+        self.registers.exec = new_exec
+        self.registers.set_sgpr_u64(reg_d, ~original_exec)
+        self.registers._status.set_scc(1 if new_exec != 0 else 0)
 
-    def s_or_not1_saveexec_b32(self):
-        # Implementation for S_OR_NOT1_SAVEEXEC_B32
-        pass
+    def s_or_not1_saveexec_b32(self, reg_d, reg_s0):
+        original_exec = ~self.registers.exec & 0xFFFFFFFF00000000
+        s0_val = self.registers.sgpr_u32(reg_s0) & 0xFFFFFFFF
+        new_exec = original_exec | (s0_val | 0xFFFFFFFF)
+        self.registers.exec = new_exec
+        self.registers.set_sgpr_u32(reg_d, ~original_exec & 0xFFFFFFFF)
+        self.registers._status.set_scc(1 if new_exec != 0 else 0)
 
-    def s_or_not1_saveexec_b64(self):
-        # Implementation for S_OR_NOT1_SAVEEXEC_B64
-        pass
+    def s_or_not1_saveexec_b64(self, reg_d, reg_s0):
+        original_exec = ~self.registers.exec
+        s0_val = self.registers.sgpr_u64(reg_s0)
+        new_exec = original_exec | s0_val
+        self.registers.exec = new_exec
+        self.registers.set_sgpr_u64(reg_d, ~original_exec)
+        self.registers._status.set_scc(1 if new_exec != 0 else 0)
 
-    def s_and_not0_wrexec_b32(self):
-        # Implementation for S_AND_NOT0_WREXEC_B32
-        pass
+    def s_and_not0_wrexec_b32(self, reg_d, reg_s0):
+        s0_val = ~self.registers.sgpr_u32(reg_s0) & 0xFFFFFFFF
+        new_exec = (self.registers.exec & 0xFFFFFFFF00000000) | ((self.registers.exec & 0xFFFFFFFF) & s0_val)
+        self.registers.exec = new_exec
+        self.registers.set_sgpr_u32(reg_d, new_exec & 0xFFFFFFFF)
+        self.registers._status.set_scc(1 if new_exec != 0 else 0)
 
-    def s_and_not0_wrexec_b64(self):
-        # Implementation for S_AND_NOT0_WREXEC_B64
-        pass
+    def s_and_not0_wrexec_b64(self, reg_d, reg_s0):
+        s0_val = ~self.registers.sgpr_u64(reg_s0)
+        new_exec = self.registers.exec & s0_val
+        self.registers.exec = new_exec
+        self.registers.set_sgpr_u64(reg_d, new_exec)
+        self.registers._status.set_scc(1 if new_exec != 0 else 0)
 
-    def s_and_not1_wrexec_b32(self):
-        # Implementation for S_AND_NOT1_WREXEC_B32
-        pass
+    def s_and_not1_wrexec_b32(self, reg_d, reg_s0):
+        s0_val = self.registers.sgpr_u32(reg_s0) & 0xFFFFFFFF
+        new_exec = (~self.registers.exec & 0xFFFFFFFF00000000) | (s0_val & 0xFFFFFFFF)
+        self.registers.exec = new_exec
+        self.registers.set_sgpr_u32(reg_d, new_exec & 0xFFFFFFFF)
+        self.registers._status.set_scc(1 if new_exec != 0 else 0)
 
-    def s_and_not1_wrexec_b64(self):
-        # Implementation for S_AND_NOT1_WREXEC_B64
-        pass
+    def s_and_not1_wrexec_b64(self, reg_d, reg_s0):
+        s0_val = self.registers.sgpr_u64(reg_s0)
+        new_exec = ~self.registers.exec & s0_val
+        self.registers.exec = new_exec
+        self.registers.set_sgpr_u64(reg_d, new_exec)
+        self.registers._status.set_scc(1 if new_exec != 0 else 0)
 
-    def s_movrels_b32(self):
-        # Implementation for S_MOVRELS_B32
-        pass
+    def s_movrels_b32(self, reg_d, reg_s0):
+        addr = self.registers.sgpr_u32(reg_s0)
+        addr += self.registers.m0 & 0xFFFFFFFF  # Adding least significant 32 bits of M0
+        value = self.registers.sgpr_u32(addr % len(self.registers._sgpr))
+        self.registers.set_sgpr_u32(reg_d, value)
 
-    def s_movereld_b32(self):
-        # Implementation for S_MOVRELD_B32
-        pass
+    def s_movereld_b32(self, reg_d, reg_s0):
+        addr = self.registers.sgpr_u32(reg_s0)
+        addr += self.registers.m0 & 0xFFFFFFFF  
+        value = self.registers.sgpr_u32(addr % len(self.registers._sgpr))
+        self.registers.set_sgpr_u32(reg_d, value)
 
-    def s_movreld_b64(self):
-        # Implementation for S_MOVRELD_B64
-        pass
+    def s_movreld_b64(self, reg_d, reg_s0):
+        addr = self.registers.sgpr_u64(reg_s0)
+        addr += self.registers.m0 & 0xFFFFFFFF  
+        value = self.registers.sgpr_u64(addr % len(self.registers._sgpr))
+        self.registers.set_sgpr_u64(reg_d, value)
 
-    def s_moverelsd_2_b32(self):
-        # Implementation for S_MOVRELSD_2_B32
-        pass
+    def s_moverelsd_2_b32(self, reg_d, reg_s0):
+        addr = self.registers.sgpr_u32(reg_s0)
+        addr += self.registers.m0 & 0xFFFFFFFF  
+        value1 = self.registers.sgpr_u32(addr % len(self.registers._sgpr))
+        value2 = self.registers.sgpr_u32((addr + 1) % len(self.registers._sgpr))
+        combined_value = (value2 << 16) | value1  # Combining values
+        self.registers.set_sgpr_u32(reg_d, combined_value)
 
-    def s_getpc_b64(self):
-        # Implementation for S_GETPC_B64
-        pass
+    def s_getpc_b64(self, reg_d):
+        next_instruction_address = self.registers.pc + 4
+        self.registers.set_sgpr_u64(reg_d, next_instruction_address)
 
-    def s_setpc_b64(self):
-        # Implementation for S_SETPC_B64
-        pass
+    def s_setpc_b64(self, reg_s):
+        new_pc_value = self.registers.sgpr_u64(reg_s)
+        self.registers.pc = new_pc_value
 
-    def s_swappc_b64(self):
-        # Implementation for S_SWAPPC_B64
-        pass
+    def s_swappc_b64(self, reg_d, reg_s):
+        next_instruction_address = self.registers.pc + 4
+        self.registers.set_sgpr_u64(reg_d, next_instruction_address)
+        jump_addr = self.registers.sgpr_u64(reg_s)
+        self.registers.pc = jump_addr
 
-    def s_rfe_b64(self):
-        # Implementation for S_RFE_B64
-        pass
+    def s_rfe_b64(self, reg_s):
+        self.registers.status.set_priv(0)
+        jump_addr = self.registers.sgpr_u64(reg_s)
+        self.registers.pc = jump_addr
 
     def s_sendmsg_rtn_b32(self):
         # Implementation for S_SENDMSG_RTN_B32
