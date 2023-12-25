@@ -7,3 +7,12 @@ Current plans are:
 2.) Generate suitable asm using the HIP compiler. HIP is a source-portable language that can be compiled to run on either AMD or NVIDIA platform.
 3.) Implement an interpreter to parse the compiled asm and execute instructions according to the file. This step should error if there are unmapped instructions or directives in the asm.
 4.) Check for accuracy of results using some unit tests.
+
+
+# Installation
+In project root
+```
+pip install --upgrade build
+python3 -m build
+python3 -m pip install .
+```

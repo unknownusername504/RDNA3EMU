@@ -23,7 +23,7 @@ class StatusRegister(Bitfield):
         self.read, self.write = True, self._writeable()
 
     def _writeable(self):
-        return self.priv() == 1
+        return self.get_priv() == 1
 
     def _get(self, meta):
         super()._get(meta)
