@@ -234,11 +234,11 @@ class VectorOps:
     
     # Multiply two floating point inputs and accumulate the result into the destination register using fused multiplyadd.
     def v_fmac_f32(self, reg_d, reg_s0, reg_s1):
-        reg_s0_value = self.registers.get_register(reg_s0, signed=None, size=32, reg_type="VGPR_FLOAT")
-        reg_s1_value = self.registers.get_register(reg_s1, signed=None, size=32, reg_type="VGPR_FLOAT")
-        reg_d_value = self.registers.get_register(reg_d, signed=None, size=32, reg_type="VGPR_FLOAT")
+        reg_s0_value = self.registers.vgpr_f32(reg_s0)
+        reg_s1_value = self.registers.vgpr_f32(reg_s1)
+        reg_d_value = self.registers.vgpr_f32(reg_d)
         reg_d_value = reg_d_value + (reg_s0_value * reg_s1_value)
-        self.registers.set_register(reg_d, reg_d_value, signed=None, size=32, reg_type="VGPR_FLOAT")
+        self.registers.set_vgpr_f32(reg_d, reg_d_value)
     
     # Multiply a single-precision float with a literal constant and add a second single-precision float using fused multiply-add.
     def v_fmamk_f32(self, reg_d, reg_s0, reg_s1):
