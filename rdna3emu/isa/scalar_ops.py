@@ -1,4 +1,4 @@
-import rdna3emu.isa.utils 
+import rdna3emu.isa.utils as utils
 from rdna3emu.isa.registers import Registers as Re
 class ScalarOps:
     def __init__(self, registers: Re):
