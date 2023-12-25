@@ -109,3 +109,16 @@ def bitreplicate(x):
 
 x=0b0101_0101_0101_0101_0101_0101_0101_0101
 print(format(bitreplicate(x), '064b'))
+
+def bitcnt(x, bit=0, sz=32):
+    tmp = 0
+    for i in range(0, sz):
+        if (x & 1 == bit):
+            tmp += 1
+        x >>= 1
+    return tmp
+
+print(bitcnt(x, bit=1))
+print(bitcnt(0, bit=1))
+print(bitcnt(0xFFFFFFFF, bit=1))
+print(bitcnt(0xFFFFFFFFFFFFFFFF, bit=1, sz=64))

@@ -1,5 +1,6 @@
 # This file defines the instruction set for RNDA3.
 import utils
+from functools import partialmethod
 
 
 class InstructionSet():
@@ -842,8 +843,9 @@ class InstructionSet():
         self.set_register_value(reg_d, tmp, signed=True, size=32)
         self.set_scc(0 if tmp != 0 else 1) 
 
-    def s_bcnt0_i32_b32(self):
+    def s_bcnt0_i32_b32(self, reg_d, reg_s0):
         # Implementation for S_BCNT0_I32_B32
+        self.get_u32_sgpr(reg_s0)
         pass
 
     def s_bcnt0_i32_b64(self):
@@ -1391,6 +1393,7 @@ class InstructionSet():
         reg_d_value = utils.fp16_to_fp32(reg_d_value_lo) | (utils.fp16_to_fp32(reg_d_value_hi) << 16)
         self.set_register_value(reg_d, reg_d_value, signed=None, size=32, reg_type="VGPR_FLOAT")
 
+
     # Get the register value from the register ID.
     def get_register_value(self, reg_id, signed, size, reg_type):
         if reg_type == self.reg_types["VGPR_INT"] or reg_type == self.reg_types["VGPR_FLOAT"]:
@@ -1414,6 +1417,7 @@ class InstructionSet():
                     reg_value = reg_value - 2**size
             reg_value = reg_value % 2**size
         return reg_value
+
 
     # Set the register value from the register ID.
     def set_register_value(self, reg_id, reg_value, signed, size, reg_type):
@@ -1484,3 +1488,16 @@ class InstructionSet():
     def get_vcc_value(self):
         vcc = self.get_special_register_meta_bitfield("STATUS", "VCC")
         return vcc
+
+    # Easy accessors/setters
+    get_u32_sgpr = partialmethod(get_register_value, signed=False, size=32, reg_type="SGPR") 
+    get_i32_sgpr = partialmethod(get_register_value, signed=True, size=32, reg_type=2) 
+    get_u64_sgpr = partialmethod(get_register_value, signed=False, size=64, reg_type="SGPR") 
+    get_i64_sgpr = partialmethod(get_register_value, signed=True, size=64, reg_type="SGPR") 
+
+    set_u32_sgpr = partialmethod(set_register_value, signed=False, size=32, reg_type="SGPR")
+    set_u64_sgpr = partialmethod(set_register_value, signed=False, size=64, reg_type="SGPR")
+    set_i32_sgpr = partialmethod(set_register_value, signed=True, size=32, reg_type="SGPR")
+    set_i64_sgpr = partialmethod(set_register_value, signed=True, size=64, reg_type="SGPR")
+
+    
