@@ -219,60 +219,7 @@ class Registers:
       val = Registers._signed(val, size)
     reg[reg_id] = val % (2**size)
 
-  def set_register(self, reg_type, reg_id, value, size=32, signed=True, floating=False):
-        """
-        Set the value of a register based on type, size, and sign.
-
-        :param reg_type: 'vgpr' or 'sgpr' to specify the register type
-        :param reg_id: The identifier of the register to set
-        :param value: The value to set in the register
-        :param size: The size of the register in bits (e.g., 8, 16, 32, 64, 128)
-        :param signed: True for signed integers, False for unsigned integers
-        :param floating: True for floating-point numbers, False otherwise
-        :return: None
-        """
-
-        # Determine the prefix based on the register type and whether it's floating-point
-        prefix = 'vgpr' if reg_type == 'vgpr' else 'sgpr'
-        type_char = 'f' if floating else 'i' if signed else 'u'
-
-        # Construct the method name based on the parameters
-        method_name = f'set_{prefix}_{type_char}{size}'
-
-        # Ensure the method exists
-        if not hasattr(self, method_name):
-            raise ValueError(f"Method {method_name} does not exist for setting register values.")
-
-        # Call the appropriate method to set the register value
-        getattr(self, method_name)(reg_id, value)  
-
-        
-  def get_register(self, reg_type, reg_id, size=32, signed=True, floating=False):
-        """
-        Get the value of a register based on type, size, and sign.
-
-        :param reg_type: 'vgpr' or 'sgpr' to specify the register type
-        :param reg_id: The identifier of the register to get
-        :param size: The size of the register in bits (e.g., 8, 16, 32, 64, 128)
-        :param signed: True for signed integers, False for unsigned integers
-        :param floating: True for floating-point numbers, False otherwise
-        :return: The value from the specified register
-        """
-
-        # Determine the prefix based on the register type and whether it's floating-point
-        prefix = 'vgpr' if reg_type == 'vgpr' else 'sgpr'
-        type_char = 'f' if floating else 'i' if signed else 'u'
-
-        # Construct the method name based on the parameters
-        method_name = f'{prefix}_{type_char}{size}'
-
-        # Ensure the method exists
-        if not hasattr(self, method_name):
-            raise ValueError(f"Method {method_name} does not exist for getting register values.")
-
-        # Call the appropriate method to get the register value
-        return getattr(self, method_name)(reg_id)      
-
+  # 
 
   pm = partialmethod
   vgpr_i8 = pm(_get, attr='_vgpr', signed=True, size=8)
