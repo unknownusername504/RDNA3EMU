@@ -1,7 +1,7 @@
 # This file defines the instruction set for RNDA3.
-from scalar_ops import ScalarOps
-from vector_ops import VectorOps
-from registers import Registers
+from rdna3emu.isa.scalar_ops import ScalarOps
+from rdna3emu.isa.vector_ops import VectorOps
+from rdna3emu.isa.registers import Registers
 
 
 class InstructionSet:
