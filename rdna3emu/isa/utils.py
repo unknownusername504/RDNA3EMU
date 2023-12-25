@@ -101,12 +101,6 @@ def fp32_to_fp16(value):
     return np.float16(value)
 
 
-print(cls(0, 32))
-print(cls(0x0000CCCC, 32))
-print(cls(0xFFFF3333, 32))
-print(cls(0x7FFFFFFF, 32))
-print(cls(0x80000000, 32))
-print(cls(0xFFFFFFFF, 32))
 
 
 def sext_i32(x, in_sz=8):
@@ -116,15 +110,6 @@ def sext_i32(x, in_sz=8):
     return x
 
 
-x = 0b1100_1011
-print(format(x, "08b"))
-print(format(sext_i32(x), "032b"))
-x = 0b0100_1111
-print(format(sext_i32(x), "032b"))
-x = 0b0100_1111_1111_0000
-print(format(sext_i32(x, 16), "032b"))
-x = 0b1100_1111_1111_0000
-print(format(sext_i32(x, 16), "032b"))
 
 
 def bitset0(x, offset):
@@ -134,9 +119,6 @@ def bitset0(x, offset):
 def bitset1(x, offset):
     return x | (1 << offset)
 
-
-print(bin(bitset0(0b1111, 3)))
-print(bin(bitset1(0b0000, 3)))
 
 
 def bitreplicate(x):
@@ -153,8 +135,6 @@ def bitreplicate(x):
     return r
 
 
-x = 0b0101_0101_0101_0101_0101_0101_0101_0101
-print(format(bitreplicate(x), "064b"))
 
 
 def bitcnt(x, bit=0, sz=32):
@@ -171,7 +151,28 @@ def get_op_code_names(self):
     return self.instructions.keys()
 
 
-print(bitcnt(x, bit=1))
-print(bitcnt(0, bit=1))
-print(bitcnt(0xFFFFFFFF, bit=1))
-print(bitcnt(0xFFFFFFFFFFFFFFFF, bit=1, sz=64))
+if __name__ == '__main__':
+  print(bitcnt(x, bit=1))
+  print(bitcnt(0, bit=1))
+  print(bitcnt(0xFFFFFFFF, bit=1))
+  print(bitcnt(0xFFFFFFFFFFFFFFFF, bit=1, sz=64))
+  print(cls(0, 32))
+  print(cls(0x0000CCCC, 32))
+  print(cls(0xFFFF3333, 32))
+  print(cls(0x7FFFFFFF, 32))
+  print(cls(0x80000000, 32))
+  print(cls(0xFFFFFFFF, 32))
+  x = 0b1100_1011
+  print(format(x, "08b"))
+  print(format(sext_i32(x), "032b"))
+  x = 0b0100_1111
+  print(format(sext_i32(x), "032b"))
+  x = 0b0100_1111_1111_0000
+  print(format(sext_i32(x, 16), "032b"))
+  x = 0b1100_1111_1111_0000
+  print(format(sext_i32(x, 16), "032b"))
+  print(bin(bitset0(0b1111, 3)))
+  print(bin(bitset1(0b0000, 3)))
+  x = 0b0101_0101_0101_0101_0101_0101_0101_0101
+  print(format(bitreplicate(x), "064b"))
+
