@@ -1,5 +1,11 @@
 import utils
+from registers import Registers
+
 class VectorOps:
+    def __init__(self, register_file:Registers):
+        self.register_file = register_file
+
+    # Copy data from one of two inputs based on the vector condition code and store the result into a vector register.
     def v_cndmask_b32(self, reg_d, reg_s0, reg_s1):
         reg_s0_type = self.get_register_type(reg_s0)
         reg_s1_type = self.get_register_type(reg_s1)

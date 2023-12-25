@@ -118,6 +118,10 @@ def bitcnt(x, bit=0, sz=32):
         x >>= 1
     return tmp
 
+# Get all the op code names.
+def get_op_code_names(self):
+    return self.instructions.keys()
+
 print(bitcnt(x, bit=1))
 print(bitcnt(0, bit=1))
 print(bitcnt(0xFFFFFFFF, bit=1))
