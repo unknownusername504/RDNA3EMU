@@ -1,5 +1,5 @@
 from functools import partialmethod
-from enum import Enum
+import numpy as np
 
 
 class Bitfield:
@@ -135,11 +135,11 @@ class TrapStatusRegister(Bitfield):
   set_trap_after_inst = pm(_set, (20, 1))
 
 
-class Registers():
+class Registers:
   def __init__(self):
     self._pc = 0
     self._vgpr = [0] * 256
-    self._spgr[0] * 106
+    self._spgr = [0] * 106
     self._exec = 0  # 64-bit
     self._status = StatusRegister()
     self._vcc = 0  # 64-bit
@@ -163,31 +163,125 @@ class Registers():
     self._expcnt = 0  # 3-bit
     self._lgrmcnt = 0  # 6-bit
 
+  pc = property(lambda self: self._pc, lambda self, val: setattr(self, '_pc', val))
+  exec = property(lambda self: self._exec, lambda self, val: setattr(self, '_exec', val))
+  status = property(lambda self: self._status, lambda self, val: setattr(self, '_status', val))
+  vcc = property(lambda self: self._vcc, lambda self, val: setattr(self, '_vcc', val))
+  flat_scratch = property(lambda self: self._flat_scratch, lambda self, val: setattr(self, '_flat_scratch', val))
+  m0 = property(lambda self: self._m0, lambda self, val: setattr(self, '_m0', val))
+  tba = property(lambda self: self._tba, lambda self, val: setattr(self, '_tba', val))
+  tma = property(lambda self: self._tma, lambda self, val: setattr(self, '_tma', val))
+  ttmp = property(lambda self: self._ttmp, lambda self, val: setattr(self, '_ttmp', val))
+  flush_ib = property(lambda self: self._flush_ib, lambda self, val: setattr(self, '_flush_ib', val))
+  sh_mem_bases = property(lambda self: self._sh_mem_bases, lambda self, val: setattr(self, '_sh_mem_bases', val))
+  flat_scratch_lo = property(lambda self: self._flat_scratch_lo, lambda self, val: setattr(self, '_flat_scratch_lo', val))
+  flat_scratch_hi = property(lambda self: self._flat_scratch_hi, lambda self, val: setattr(self, '_flat_scratch_hi', val))
+  hw_id1 = property(lambda self: self._hw_id1, lambda self, val: setattr(self, '_hw_id1', val))
+  hw_id2 = property(lambda self: self._hw_id2, lambda self, val: setattr(self, '_hw_id2', val))
+  shader_cycles = property(lambda self: self._shader_cycles, lambda self, val: setattr(self, '_shader_cycles', val))
+  vmcnt = property(lambda self: self._vmcnt, lambda self, val: setattr(self, '_vmcnt', val))
+  vscnt = property(lambda self: self._vscnt, lambda self, val: setattr(self, '_vscnt', val))
+  expcnt = property(lambda self: self._expcnt, lambda self, val: setattr(self, '_expcnt', val))
+  lgrmcnt = property(lambda self: self._lgrmcnt, lambda self, val: setattr(self, '_lgrmcnt', val))
 
-@property
-def PC(self):
-  return self._pc
+  def _signed(x, size):
+    sign = x >> (size - 1)
+    if sign == 1:
+      x = x - 2**size
+    return x
 
+  def floating(val, size):
+    if size == 16:
+      return np.float16(val)
+    elif size == 32:
+      return np.float32(val)
+    elif size == 64:
+      return np.float64(val)
+    elif size == 128:
+      return np.float128(val)
+    else:
+      raise Exception(f'Float size {size} not supported.')
 
-def PC(self, v):
-  self._pc = v
+  def _get(self, reg_id, attr=None, signed=False, size=None, f=False):
+    val = getattr(self, attr)[reg_id]
+    if f:
+      return Registers.floating(val, size)
+    if signed:
+      val = Registers._signed(val, size)
+    return val % (2**size)
 
+  def _set(self, reg_id, val, attr=None, signed=None, size=None, f=False):
+    reg = getattr(self, attr)
+    if f:
+      reg[reg_id] = Registers.floating(val, size)
+      return
+    if signed:
+      val = Registers._signed(val, size)
+    reg[reg_id] = val % (2**size)
 
-@staticmethod
-def _signed(x, size):
-  sign = x >> (size - 1)
-  if sign == 1:
-    x = x - 2**size
-  return x
+  pm = partialmethod
+  vgpr_i8 = pm(_get, attr='_vgpr', signed=True, size=8)
+  set_vgpr_i8 = pm(_set, attr='_vgpr', signed=True, size=8)
 
+  vgpr_i16 = pm(_get, attr='_vgpr', signed=True, size=16)
+  set_vgpr_i16 = pm(_set, attr='_vgpr', signed=True, size=16)
 
-def _get_spgr(self, reg_id, signed=False, size=32):
-  reg_val = self._spgr[reg_id] if not signed else _signed(
-    self._spgr[reg_id], size)
-  return reg_val % (2**size)
+  vgpr_i32 = pm(_get, attr='_vgpr', signed=True, size=32)
+  set_vgpr_i32 = pm(_set, attr='_vgpr', signed=True, size=32)
 
+  vgpr_i64 = pm(_get, attr='_vgpr', signed=True, size=64)
+  set_vgpr_i64 = pm(_set, attr='_vgpr', signed=True, size=64)
 
-def _get_vgpr(self, reg_id, signed=False, size=32, type='int'):
-  reg_val = self._vpgr[reg_id] if not signed else _signed(
-    self._vpgr[reg_id], size)
-  return reg_val % (2**size)
+  vgpr_u8 = pm(_get, attr='_vgpr', signed=False, size=8)
+  set_vgpr_u8 = pm(_set, attr='_vgpr', signed=False, size=8)
+
+  vgpr_u16 = pm(_get, attr='_vgpr', signed=False, size=16)
+  set_vgpr_u16 = pm(_set, attr='_vgpr', signed=False, size=16)
+
+  vgpr_u32 = pm(_get, attr='_vgpr', signed=False, size=32)
+  set_vgpr_u32 = pm(_set, attr='_vgpr', signed=False, size=32)
+
+  vgpr_u64 = pm(_get, attr='_vgpr', signed=False, size=64)
+  set_vgpr_u64 = pm(_set, attr='_vgpr', signed=False, size=64)
+
+  vgpr_u128 = pm(_get, attr='_vgpr', signed=False, size=128)
+  set_vgpr_u128 = pm(_set, attr='_vgpr', signed=False, size=128)
+
+  vgpr_f16 = pm(_get, attr='_vgpr', size=16, f=True)
+  set_vgpr_f16 = pm(_set, attr='_vgpr', size=16, f=True)
+
+  vgpr_f32 = pm(_get, attr='_vgpr', size=32, f=True)
+  set_vgpr_f32 = pm(_set, attr='_vgpr', size=32, f=True)
+
+  vgpr_f64 = pm(_get, attr='_vgpr', size=64, f=True)
+  set_vgpr_f64 = pm(_set, attr='_vgpr', size=64, f=True)
+
+  vgpr_f128 = pm(_get, attr='_vgpr', size=128, f=True)
+  set_vgpr_f128 = pm(_set, attr='_vgpr', size=128, f=True)
+
+  sgpr_i8 = pm(_get, attr='_sgpr', signed=True, size=8)
+  set_sgpr_i8 = pm(_set, attr='_sgpr', signed=True, size=8)
+
+  sgpr_i16 = pm(_get, attr='_sgpr', signed=True, size=16)
+  set_sgpr_i16 = pm(_set, attr='_sgpr', signed=True, size=16)
+
+  sgpr_i32 = pm(_get, attr='_sgpr', signed=True, size=32)
+  set_sgpr_i32 = pm(_set, attr='_sgpr', signed=True, size=32)
+
+  sgpr_i64 = pm(_get, attr='_sgpr', signed=True, size=64)
+  set_sgpr_i64 = pm(_set, attr='_sgpr', signed=True, size=64)
+
+  sgpr_u8 = pm(_get, attr='_sgpr', signed=False, size=8)
+  set_sgpr_u8 = pm(_set, attr='_sgpr', signed=False, size=8)
+
+  sgpr_u16 = pm(_get, attr='_sgpr', signed=False, size=16)
+  set_sgpr_u16 = pm(_set, attr='_sgpr', signed=False, size=16)
+
+  sgpr_u32 = pm(_get, attr='_sgpr', signed=False, size=32)
+  set_sgpr_u32 = pm(_set, attr='_sgpr', signed=False, size=32)
+
+  sgpr_u64 = pm(_get, attr='_sgpr', signed=False, size=64)
+  set_sgpr_u64 = pm(_set, attr='_sgpr', signed=False, size=64)
+
+  sgpr_u128 = pm(_get, attr='_sgpr', signed=False, size=128)
+  set_sgpr_u128 = pm(_set, attr='_sgpr', signed=False, size=128)
