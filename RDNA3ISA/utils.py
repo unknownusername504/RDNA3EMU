@@ -1,4 +1,4 @@
-
+import numpy as np
 def rev_b32(x):
     # Bitmask constants for reversing bits in a 32-bit integer
     mask1 = 0x55555555  # 01010101010101010101010101010101
@@ -60,6 +60,38 @@ def cls(x, size=32):
             break
         x <<= 1
     return tmp
+
+def count_zero_bits(x, size=32):
+    count = 0
+    for i in range(size):
+        if (x & (1 << i)) == 0:
+            count += 1
+    return count
+
+def count_one_bits(x, size=32):
+    count = 0
+    for i in range(size):
+        if x & (1 << i):
+            count += 1
+    return count
+
+
+def fp16_to_fp32(fp16_val):
+    """
+    Convert a 16-bit half-precision floating-point number to a 32-bit single-precision floating-point number.
+
+    :param fp16_val: The 16-bit floating-point number to convert.
+    :return: A 32-bit single-precision floating-point representation of the input.
+    """
+    fp16_val = np.float16(fp16_val)
+    
+    return np.float32(fp16_val)
+
+def fp32_to_fp16(value):
+    
+    value = np.float32(value)
+    
+    return np.float16(value)
 
 
 print(cls(0, 32))
