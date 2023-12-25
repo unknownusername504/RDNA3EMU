@@ -329,71 +329,68 @@ class Registers:
         return getattr(self, method_name)(reg_id)
 
     pm = partialmethod
-    get_vgpr_i8 = pm(_get, attr="_vgpr", signed=True, size=8)
-    set_vgpr_i8 = pm(_set, attr="_vgpr", signed=True, size=8)
+    vgpr_i8 = pm(_get, attr='_vgpr', signed=True, size=8)
+    set_vgpr_i8 = pm(_set, attr='_vgpr', signed=True, size=8)
 
-    get_vgpr_i16 = pm(_get, attr="_vgpr", signed=True, size=16)
-    set_vgpr_i16 = pm(_set, attr="_vgpr", signed=True, size=16)
+    vgpr_i16 = pm(_get, attr='_vgpr', signed=True, size=16)
+    set_vgpr_i16 = pm(_set, attr='_vgpr', signed=True, size=16)
 
-    get_vgpr_i32 = pm(_get, attr="_vgpr", signed=True, size=32)
-    set_vgpr_i32 = pm(_set, attr="_vgpr", signed=True, size=32)
+    vgpr_i32 = pm(_get, attr='_vgpr', signed=True, size=32)
+    set_vgpr_i32 = pm(_set, attr='_vgpr', signed=True, size=32)
 
-    get_vgpr_i64 = pm(_get, attr="_vgpr", signed=True, size=64)
-    set_vgpr_i64 = pm(_set, attr="_vgpr", signed=True, size=64)
+    vgpr_i64 = pm(_get, attr='_vgpr', signed=True, size=64)
+    set_vgpr_i64 = pm(_set, attr='_vgpr', signed=True, size=64)
 
-    get_vgpr_u8 = pm(_get, attr="_vgpr", signed=False, size=8)
-    set_vgpr_u8 = pm(_set, attr="_vgpr", signed=False, size=8)
+    vgpr_u8 = pm(_get, attr='_vgpr', signed=False, size=8)
+    set_vgpr_u8 = pm(_set, attr='_vgpr', signed=False, size=8)
 
-    get_vgpr_u16 = pm(_get, attr="_vgpr", signed=False, size=16)
-    set_vgpr_u16 = pm(_set, attr="_vgpr", signed=False, size=16)
+    vgpr_u16 = pm(_get, attr='_vgpr', signed=False, size=16)
+    set_vgpr_u16 = pm(_set, attr='_vgpr', signed=False, size=16)
 
-    get_vgpr_u32 = pm(_get, attr="_vgpr", signed=False, size=32)
-    set_vgpr_u32 = pm(_set, attr="_vgpr", signed=False, size=32)
+    vgpr_u32 = pm(_get, attr='_vgpr', signed=False, size=32)
+    set_vgpr_u32 = pm(_set, attr='_vgpr', signed=False, size=32)
 
-    get_vgpr_u64 = pm(_get, attr="_vgpr", signed=False, size=64)
-    set_vgpr_u64 = pm(_set, attr="_vgpr", signed=False, size=64)
+    vgpr_u64 = pm(_get, attr='_vgpr', signed=False, size=64)
+    set_vgpr_u64 = pm(_set, attr='_vgpr', signed=False, size=64)
 
-    get_vgpr_u128 = pm(_get, attr="_vgpr", signed=False, size=128)
-    set_vgpr_u128 = pm(_set, attr="_vgpr", signed=False, size=128)
+    vgpr_u128 = pm(_get, attr='_vgpr', signed=False, size=128)
+    set_vgpr_u128 = pm(_set, attr='_vgpr', signed=False, size=128)
 
-    get_vgpr_f16 = pm(_get, attr="_vgpr", size=16, f=True)
-    set_vgpr_f16 = pm(_set, attr="_vgpr", size=16, f=True)
+    vgpr_f16 = pm(_get, attr='_vgpr', size=16, f=True)
+    set_vgpr_f16 = pm(_set, attr='_vgpr', size=16, f=True)
 
-    get_vgpr_f32 = pm(_get, attr="_vgpr", size=32, f=True)
-    set_vgpr_f32 = pm(_set, attr="_vgpr", size=32, f=True)
+    vgpr_f32 = pm(_get, attr='_vgpr', size=32, f=True)
+    set_vgpr_f32 = pm(_set, attr='_vgpr', size=32, f=True)
 
-    get_vgpr_f64 = pm(_get, attr="_vgpr", size=64, f=True)
-    set_vgpr_f64 = pm(_set, attr="_vgpr", size=64, f=True)
+    vgpr_f64 = pm(_get, attr='_vgpr', size=64, f=True)
+    set_vgpr_f64 = pm(_set, attr='_vgpr', size=64, f=True)
 
-    get_vgpr_f128 = pm(_get, attr="_vgpr", size=128, f=True)
-    set_vgpr_f128 = pm(_set, attr="_vgpr", size=128, f=True)
+    vgpr_f128 = pm(_get, attr='_vgpr', size=128, f=True)
+    set_vgpr_f128 = pm(_set, attr='_vgpr', size=128, f=True)
 
-    get_sgpr_i8 = pm(_get, attr="_sgpr", signed=True, size=8)
-    set_sgpr_i8 = pm(_set, attr="_sgpr", signed=True, size=8)
+    sgpr_i8 = pm(_get, attr='_sgpr', signed=True, size=8)
+    set_sgpr_i8 = pm(_set, attr='_sgpr', signed=True, size=8)
 
-    get_sgpr_i16 = pm(_get, attr="_sgpr", signed=True, size=16)
-    set_sgpr_i16 = pm(_set, attr="_sgpr", signed=True, size=16)
+    sgpr_i16 = pm(_get, attr='_sgpr', signed=True, size=16)
+    set_sgpr_i16 = pm(_set, attr='_sgpr', signed=True, size=16)
 
-    get_sgpr_i32 = pm(_get, attr="_sgpr", signed=True, size=32)
-    set_sgpr_i32 = pm(_set, attr="_sgpr", signed=True, size=32)
+    sgpr_i32 = pm(_get, attr='_sgpr', signed=True, size=32)
+    set_sgpr_i32 = pm(_set, attr='_sgpr', signed=True, size=32)
 
-    get_sgpr_i64 = pm(_get, attr="_sgpr", signed=True, size=64)
-    set_sgpr_i64 = pm(_set, attr="_sgpr", signed=True, size=64)
+    sgpr_i64 = pm(_get, attr='_sgpr', signed=True, size=64)
+    set_sgpr_i64 = pm(_set, attr='_sgpr', signed=True, size=64)
 
-    get_sgpr_u8 = pm(_get, attr="_sgpr", signed=False, size=8)
-    set_sgpr_u8 = pm(_set, attr="_sgpr", signed=False, size=8)
+    sgpr_u8 = pm(_get, attr='_sgpr', signed=False, size=8)
+    set_sgpr_u8 = pm(_set, attr='_sgpr', signed=False, size=8)
 
-    get_sgpr_u16 = pm(_get, attr="_sgpr", signed=False, size=16)
-    set_sgpr_u16 = pm(_set, attr="_sgpr", signed=False, size=16)
+    sgpr_u16 = pm(_get, attr='_sgpr', signed=False, size=16)
+    set_sgpr_u16 = pm(_set, attr='_sgpr', signed=False, size=16)
 
-    get_sgpr_u32 = pm(_get, attr="_sgpr", signed=False, size=32)
-    set_sgpr_u32 = pm(_set, attr="_sgpr", signed=False, size=32)
+    sgpr_u32 = pm(_get, attr='_sgpr', signed=False, size=32)
+    set_sgpr_u32 = pm(_set, attr='_sgpr', signed=False, size=32)
 
-    get_sgpr_u64 = pm(_get, attr="_sgpr", signed=False, size=64)
-    set_sgpr_u64 = pm(_set, attr="_sgpr", signed=False, size=64)
+    sgpr_u64 = pm(_get, attr='_sgpr', signed=False, size=64)
+    set_sgpr_u64 = pm(_set, attr='_sgpr', signed=False, size=64)
 
-    get_sgpr_u128 = pm(_get, attr="_sgpr", signed=False, size=128)
-    set_sgpr_u128 = pm(_set, attr="_sgpr", signed=False, size=128)
-
-    set_scc_value = pm(_set, attr="_status", reg_id=0)
-    get_scc_value = pm(_get, attr="_status", reg_id=0)
+    sgpr_u128 = pm(_get, attr='_sgpr', signed=False, size=128)
+    set_sgpr_u128 = pm(_set, attr='_sgpr', signed=False, size=128)
