@@ -7,9 +7,9 @@ from registers import Registers
 
 class InstructionSet():
     def __init__(self):
-        self.register_file = Registers()
-        self.vector_ops = VectorOps(self.register_file)
-        self.scalar_ops = ScalarOps(self.register_file)
+        self.registers = Registers()
+        self.vector_ops = VectorOps(self.registers)
+        self.scalar_ops = ScalarOps(self.registers)
         self.instructions = {
             "SOP2": {
                 "S_ADD_U32": self.scalar_ops.s_add_u32, # 0
