@@ -599,7 +599,7 @@ class ScalarOps:
         reg_s0_val = self.registers.get_register(reg_s0, signed=True, size=32) 
         tmp = abs(reg_s0_val) 
         self.registers.set_register(reg_d, tmp, signed=True, size=32)
-        self.set_scc_value(0 if tmp != 0 else 1) 
+        self.registers.set_scc_value(0 if tmp != 0 else 1) 
 
     #count the number of bits set to 0 in a scalar input and store the result into a scalar register.
     def s_bcnt0_i32_b32(self, reg_d, reg_s0):
