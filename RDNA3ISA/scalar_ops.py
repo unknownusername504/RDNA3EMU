@@ -601,23 +601,34 @@ class ScalarOps:
         self.register_file.set_register_value(reg_d, tmp, signed=True, size=32)
         self.set_scc_value(0 if tmp != 0 else 1) 
 
+    #count the number of bits set to 0 in a scalar input and store the result into a scalar register.
     def s_bcnt0_i32_b32(self, reg_d, reg_s0):
-        # Implementation for S_BCNT0_I32_B32
-        self.get_u32_sgpr(reg_s0)
-        pass
+        value = self.registers.get_register(reg_s0, signed=False, size=32)
+        count_of_zero_bits = utils.count_zero_bits(value, 32)
+        self.registers.set_register(reg_d, count_of_zero_bits, signed=True, size=32)
+        self.registers._status.set_scc(1 if count_of_zero_bits != 0 else 0)
 
-    def s_bcnt0_i32_b64(self):
-        # Implementation for S_BCNT0_I32_B64
-        pass
+    #count the number of bits set to 0 in a scalar input and store the result into a scalar register.
+    def s_bcnt0_i32_b64(self, reg_d, reg_s0):
+        value = self.registers.get_register(reg_s0, signed=False, size=64)
+        count_of_zero_bits = utils.count_zero_bits(value, 64)
+        self.registers.set_register(reg_d, count_of_zero_bits, signed=True, size=32)
+        self.registers._status.set_scc(1 if count_of_zero_bits != 0 else 0)
 
-    def s_bcnt1_i32_b32(self):
-        # Implementation for S_BCNT1_I32_B32
-        pass
+    #count the number of bits set to 1 in a scalar input and store the result into a scalar register.
+    def s_bcnt1_i32_b32(self, reg_d, reg_s0):
+        value = self.registers.get_register(reg_s0, signed=False, size=32)
+        count_of_one_bits = utils.count_one_bits(value, 32)
+        self.registers.set_register(reg_d, count_of_one_bits, signed=True, size=32)
+        self.registers._status.set_scc(1 if count_of_one_bits != 0 else 0)
 
-    def s_bcnt1_i32_b64(self):
-        # Implementation for S_BCNT1_I32_B64
-        pass
-
+    #count the number of bits set to 1 in a scalar input and store the result into a scalar register.
+    def s_bcnt1_i32_b64(self, reg_d, reg_s0):
+        value = self.registers.get_register(reg_s0, signed=False, size=64)
+        count_of_one_bits = utils.count_one_bits(value, 64)
+        self.registers.set_register(reg_d, count_of_one_bits, signed=True, size=32)
+        self.registers._status.set_scc(1 if count_of_one_bits != 0 else 0)
+    
     def s_quadmask_b32(self):
         # Implementation for S_QUADMASK_B32
         pass
