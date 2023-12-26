@@ -987,8 +987,44 @@ class ScalarOps:
             self.registers.pc += offset
         self.registers.pc += 4
 
-    def s_clause(self):
-        pass
+    """
+    Begin a clause consisting of instructions matching the instruction after the s_clause. 
+    The clause length is: (SIMM16[5:0] + 1), and clauses must be between 2 and 63 instructions. 
+    SIMM16[5:0] must be 1-62, not 0 or 63. 
+    The clause breaks after every N instructions, N = simm[11:8] (0 - 15; 0 = no breaks)
+    We will just pass the max code block to this function and let it handle the rest.
+    """
+
+    def s_clause(self, simm16, clause_code_block):
+        clause_length = (simm16 & 0x3F) + 1
+        # Check between 1 and 62
+        if (clause_length == 0) or (clause_length == 63):
+            raise Exception("Clause length must be between 1 and 62")
+
+        # Check if clause length is greater than the number of instructions in the clause
+        if clause_length > len(clause_code_block):
+            raise Exception(
+                "Clause length must be less than the number of instructions in the clause"
+            )
+
+        clause_break = (simm16 >> 8) & 0xF
+        # Check between 0 and 15
+        if clause_break > 15:
+            raise Exception("Clause break must be between 0 and 15")
+
+        # Check if clause break is greater than the number of instructions in the clause
+        if clause_break > clause_length:
+            raise Exception(
+                "Clause break must be less than the number of instructions in the clause"
+            )
+
+        # Execute the clause
+        for i in range(clause_length):
+            self.execute_instruction(clause_code_block[i])
+            if (i + 1) % clause_break == 0:
+                self.registers.pc += 4
+
+        self.registers.pc += 4
 
     def s_endpgm(self):
         pass
