@@ -6,7 +6,7 @@ setup(
     license='MIT',
     packages=['rdna3emu'],
     install_requires=[
-        'numpy',
+        'numpy', 'ply'
     ],
     python_requires='>=3.8',
 )
