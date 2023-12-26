@@ -1,4 +1,5 @@
 import numpy as np
+import os
 
 
 def rev_b32(x):
@@ -101,15 +102,11 @@ def fp32_to_fp16(value):
     return np.float16(value)
 
 
-
-
 def sext_i32(x, in_sz=8):
     m = 1 << (in_sz - 1)
     if m & x:
         return x | 0xFFFFFF00
     return x
-
-
 
 
 def bitset0(x, offset):
@@ -118,7 +115,6 @@ def bitset0(x, offset):
 
 def bitset1(x, offset):
     return x | (1 << offset)
-
 
 
 def bitreplicate(x):
@@ -135,8 +131,6 @@ def bitreplicate(x):
     return r
 
 
-
-
 def bitcnt(x, bit=0, sz=32):
     tmp = 0
     for i in range(0, sz):
@@ -146,33 +140,134 @@ def bitcnt(x, bit=0, sz=32):
     return tmp
 
 
-# Get all the op code names.
-def get_op_code_names(self):
-    return self.instructions.keys()
+# Function to parse the asm file and output used instructions
+def find_used_instructions(asm_file, instructions):
+    parsed_instructions = set()
+    with open(asm_file, "r") as f:
+        lines = f.readlines()
+        for line in lines:
+            # Trim whitespace
+            line = line.strip()
+            if line.startswith("s_") or line.startswith("v_"):
+                op_token = line.split()[0]
+                # Convert to uppercase
+                op_token = op_token.upper()
+                # Remove "_e32" or "_e64" from the end of the instruction
+                if op_token.endswith("_E32") or op_token.endswith("_E64"):
+                    op_token = op_token[:-4]
+                # Check if the instruction is in the instruction set
+                for instruction in instructions:
+                    if op_token in instructions[instruction]:
+                        parsed_instructions.add(op_token)
+
+    # Go through the instruction set and find the used instructions
+    used_instructions = []
+    for instruction in instructions:
+        for op in instructions[instruction]:
+            if op in parsed_instructions:
+                used_instructions.append(op)
+
+    # Save used instructions to file
+    folder_path = os.path.dirname(os.path.abspath(__file__))
+    folder_path = os.path.join(folder_path, "instruction_usage")
+    save_path = os.path.join(folder_path, "used_instructions.txt")
+    with open(save_path, "w") as f:
+        for instruction in used_instructions:
+            f.write(instruction + "\n")
+
+    return used_instructions
 
 
-if __name__ == '__main__':
-  print(bitcnt(x, bit=1))
-  print(bitcnt(0, bit=1))
-  print(bitcnt(0xFFFFFFFF, bit=1))
-  print(bitcnt(0xFFFFFFFFFFFFFFFF, bit=1, sz=64))
-  print(cls(0, 32))
-  print(cls(0x0000CCCC, 32))
-  print(cls(0xFFFF3333, 32))
-  print(cls(0x7FFFFFFF, 32))
-  print(cls(0x80000000, 32))
-  print(cls(0xFFFFFFFF, 32))
-  x = 0b1100_1011
-  print(format(x, "08b"))
-  print(format(sext_i32(x), "032b"))
-  x = 0b0100_1111
-  print(format(sext_i32(x), "032b"))
-  x = 0b0100_1111_1111_0000
-  print(format(sext_i32(x, 16), "032b"))
-  x = 0b1100_1111_1111_0000
-  print(format(sext_i32(x, 16), "032b"))
-  print(bin(bitset0(0b1111, 3)))
-  print(bin(bitset1(0b0000, 3)))
-  x = 0b0101_0101_0101_0101_0101_0101_0101_0101
-  print(format(bitreplicate(x), "064b"))
+# Function to parse the asm file and output unimplemented instructions
+def find_unimplemented_instructions(asm_file, instructions):
+    parsed_instructions = set()
+    with open(asm_file, "r") as f:
+        lines = f.readlines()
+        for line in lines:
+            # Trim whitespace
+            line = line.strip()
+            if line.startswith("s_") or line.startswith("v_"):
+                op_token = line.split()[0]
+                # Convert to uppercase
+                op_token = op_token.upper()
+                # Remove "_e32" or "_e64" from the end of the instruction
+                if op_token.endswith("_E32") or op_token.endswith("_E64"):
+                    op_token = op_token[:-4]
+                parsed_instructions.add(op_token)
 
+    # Get the used instructions
+    used_instructions = find_used_instructions(asm_file, instructions)
+
+    # Remove used instructions from parsed instructions
+    for instruction in used_instructions:
+        parsed_instructions.remove(instruction)
+
+    # Unimplemented instructions are left in parsed_instructions
+    unimplemented_instructions = list(parsed_instructions)
+
+    # Sort the list
+    unimplemented_instructions.sort()
+
+    # Save used instructions to file
+    folder_path = os.path.dirname(os.path.abspath(__file__))
+    folder_path = os.path.join(folder_path, "instruction_usage")
+    save_path = os.path.join(folder_path, "unimplemented_instructions.txt")
+    with open(save_path, "w") as f:
+        for instruction in unimplemented_instructions:
+            f.write(instruction + "\n")
+
+    return unimplemented_instructions
+
+
+# Function to parse the asm file and output unused instructions
+def find_unused_instructions(asm_file, instructions):
+    used_instructions = find_used_instructions(asm_file, instructions)
+    unused_instructions = []
+    for instruction in instructions:
+        for op in instructions[instruction]:
+            if op not in used_instructions:
+                unused_instructions.append(op)
+
+    # Save unused instructions to file
+    folder_path = os.path.dirname(os.path.abspath(__file__))
+    folder_path = os.path.join(folder_path, "instruction_usage")
+    save_path = os.path.join(folder_path, "unused_instructions.txt")
+    with open(save_path, "w") as f:
+        for instruction in unused_instructions:
+            f.write(instruction + "\n")
+
+    return unused_instructions
+
+
+def populate_instruction_usage(instructions):
+    cwd = os.getcwd()
+    asm_file = os.path.join(cwd, "Data/example_asm.asm")
+    find_used_instructions(asm_file, instructions)
+    find_unimplemented_instructions(asm_file, instructions)
+    find_unused_instructions(asm_file, instructions)
+
+
+if __name__ == "__main__":
+    print(bitcnt(x, bit=1))
+    print(bitcnt(0, bit=1))
+    print(bitcnt(0xFFFFFFFF, bit=1))
+    print(bitcnt(0xFFFFFFFFFFFFFFFF, bit=1, sz=64))
+    print(cls(0, 32))
+    print(cls(0x0000CCCC, 32))
+    print(cls(0xFFFF3333, 32))
+    print(cls(0x7FFFFFFF, 32))
+    print(cls(0x80000000, 32))
+    print(cls(0xFFFFFFFF, 32))
+    x = 0b1100_1011
+    print(format(x, "08b"))
+    print(format(sext_i32(x), "032b"))
+    x = 0b0100_1111
+    print(format(sext_i32(x), "032b"))
+    x = 0b0100_1111_1111_0000
+    print(format(sext_i32(x, 16), "032b"))
+    x = 0b1100_1111_1111_0000
+    print(format(sext_i32(x, 16), "032b"))
+    print(bin(bitset0(0b1111, 3)))
+    print(bin(bitset1(0b0000, 3)))
+    x = 0b0101_0101_0101_0101_0101_0101_0101_0101
+    print(format(bitreplicate(x), "064b"))

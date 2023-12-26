@@ -1,7 +1,13 @@
 # This file defines the instruction set for RNDA3.
+import sys
+
+# Add rdna3emu to path
+sys.path.append("../rdna3emu/")
+
 from rdna3emu.isa.scalar_ops import ScalarOps
 from rdna3emu.isa.vector_ops import VectorOps
 from rdna3emu.isa.registers import Registers
+from rdna3emu.isa.utils import populate_instruction_usage
 
 
 class InstructionSet:
@@ -177,4 +183,96 @@ class InstructionSet:
                 "V_LDEXP_F16": self.vector_ops.v_ldexp_f16,
                 "V_PK_FMAC_F16": self.vector_ops.v_pk_fmac_f16,
             },
+            "VOP1": {
+                "V_NOP": self.vector_ops.v_nop,  # 0
+                "V_MOV_B32": self.vector_ops.v_mov_b32,  # 1
+                "V_READFIRSTLANE_B32": self.vector_ops.v_readfirstlane_b32,  # 2
+                "V_CVT_I32_F64": self.vector_ops.v_cvt_i32_f64,  # 3
+                "V_CVT_F64_I32": self.vector_ops.v_cvt_f64_i32,  # 4
+                "V_CVT_F32_I32": self.vector_ops.v_cvt_f32_i32,  # 5
+                "V_CVT_F32_U32": self.vector_ops.v_cvt_f32_u32,  # 6
+                "V_CVT_U32_F32": self.vector_ops.v_cvt_u32_f32,  # 7
+                "V_CVT_I32_F32": self.vector_ops.v_cvt_i32_f32,  # 8
+                "V_CVT_F16_F32": self.vector_ops.v_cvt_f16_f32,  # 10
+                "V_CVT_F32_F16": self.vector_ops.v_cvt_f32_f16,  # 11
+                "V_CVT_NEAREST_I32_F32": self.vector_ops.v_cvt_nearest_i32_f32,  # 12
+                "V_CVT_FLOOR_I32_F32": self.vector_ops.v_cvt_floor_i32_f32,  # 13
+                "V_CVT_OFF_F32_I4": self.vector_ops.v_cvt_off_f32_i4,  # 14
+                "V_CVT_F32_F64": self.vector_ops.v_cvt_f32_f64,  # 15
+                "V_CVT_F64_F32": self.vector_ops.v_cvt_f64_f32,  # 16
+                "V_CVT_F32_UBYTE0": self.vector_ops.v_cvt_f32_ubyte0,  # 17
+                "V_CVT_F32_UBYTE1": self.vector_ops.v_cvt_f32_ubyte1,  # 18
+                "V_CVT_F32_UBYTE2": self.vector_ops.v_cvt_f32_ubyte2,  # 19
+                "V_CVT_F32_UBYTE3": self.vector_ops.v_cvt_f32_ubyte3,  # 20
+                "V_CVT_U32_F64": self.vector_ops.v_cvt_u32_f64,  # 21
+                "V_CVT_F64_U32": self.vector_ops.v_cvt_f64_u32,  # 22
+                "V_TRUNC_F64": self.vector_ops.v_trunc_f64,  # 23
+                "V_CEIL_F64": self.vector_ops.v_ceil_f64,  # 24
+                "V_RNDNE_F64": self.vector_ops.v_rndne_f64,  # 25
+                "V_FLOOR_F64": self.vector_ops.v_floor_f64,  # 26
+                "V_PIPEFLUSH": self.vector_ops.v_pipeflush,  # 27
+                "V_MOV_B16": self.vector_ops.v_mov_b16,  # 28
+                "V_FRACT_F32": self.vector_ops.v_fract_f32,  # 32
+                "V_TRUNC_F32": self.vector_ops.v_trunc_f32,  # 33
+                "V_CEIL_F32": self.vector_ops.v_ceil_f32,  # 34
+                "V_RNDNE_F32": self.vector_ops.v_rndne_f32,  # 35
+                "V_FLOOR_F32": self.vector_ops.v_floor_f32,  # 36
+                "V_EXP_F32": self.vector_ops.v_exp_f32,  # 37
+                "V_LOG_F32": self.vector_ops.v_log_f32,  # 39
+                "V_RCP_F32": self.vector_ops.v_rcp_f32,  # 42
+                "V_RCP_IFLAG_F32": self.vector_ops.v_rcp_iflag_f32,  # 43
+                "V_RSQ_F32": self.vector_ops.v_rsq_f32,  # 46
+                "V_RCP_F64": self.vector_ops.v_rcp_f64,  # 47
+                "V_RSQ_F64": self.vector_ops.v_rsq_f64,  # 49
+                "V_SQRT_F32": self.vector_ops.v_sqrt_f32,  # 51
+                "V_SQRT_F64": self.vector_ops.v_sqrt_f64,  # 52
+                "V_SIN_F32": self.vector_ops.v_sin_f32,  # 53
+                "V_COS_F32": self.vector_ops.v_cos_f32,  # 54
+                "V_NOT_B32": self.vector_ops.v_not_b32,  # 55
+                "V_BFREV_B32": self.vector_ops.v_bfrev_b32,  # 56
+                "V_CLZ_I32_U32": self.vector_ops.v_clz_i32_u32,  # 57
+                "V_CTZ_I32_B32": self.vector_ops.v_ctz_i32_b32,  # 58
+                "V_CLS_I32": self.vector_ops.v_cls_i32,  # 59
+                "V_FREXP_EXP_I32_F64": self.vector_ops.v_frexp_exp_i32_f64,  # 60
+                "V_FREXP_MANT_F64": self.vector_ops.v_frexp_mant_f64,  # 61
+                "V_FRACT_F64": self.vector_ops.v_fract_f64,  # 62
+                "V_FREXP_EXP_I32_F32": self.vector_ops.v_frexp_exp_i32_f32,  # 63
+                "V_FREXP_MANT_F32": self.vector_ops.v_frexp_mant_f32,  # 64
+                "V_MOVRELD_B32": self.vector_ops.v_movreld_b32,  # 66
+                "V_MOVRELS_B32": self.vector_ops.v_movrels_b32,  # 67
+                "V_MOVRELSD_B32": self.vector_ops.v_movrelsd_b32,  # 68
+                "V_MOVRELSD_2_B32": self.vector_ops.v_movrelsd_2_b32,  # 72
+                "V_CVT_F16_U16": self.vector_ops.v_cvt_f16_u16,  # 80
+                "V_CVT_F16_I16": self.vector_ops.v_cvt_f16_i16,  # 81
+                "V_CVT_U16_F16": self.vector_ops.v_cvt_u16_f16,  # 82
+                "V_CVT_I16_F16": self.vector_ops.v_cvt_i16_f16,  # 83
+                "V_RCP_F16": self.vector_ops.v_rcp_f16,  # 84
+                "V_SQRT_F16": self.vector_ops.v_sqrt_f16,  # 85
+                "V_RSQ_F16": self.vector_ops.v_rsq_f16,  # 86
+                "V_LOG_F16": self.vector_ops.v_log_f16,  # 87
+                "V_EXP_F16": self.vector_ops.v_exp_f16,  # 88
+                "V_FREXP_MANT_F16": self.vector_ops.v_frexp_mant_f16,  # 89
+                "V_FREXP_EXP_I16_F16": self.vector_ops.v_frexp_exp_i16_f16,  # 90
+                "V_FLOOR_F16": self.vector_ops.v_floor_f16,  # 91
+                "V_CEIL_F16": self.vector_ops.v_ceil_f16,  # 92
+                "V_TRUNC_F16": self.vector_ops.v_trunc_f16,  # 93
+                "V_RNDNE_F16": self.vector_ops.v_rndne_f16,  # 94
+                "V_FRACT_F16": self.vector_ops.v_fract_f16,  # 95
+                "V_SIN_F16": self.vector_ops.v_sin_f16,  # 96
+                "V_COS_F16": self.vector_ops.v_cos_f16,  # 97
+                "V_SAT_PK_U8_I16": self.vector_ops.v_sat_pk_u8_i16,  # 98
+                "V_CVT_NORM_I16_F16": self.vector_ops.v_cvt_norm_i16_f16,  # 99
+                "V_CVT_NORM_U16_F16": self.vector_ops.v_cvt_norm_u16_f16,  # 100
+                "V_SWAP_B32": self.vector_ops.v_swap_b32,  # 101
+                "V_SWAP_B16": self.vector_ops.v_swap_b16,  # 102
+                "V_PERMLANE64_B32": self.vector_ops.v_permlane64_b32,  # 103
+                "V_SWAPREL_B32": self.vector_ops.v_swaprel_b32,  # 104
+                "V_NOT_B16": self.vector_ops.v_not_b16,  # 105
+                "V_CVT_I32_I16": self.vector_ops.v_cvt_i32_i16,  # 106
+                "V_CVT_U32_U16": self.vector_ops.v_cvt_u32_u16,  # 107
+            },
         }
+
+
+if __name__ == "__main__":
+    populate_instruction_usage(InstructionSet().instructions)
