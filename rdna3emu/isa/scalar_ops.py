@@ -933,3 +933,111 @@ class ScalarOps:
     def s_sendmsg_rtn_b64(self):
         # Implementation for S_SENDMSG_RTN_B64
         pass
+
+
+
+    #SOPP INSTUCTIONS
+
+    def s_branch(self, simm16):
+        offset = simm16 * 4
+        self.registers.pc += offset + 4
+
+    def s_cbranch_execnz(self, simm16):
+        if self.registers._status.get_execz == 0:
+            offset = simm16 * 4
+            self.registers.pc += offset
+        self.registers.pc += 4    
+
+    def s_cbranch_execz(self, simm16):
+        if self.registers._status.get_execz == 1:
+            offset = simm16 * 4
+            self.registers.pc += offset
+        self.registers.pc += 4
+
+    def s_cbranch_scc1(self, simm16):
+        if self.registers._status.get_scc == 1:
+            offset = simm16 * 4
+            self.registers.pc += offset
+        self.registers.pc += 4    
+
+    def s_cbranch_vccz(self, simm16):
+        if self.registers._status.get_vccz == 1:
+            offset = simm16 * 4
+            self.registers.pc += offset
+        self.registers.pc += 4
+
+    def s_cbranch_vccnz(self, simm16):
+        if self.registers._status.get_vccz == 0:
+            offset = simm16 * 4
+            self.registers.pc += offset
+        self.registers.pc += 4
+
+    def s_clause(self):
+        pass
+
+    def s_cmp_eq_u32(self, reg_s0, reg_s1):
+        s0_value = self.registers.sgpr_u32(reg_s0)
+        s1_value = self.registers.sgpr_u32(reg_s1)
+        self.registers._status.set_scc(1 if s0_value == s1_value else 0)
+
+    def s_delay_alu(self):
+        pass
+
+    def s_endpgm(self):
+        pass   
+
+    def s_load_b64(self, reg_sdata, addr, offset=0):
+        effective_addr = self.calculate_effective_address(addr, offset)
+        data_lower = self.memory.load_u32(effective_addr)
+        data_upper = self.memory.load_u32(effective_addr + 4)
+        self.registers.set_sgpr_u64(reg_sdata, (data_upper << 32) | data_lower)
+        self.registers.pc += 4
+
+    def s_load_b128(self, reg_sdata, addr, offset=0):
+        effective_addr = self.calculate_effective_address(addr, offset)
+        segments = [self.memory.load_u32(effective_addr + i) for i in range(0, 16, 4)]
+        for i, segment in enumerate(segments):
+            self.registers.set_scalar_register(reg_sdata, segment, i * 32)  # Assuming set_scalar_register can handle 128-bit registers and offsets
+        self.registers.pc += 4
+
+    def calculate_effective_address(self, addr, offset):
+        if isinstance(offset, int):  
+            return addr + (offset & 0x1FFFFF)  # Mask to 21 bits
+        else:  #  'offset' is an SGPR ????
+            return addr + (self.registers.sgpr_u32(offset) & 0xFFFFFFFC)  # Ignore 2 LSBs
+
+    def s_load_b32(self, reg_sdata, addr, offset=0):
+        if isinstance(offset, int):  
+            effective_addr = addr + (offset & 0x1FFFFF) 
+        else:  
+            effective_addr = addr + (self.registers.sgpr_u32(offset) & 0xFFFFFFFC) 
+        
+        data = self.memory.load_u32(effective_addr)
+        
+        self.registers.set_sgpr_u32(reg_sdata, data)
+
+        self.registers.pc += 4
+
+    def s_nop(self, simm16):
+        wait_states = simm16 & 0xF
+        for _ in range(wait_states):
+            self.nop()  # Represents a single clock cycle delay
+        self.registers.pc += 4
+
+    def nop(self):
+        pass    
+
+    def s_sendmsg(self):
+        pass
+
+    def s_sleep(self):
+        pass    
+
+    def s_trap(self):
+        pass
+
+    def s_waitcnt(self):
+        pass
+
+    def s_waitcnt_vscnt(self):
+        pass

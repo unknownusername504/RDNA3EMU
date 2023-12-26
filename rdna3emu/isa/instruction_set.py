@@ -271,6 +271,28 @@ class InstructionSet:
                 "V_CVT_I32_I16": self.vector_ops.v_cvt_i32_i16,  # 106
                 "V_CVT_U32_U16": self.vector_ops.v_cvt_u32_u16,  # 107
             },
+            "SOPP": {
+                "S_BRANCH": self.scalar_ops.s_branch,  # 0
+                "S_CBRANCH_EXECNZ": self.scalar_ops.s_cbranch_execnz,  # 1
+                "S_CBRANCH_EXECZ": self.scalar_ops.s_cbranch_execz,  # 2
+                "S_CBRANCH_SCC1": self.scalar_ops.s_cbranch_scc1,  # 3
+                "S_CBRANCH_VCCZ": self.scalar_ops.s_cbranch_vccz,  # 4
+                "S_CBRANCH_VCCNZ": self.scalar_ops.s_cbranch_vccnz,  # 5
+                "S_CLAUSE": self.scalar_ops.s_clause,  # 6 Missing implementation
+                "S_CMP_EQ_U32": self.scalar_ops.s_cmp_eq_u32,  # 7
+                "S_DELAY_ALU": self.scalar_ops.s_delay_alu,  # 8 Missing implementation
+                "S_ENDPGM": self.scalar_ops.s_endpgm,  # 9 Missing implementation
+                "S_LOAD_B128": self.scalar_ops.s_load_b128,  # 10 
+                "S_Load_B64": self.scalar_ops.s_load_b64,  # 11
+                "S_Load_B32": self.scalar_ops.s_load_b32,  # 12
+                "S_NOP": self.scalar_ops.s_nop,  # 13
+                "S_SENDMSG": self.scalar_ops.s_sendmsg,  # 14
+                "S_SLEEP": self.scalar_ops.s_sleep,  # 15
+                "S_TRAP": self.scalar_ops.s_trap,  # 16
+                "S_WAITCNT": self.scalar_ops.s_waitcnt,  # 17
+                "S_WAITCNT_VSCNT": self.scalar_ops.s_waitcnt_vscnt,  # 18
+
+            },
         }
 
 
