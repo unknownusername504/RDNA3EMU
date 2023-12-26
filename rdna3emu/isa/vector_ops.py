@@ -764,3 +764,107 @@ class VectorOps:
     #
     def v_cvt_u32_u16(self):
         pass
+
+    # VOP3 instructions
+    #
+    def v_lshl_add_u32(self):
+        pass
+
+    #
+    def v_and_or_b32(self):
+        pass
+
+    #
+    def v_or3_b32(self):
+        pass
+
+    #
+    def v_mbcnt_lo_u32_b32(self):
+        pass
+
+    #
+    def v_mul_lo_u32(self):
+        pass
+
+    #
+    def v_mul_hi_u32(self):
+        pass
+
+    #
+    def v_lshlrev_b16(self):
+        pass
+
+    #
+    def v_lshlrev_b64(self):
+        pass
+
+    #
+    def v_writelane_b32(self):
+        pass
+
+    # VOP3SD instructions
+    #
+    def v_mad_u64_u32(self):
+        pass
+
+    #
+    def v_add_co_u32(self):
+        pass
+
+    #
+    def v_sub_co_u32(self):
+        pass
+
+    # VOPC instructions
+    #
+    def v_cmp_eq_u32(self):
+        pass
+
+    #
+    def v_cmp_ne_u32(self):
+        pass
+
+    #
+    def v_cmp_lt_u64(self):
+        pass
+
+    #
+    def v_cmp_eq_u64(self):
+        pass
+
+    #
+    def v_cmp_gt_u64(self):
+        pass
+
+    #
+    def v_cmp_ne_u64(self):
+        pass
+
+    #
+    def v_cmpx_eq_u32(self):
+        pass
+
+    #
+    def v_cmpx_gt_u32(self):
+        pass
+
+    #
+    def v_cmpx_ne_u32(self):
+        pass
+
+    #
+    def v_cmpx_ne_u64(self):
+        pass
+
+    #
+    def v_cmp_eq_u16(self):
+        pass
+
+    # VOPD instructions
+    #
+    def v_dual_mov_b32(self):
+        pass
+
+    #
+    def v_dual_cndmask_b32(self):
+        pass

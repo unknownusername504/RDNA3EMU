@@ -933,3 +933,64 @@ class ScalarOps:
     def s_sendmsg_rtn_b64(self):
         # Implementation for S_SENDMSG_RTN_B64
         pass
+
+    # SOPP instructions
+    def s_nop(self):
+        pass
+
+    def s_sleep(self):
+        pass
+
+    def s_delay_alu(self):
+        pass
+
+    def s_waitcnt(self):
+        pass
+
+    def s_trap(self):
+        pass
+
+    def s_branch(self):
+        pass
+
+    def s_cbranch_scc1(self):
+        pass
+
+    def s_cbranch_vccz(self):
+        pass
+
+    def s_cbranch_vccnz(self):
+        pass
+
+    def s_cbranch_execz(self):
+        pass
+
+    def s_cbranch_execnz(self):
+        pass
+
+    def s_clause(self):
+        pass
+
+    def s_endpgm(self):
+        pass
+
+    def s_sendmsg(self):
+        pass
+
+    # SOPC instructions
+    def s_cmp_eq_u32(self):
+        pass
+
+    # SMEM instructions
+    def s_load_b32(self):
+        pass
+
+    def s_load_b64(self):
+        pass
+
+    def s_load_b128(self):
+        pass
+
+    # SOPK instructions
+    def s_waitcnt_vscnt(self):
+        pass

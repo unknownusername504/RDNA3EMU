@@ -271,6 +271,66 @@ class InstructionSet:
                 "V_CVT_I32_I16": self.vector_ops.v_cvt_i32_i16,  # 106
                 "V_CVT_U32_U16": self.vector_ops.v_cvt_u32_u16,  # 107
             },
+            "SOPP": {
+                "S_NOP": self.scalar_ops.s_nop,  # 0
+                "S_SLEEP": self.scalar_ops.s_sleep,  # 3
+                "S_DELAY_ALU": self.scalar_ops.s_delay_alu,  # 7
+                "S_WAITCNT": self.scalar_ops.s_waitcnt,  # 9
+                "S_TRAP": self.scalar_ops.s_trap,  # 16
+                "S_BRANCH": self.scalar_ops.s_branch,  # 32
+                "S_CBRANCH_SCC1": self.scalar_ops.s_cbranch_scc1,  # 34
+                "S_CBRANCH_VCCZ": self.scalar_ops.s_cbranch_vccz,  # 35
+                "S_CBRANCH_VCCNZ": self.scalar_ops.s_cbranch_vccnz,  # 36
+                "S_CBRANCH_EXECZ": self.scalar_ops.s_cbranch_execz,  # 37
+                "S_CBRANCH_EXECNZ": self.scalar_ops.s_cbranch_execnz,  # 38
+                "S_CLAUSE": self.scalar_ops.s_clause,  # 39
+                "S_ENDPGM": self.scalar_ops.s_endpgm,  # 48
+                "S_SENDMSG": self.scalar_ops.s_sendmsg,  # 54
+            },
+            "SOPC": {
+                "S_CMP_EQ_U32": self.scalar_ops.s_cmp_eq_u32,  # 6
+            },
+            "SMEM": {
+                "S_LOAD_B32": self.scalar_ops.s_load_b32,  # 0
+                "S_LOAD_B64": self.scalar_ops.s_load_b64,  # 1
+                "S_LOAD_B128": self.scalar_ops.s_load_b128,  # 2
+            },
+            "SOPK": {
+                "S_WAITCNT_VSCNT": self.scalar_ops.s_waitcnt_vscnt,  # 24
+            },
+            "VOP3": {
+                "V_LSHL_ADD_U32": self.vector_ops.v_lshl_add_u32,  # 582
+                "V_AND_OR_B32": self.vector_ops.v_and_or_b32,  # 599
+                "V_OR3_B32": self.vector_ops.v_or3_b32,  # 600
+                "V_MBCNT_LO_U32_B32": self.vector_ops.v_mbcnt_lo_u32_b32,  # 799
+                "V_MUL_LO_U32": self.vector_ops.v_mul_lo_u32,  # 812
+                "V_MUL_HI_U32": self.vector_ops.v_mul_hi_u32,  # 813
+                "V_LSHLREV_B16": self.vector_ops.v_lshlrev_b16,  # 824
+                "V_LSHLREV_B64": self.vector_ops.v_lshlrev_b64,  # 828
+                "V_WRITELANE_B32": self.vector_ops.v_writelane_b32,  # 865
+            },
+            "VOP3SD": {
+                "V_MAD_U64_U32": self.vector_ops.v_mad_u64_u32,  # 766
+                "V_ADD_CO_U32": self.vector_ops.v_add_co_u32,  # 768
+                "V_SUB_CO_U32": self.vector_ops.v_sub_co_u32,  # 769
+            },
+            "VOPC": {
+                "V_CMP_EQ_U32": self.vector_ops.v_cmp_eq_u32,  # 74
+                "V_CMP_NE_U32": self.vector_ops.v_cmp_ne_u32,  # 75
+                "V_CMP_LT_U64": self.vector_ops.v_cmp_lt_u64,  # 89
+                "V_CMP_EQ_U64": self.vector_ops.v_cmp_eq_u64,  # 90
+                "V_CMP_GT_U64": self.vector_ops.v_cmp_gt_u64,  # 92
+                "V_CMP_NE_U64": self.vector_ops.v_cmp_ne_u64,  # 93
+                "V_CMPX_EQ_U32": self.vector_ops.v_cmpx_eq_u32,  # 202
+                "V_CMPX_GT_U32": self.vector_ops.v_cmpx_gt_u32,  # 204
+                "V_CMPX_NE_U32": self.vector_ops.v_cmpx_ne_u32,  # 205
+                "V_CMPX_NE_U64": self.vector_ops.v_cmpx_ne_u64,  # 221
+                "V_CMP_EQ_U16": self.vector_ops.v_cmp_eq_u16,  # 224
+            },
+            "VOPD": {
+                "V_DUAL_MOV_B32": self.vector_ops.v_dual_mov_b32,  # 8
+                "V_DUAL_CNDMASK_B32": self.vector_ops.v_dual_cndmask_b32,  # 9
+            },
         }
 
 
