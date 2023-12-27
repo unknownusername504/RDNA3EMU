@@ -30,7 +30,7 @@ tokens =  (
    'LABEL',
    'INSTRUCTION',
    'COMMA',
-   'COLON',
+   'DBLCOLON',
    'COMMENT',
    'STRING',
    'LPAREN',
@@ -46,7 +46,7 @@ binary = r'[-]?0b[01]+'
 integer =hex + r'|' +  octal + r'|' + binary + r'|' +  decimal 
 t_INTEGER = integer
 t_FLOATING = r'[-]?[0-9]*[.][0-9]+([eE][+-]?[0-9]*)? | [-]0x[0-9a-fA-F]*(.[0-9a-fA-F]+)?[pP][+-]?[0-9a-fA-F]+'
-t_COLON = r':'
+t_DBLCOLON = r'::'
 t_LPAREN = r'\('
 t_RPAREN = r'\)'
 t_PLUS = r'\+'
@@ -127,16 +127,16 @@ def t_error(t):
 # Build the lexer
 lexer = lex.lex()
 
-with open('../../Data/tinyconvdump.txt', 'r') as f:
-  for _ in range(5):
-     next(f)
-  data = f.read() 
-# Test it out with the file contents
-lexer.input(data)
+# with open('../../Data/tinyconvdump.txt', 'r') as f:
+#   for _ in range(5):
+#      next(f)
+#   data = f.read() 
+# # Test it out with the file contents
+# lexer.input(data)
 
-# Tokenize
-while True:
-    tok = lexer.token()
-    if not tok:
-        break  # No more input
-    print(tok)
+# # Tokenize
+# while True:
+#     tok = lexer.token()
+#     if not tok:
+#         break  # No more input
+#     print(tok)
