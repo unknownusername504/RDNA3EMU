@@ -3,6 +3,7 @@ from rdna3emu.isa.registers import Registers as Re
 from rdna3emu.isa.memory import Memory as Me
 import numpy as np
 
+
 class VectorOps:
     def __init__(self, registers: Re, memory: Me):
         self.registers = registers
@@ -11,13 +12,10 @@ class VectorOps:
     # VOP2 instructions
     # Copy data from one of two inputs based on the vector condition code and store the result into a vector register.
     def v_cndmask_b32(self, reg_d, reg_s0, reg_s1):
-        reg_s0_type = self.get_register_type(reg_s0)
-        reg_s1_type = self.get_register_type(reg_s1)
         reg_s0_value = self.registers.sgpr_u32(reg_s0)
         reg_s1_value = self.registers.sgpr_u32(reg_s1)
-        reg_vcc_value = self.get_vcc_value()
+        reg_vcc_value = self.registers.vcc
         reg_d_value = reg_s0_value if reg_vcc_value == 1 else reg_s1_value
-        reg_d_type = reg_s0_type if reg_s0_type == reg_s1_type else reg_s1_type
         self.registers.set_sgpr_u32(reg_d, reg_d_value)
 
     # Dot product of packed FP16 values, accumulate with destination.
@@ -482,7 +480,8 @@ class VectorOps:
         s_value = self.registers.vgpr_f16(reg_s)
         d_value = s_value.astype(np.float32)
         self.registers.set_vgpr_f32(reg_d, d_value)
-# Convert from a single-precision float input to a signed 32-bit integer using round-to-nearest-integer semantics (ignore the default rounding mode) and store the result into a vector register.
+
+    # Convert from a single-precision float input to a signed 32-bit integer using round-to-nearest-integer semantics (ignore the default rounding mode) and store the result into a vector register.
     def v_cvt_nearest_i32_f32(self, reg_d, reg_s):
         s_value = self.registers.vgpr_f32(reg_s)
         d_value = int(round(s_value))
