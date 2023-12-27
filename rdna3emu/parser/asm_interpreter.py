@@ -20,7 +20,7 @@ class AsmInterpreter:
     def preprocess_op_token(self, token):
         # Convert to uppercase
         token = token.upper()
-        # Remove "_e32" or "_e64" from the end of the instruction
+        # Remove "_e32" or "_e64" from the end of the instruction since we don't care about that yet
         if token.endswith("_E32") or token.endswith("_E64"):
             token = token[:-4]
         return token
