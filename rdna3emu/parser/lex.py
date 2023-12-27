@@ -34,7 +34,8 @@ tokens =  (
    'COMMENT',
    'STRING',
    'LPAREN',
-   'RPAREN', 'PLUS', 'MINUS', 'AT', 'OR', 'HASH'
+   'RPAREN', 'PLUS', 'MINUS', 'AT', 'OR', 'HASH',
+   'REF',
 ) + tuple(reserved.values())
 
 # Regular expression rules for simple tokens
@@ -53,6 +54,10 @@ t_MINUS = r'-'
 t_AT = r'@'
 t_OR = r'\|'
 t_HASH = r'\#'
+
+def t_REF(t):
+  r'<[a-zA-Z_.][a-zA-Z0-9_$.@]*>'
+  return t
 def t_TEXT(t): 
   r'\.text'
   return t
@@ -110,7 +115,7 @@ t_ignore  = ' \t'
 
 # A rule to handle comments
 def t_COMMENT(t):
-    r'\;.*'
+    r'\/\/.*'
     pass  # Token discarded
 
 # Error handling rule
@@ -122,7 +127,9 @@ def t_error(t):
 # Build the lexer
 lexer = lex.lex()
 
-with open('../../Data/example_asm.asm', 'r') as f:
+with open('../../Data/tinyconvdump.txt', 'r') as f:
+  for _ in range(5):
+     next(f)
   data = f.read() 
 # Test it out with the file contents
 lexer.input(data)
