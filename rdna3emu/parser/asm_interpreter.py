@@ -150,6 +150,11 @@ class AsmInterpreter:
 
     def interpret_asm(self):
         tokens = []
+        # Drop the first 3 tokens as those are function prologue
+        for _ in range(3):
+            token = self.lexer.token()
+            if not token:
+                return  # No more input
         # Tokenize
         while True:
             token = self.lexer.token()
