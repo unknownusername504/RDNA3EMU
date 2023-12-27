@@ -1,7 +1,7 @@
 import rdna3emu.isa.utils as utils
 from rdna3emu.isa.registers import Registers as Re
 from rdna3emu.isa.memory import Memory as Me
-
+import numpy as np
 
 class VectorOps:
     def __init__(self, registers: Re, memory: Me):
@@ -436,72 +436,103 @@ class VectorOps:
         self.registers.set_sgpr_u32(reg_d, reg_d_value)
 
     # Convert from a double-precision float input to a signed 32-bit integer and store the result into a vector register.
-    def v_cvt_i32_f64(self):
-        pass
+    def v_cvt_i32_f64(self, reg_d, reg_s):
+        s_value = self.registers.vgpr_f64(reg_s)
+        d_value = int(s_value)
+        self.registers.set_vgpr_i32(reg_d, d_value)
 
     # Convert from a signed 32-bit integer input to a double-precision float and store the result into a vector register.
-    def v_cvt_f64_i32(self):
-        pass
+    def v_cvt_f64_i32(self, reg_d, reg_s):
+        s_value = self.registers.vgpr_i32(reg_s)
+        d_value = float(s_value)
+        self.registers.set_vgpr_f64(reg_d, d_value)
 
     # Convert from a signed 32-bit integer input to a single-precision float and store the result into a vector register.
-    def v_cvt_f32_i32(self):
-        pass
+    def v_cvt_f32_i32(self, reg_d, reg_s):
+        s_value = self.registers.vgpr_i32(reg_s)
+        d_value = float(s_value)
+        self.registers.set_vgpr_f32(reg_d, d_value)
 
     # Convert from an unsigned 32-bit integer input to a single-precision float and store the result into a vector register.
-    def v_cvt_f32_u32(self):
-        pass
+    def v_cvt_f32_u32(self, reg_d, reg_s):
+        s_value = self.registers.vgpr_u32(reg_s)
+        d_value = float(s_value)
+        self.registers.set_vgpr_f32(reg_d, d_value)
 
     # Convert from a single-precision float input to an unsigned 32-bit integer and store the result into a vector register.
-    def v_cvt_u32_f32(self):
-        pass
+    def v_cvt_u32_f32(self, reg_d, reg_s):
+        s_value = self.registers.vgpr_f32(reg_s)
+        d_value = int(s_value)
+        self.registers.set_vgpr_u32(reg_d, d_value)
 
     # Convert from a single-precision float input to a signed 32-bit integer and store the result into a vector register.
-    def v_cvt_i32_f32(self):
-        pass
+    def v_cvt_i32_f32(self, reg_d, reg_s):
+        s_value = self.registers.vgpr_f32(reg_s)
+        d_value = int(s_value)
+        self.registers.set_vgpr_i32(reg_d, d_value)
 
     # Convert from a single-precision float input to an FP16 float and store the result into a vector register.
-    def v_cvt_f16_f32(self):
-        pass
+    def v_cvt_f16_f32(self, reg_d, reg_s):
+        s_value = self.registers.vgpr_f32(reg_s)
+        d_value = s_value.astype(np.float16)
+        self.registers.set_vgpr_f16(reg_d, d_value)
 
     # Convert from an FP16 float input to a single-precision float and store the result into a vector register.
-    def v_cvt_f32_f16(self):
-        pass
-
-    # Convert from a single-precision float input to a signed 32-bit integer using round-to-nearest-integer semantics (ignore the default rounding mode) and store the result into a vector register.
-    def v_cvt_nearest_i32_f32(self):
-        pass
+    def v_cvt_f32_f16(self, reg_d, reg_s):
+        s_value = self.registers.vgpr_f16(reg_s)
+        d_value = s_value.astype(np.float32)
+        self.registers.set_vgpr_f32(reg_d, d_value)
+# Convert from a single-precision float input to a signed 32-bit integer using round-to-nearest-integer semantics (ignore the default rounding mode) and store the result into a vector register.
+    def v_cvt_nearest_i32_f32(self, reg_d, reg_s):
+        s_value = self.registers.vgpr_f32(reg_s)
+        d_value = int(round(s_value))
+        self.registers.set_vgpr_i32(reg_d, d_value)
 
     # Convert from a single-precision float input to a signed 32-bit integer using round-down semantics (ignore the default rounding mode) and store the result into a vector register.
-    def v_cvt_floor_i32_f32(self):
-        pass
+    def v_cvt_floor_i32_f32(self, reg_d, reg_s):
+        s_value = self.registers.vgpr_f32(reg_s)
+        d_value = int(np.floor(s_value))
+        self.registers.set_vgpr_i32(reg_d, d_value)
 
     # Convert from a signed 4-bit integer to a single-precision float using an offset table and store the result into a vector register.
-    def v_cvt_off_f32_i4(self):
+    def v_cvt_off_f32_i4(self, reg_d, reg_s):
         pass
 
     # Convert from a double-precision float input to a single-precision float and store the result into a vector register.
-    def v_cvt_f32_f64(self):
-        pass
+    def v_cvt_f32_f64(self, reg_d, reg_s):
+        s_value = self.registers.vgpr_f64(reg_s)
+        d_value = float(np.float32(s_value))
+        self.registers.set_vgpr_f32(reg_d, d_value)
 
     # Convert from a single-precision float input to a double-precision float and store the result into a vector register.
-    def v_cvt_f64_f32(self):
-        pass
+    def v_cvt_f64_f32(self, reg_d, reg_s):
+        s_value = self.registers.vgpr_f32(reg_s)
+        d_value = float(np.float64(s_value))
+        self.registers.set_vgpr_f64(reg_d, d_value)
 
     # Convert an unsigned byte in byte 0 of the input to a single-precision float and store the result into a vector register.
-    def v_cvt_f32_ubyte0(self):
-        pass
+    def v_cvt_f32_ubyte0(self, reg_d, reg_s):
+        byte_value = self.registers.vgpr_u32(reg_s) & 0xFF  # Extract byte 0
+        d_value = float(byte_value)
+        self.registers.set_vgpr_f32(reg_d, d_value)
 
     # Convert an unsigned byte in byte 1 of the input to a single-precision float and store the result into a vector register.
-    def v_cvt_f32_ubyte1(self):
-        pass
+    def v_cvt_f32_ubyte1(self, reg_d, reg_s):
+        byte_value = (self.registers.vgpr_u32(reg_s) >> 8) & 0xFF  # Extract byte 1
+        d_value = float(byte_value)
+        self.registers.set_vgpr_f32(reg_d, d_value)
 
     # Convert an unsigned byte in byte 2 of the input to a single-precision float and store the result into a vector register.
-    def v_cvt_f32_ubyte2(self):
-        pass
+    def v_cvt_f32_ubyte2(self, reg_d, reg_s):
+        byte_value = (self.registers.vgpr_u32(reg_s) >> 16) & 0xFF  # Extract byte 2
+        d_value = float(byte_value)
+        self.registers.set_vgpr_f32(reg_d, d_value)
 
     # Convert an unsigned byte in byte 3 of the input to a single-precision float and store the result into a vector register.
-    def v_cvt_f32_ubyte3(self):
-        pass
+    def v_cvt_f32_ubyte3(self, reg_d, reg_s):
+        byte_value = (self.registers.vgpr_u32(reg_s) >> 24) & 0xFF  # Extract byte 3
+        d_value = float(byte_value)
+        self.registers.set_vgpr_f32(reg_d, d_value)
 
     # Convert from a double-precision float input to an unsigned 32-bit integer and store the result into a vector register.
     def v_cvt_u32_f64(self):
