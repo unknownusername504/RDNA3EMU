@@ -44,6 +44,9 @@ class AsmInterpreter:
                 tokens.append(lex.LexToken(token.type, register_name + str(i)))
         else:
             tokens.append(token)
+        # Strip the "v" or "s" from the register name
+        for i in range(len(tokens)):
+            tokens[i] = tokens[i].value[1:]
         return tokens
 
     # Process a symbol token
