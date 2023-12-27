@@ -1,10 +1,12 @@
 import rdna3emu.isa.utils as utils
 from rdna3emu.isa.registers import Registers as Re
+from rdna3emu.isa.memory import Memory as Me
 
 
 class ScalarOps:
-    def __init__(self, registers: Re):
+    def __init__(self, registers: Re, memory: Me):
         self.registers = registers
+        self.memory = memory
 
     # SOP2 instructions
     # Add two unsigned inputs, store the result into a scalar register and store the carry-out bit into SCC.
@@ -1039,41 +1041,43 @@ class ScalarOps:
         self.registers._status.set_scc(1 if s0_value == s1_value else 0)
 
     # SMEM instructions
-    def calculate_effective_address(self, addr, offset):
-        if isinstance(offset, int):
-            return addr + (offset & 0x1FFFFF)  # Mask to 21 bits
-        else:  #  'offset' is an SGPR ????
-            return addr + (
-                self.registers.sgpr_u32(offset) & 0xFFFFFFFC
-            )  # Ignore 2 LSBs
+    # Load a 32-bit value from memory into a scalar register.
+    # If the offset is specified as an SGPR, the SGPR contains an UNSIGNED BYTE offset (the 2 LSBs are ignored).
+    # If the offset is specified as an immediate 21-bit constant, the constant is a SIGNED BYTE offset.
+    def s_load_b32(self, reg_d, reg_s0, reg_s1):
+        reg_s0_value = self.registers.sgpr_u64(reg_s0)
+        reg_s1_value = self.registers.sgpr_u64(reg_s1)
+        reg_d_value = self.memory.get_memory(reg_s0_value + reg_s1_value, 4)
+        self.registers.set_sgpr_u32(reg_d, reg_d_value)
 
-    def s_load_b32(self, reg_sdata, addr, offset=0):
-        if isinstance(offset, int):
-            effective_addr = addr + (offset & 0x1FFFFF)
-        else:
-            effective_addr = addr + (self.registers.sgpr_u32(offset) & 0xFFFFFFFC)
+    def s_load_b32_imm(self, reg_d, reg_s0, imm):
+        reg_s0_value = self.registers.sgpr_u64(reg_s0)
+        reg_d_value = self.memory.get_memory(reg_s0_value + imm, 4)
+        self.registers.set_sgpr_u32(reg_d, reg_d_value)
 
-        data = self.memory.load_u32(effective_addr)
+    # Load a 64-bit value from memory into a scalar register.
+    def s_load_b64(self, reg_d, reg_s0, reg_s1):
+        reg_s0_value = self.registers.sgpr_u64(reg_s0)
+        reg_s1_value = self.registers.sgpr_u64(reg_s1)
+        reg_d_value = self.memory.get_memory(reg_s0_value + reg_s1_value, 8)
+        self.registers.set_sgpr_u64(reg_d, reg_d_value)
 
-        self.registers.set_sgpr_u32(reg_sdata, data)
+    def s_load_b64_imm(self, reg_d, reg_s0, imm):
+        reg_s0_value = self.registers.sgpr_u64(reg_s0)
+        reg_d_value = self.memory.get_memory(reg_s0_value + imm, 8)
+        self.registers.set_sgpr_u64(reg_d, reg_d_value)
 
-        self.registers.pc += 4
+    # Load a 128-bit value from memory into a scalar register.
+    def s_load_b128(self, reg_d, reg_s0, reg_s1):
+        reg_s0_value = self.registers.sgpr_u64(reg_s0)
+        reg_s1_value = self.registers.sgpr_u64(reg_s1)
+        reg_d_value = self.memory.get_memory(reg_s0_value + reg_s1_value, 16)
+        self.registers.set_sgpr_u128(reg_d, reg_d_value)
 
-    def s_load_b64(self, reg_sdata, addr, offset=0):
-        effective_addr = self.calculate_effective_address(addr, offset)
-        data_lower = self.memory.load_u32(effective_addr)
-        data_upper = self.memory.load_u32(effective_addr + 4)
-        self.registers.set_sgpr_u64(reg_sdata, (data_upper << 32) | data_lower)
-        self.registers.pc += 4
-
-    def s_load_b128(self, reg_sdata, addr, offset=0):
-        effective_addr = self.calculate_effective_address(addr, offset)
-        segments = [self.memory.load_u32(effective_addr + i) for i in range(0, 16, 4)]
-        for i, segment in enumerate(segments):
-            self.registers.set_scalar_register(
-                reg_sdata, segment, i * 32
-            )  # Assuming set_scalar_register can handle 128-bit registers and offsets
-        self.registers.pc += 4
+    def s_load_b128_imm(self, reg_d, reg_s0, imm):
+        reg_s0_value = self.registers.sgpr_u64(reg_s0)
+        reg_d_value = self.memory.get_memory(reg_s0_value + imm, 16)
+        self.registers.set_sgpr_u128(reg_d, reg_d_value)
 
     # SOPK instructions
     def s_waitcnt_vscnt(self):

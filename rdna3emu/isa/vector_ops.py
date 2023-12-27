@@ -1,10 +1,12 @@
 import rdna3emu.isa.utils as utils
 from rdna3emu.isa.registers import Registers as Re
+from rdna3emu.isa.memory import Memory as Me
 
 
 class VectorOps:
-    def __init__(self, registers: Re):
+    def __init__(self, registers: Re, memory: Me):
         self.registers = registers
+        self.memory = memory
 
     # VOP2 instructions
     # Copy data from one of two inputs based on the vector condition code and store the result into a vector register.

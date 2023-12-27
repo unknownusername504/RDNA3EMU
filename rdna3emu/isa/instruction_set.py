@@ -7,14 +7,16 @@ sys.path.append("../rdna3emu/")
 from rdna3emu.isa.scalar_ops import ScalarOps
 from rdna3emu.isa.vector_ops import VectorOps
 from rdna3emu.isa.registers import Registers
+from rdna3emu.isa.memory import Memory
 from rdna3emu.isa.utils import populate_instruction_usage
 
 
 class InstructionSet:
     def __init__(self):
         self.registers = Registers()
-        self.vector_ops = VectorOps(self.registers)
-        self.scalar_ops = ScalarOps(self.registers)
+        self.memory = Memory()
+        self.vector_ops = VectorOps(self.registers, self.memory)
+        self.scalar_ops = ScalarOps(self.registers, self.memory)
         self.instructions = {
             "SOP2": {
                 "S_ADD_U32": self.scalar_ops.s_add_u32,  # 0
