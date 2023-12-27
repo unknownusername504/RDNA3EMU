@@ -31,7 +31,7 @@ tokens = (
     "LABEL",
     "INSTRUCTION",
     "COMMA",
-    "COLON",
+    "DBLCOLON",
     "COMMENT",
     "STRING",
     "LPAREN",
@@ -52,7 +52,7 @@ binary = r"[-]?0b[01]+"
 integer = hex + r"|" + octal + r"|" + binary + r"|" + decimal
 t_INTEGER = integer
 t_FLOATING = r"[-]?[0-9]*[.][0-9]+([eE][+-]?[0-9]*)? | [-]0x[0-9a-fA-F]*(.[0-9a-fA-F]+)?[pP][+-]?[0-9a-fA-F]+"
-t_COLON = r":"
+t_DBLCOLON = r"::"
 t_LPAREN = r"\("
 t_RPAREN = r"\)"
 t_PLUS = r"\+"
@@ -113,7 +113,7 @@ def t_SGPR(t):
 
 
 def t_INSTRUCTION(t):
-    r"s_[a-zA-Z_\d+]+|v_[a-zA-Z_\d+]+"
+    r"s_[a-zA-Z_\d+]+|v_[a-zA-Z_\d+]+|global_[a-zA-Z_\d+]+|ds_[a-zA-Z_\d+]+"
     return t
 
 

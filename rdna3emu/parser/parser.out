@@ -1,0 +1,659 @@
+Created by PLY version 3.11 (http://www.dabeaz.com/ply)
+
+Unused terminals:
+
+    AT
+    BSS
+    COMMENT
+    DATA
+    DIRECTIVE
+    GLOBAL
+    HASH
+    HEX
+    KERNEL_DESC
+    LDS_GLOBAL
+    M0
+    MINUS
+    OCTAL
+    P2ALIGN
+    PLUS
+    REF
+    SET
+    STRING
+    TARGET
+    TEXT
+    TYPE
+    VCC_HI
+    VCC_LO
+    WEAK
+
+Grammar
+
+Rule 0     S' -> program
+Rule 1     program -> statements
+Rule 2     statements -> statement
+Rule 3     statements -> statements statement
+Rule 4     statement -> INSTRUCTION
+Rule 5     statement -> INSTRUCTION operands
+Rule 6     statement -> INSTRUCTION operands DBLCOLON INSTRUCTION operands
+Rule 7     operands -> operand
+Rule 8     operands -> operands COMMA operand
+Rule 9     operands -> operands OR operand
+Rule 10    operands -> operands operand
+Rule 11    operand -> SGPR
+Rule 12    operand -> VGPR
+Rule 13    operand -> INTEGER
+Rule 14    operand -> FLOATING
+Rule 15    operand -> SYMBOL
+Rule 16    operand -> BINARY
+Rule 17    operand -> func
+Rule 18    operand -> modifier
+Rule 19    modifier -> LABEL INTEGER
+Rule 20    func -> SYMBOL LPAREN SYMBOL RPAREN
+Rule 21    func -> SYMBOL LPAREN INTEGER RPAREN
+
+Terminals, with rules where they appear
+
+AT                   : 
+BINARY               : 16
+BSS                  : 
+COMMA                : 8
+COMMENT              : 
+DATA                 : 
+DBLCOLON             : 6
+DIRECTIVE            : 
+FLOATING             : 14
+GLOBAL               : 
+HASH                 : 
+HEX                  : 
+INSTRUCTION          : 4 5 6 6
+INTEGER              : 13 19 21
+KERNEL_DESC          : 
+LABEL                : 19
+LDS_GLOBAL           : 
+LPAREN               : 20 21
+M0                   : 
+MINUS                : 
+OCTAL                : 
+OR                   : 9
+P2ALIGN              : 
+PLUS                 : 
+REF                  : 
+RPAREN               : 20 21
+SET                  : 
+SGPR                 : 11
+STRING               : 
+SYMBOL               : 15 20 20 21
+TARGET               : 
+TEXT                 : 
+TYPE                 : 
+VCC_HI               : 
+VCC_LO               : 
+VGPR                 : 12
+WEAK                 : 
+error                : 
+
+Nonterminals, with rules where they appear
+
+func                 : 17
+modifier             : 18
+operand              : 7 8 9 10
+operands             : 5 6 6 8 9 10
+program              : 0
+statement            : 2 3
+statements           : 1 3
+
+Parsing method: LALR
+
+state 0
+
+    (0) S' -> . program
+    (1) program -> . statements
+    (2) statements -> . statement
+    (3) statements -> . statements statement
+    (4) statement -> . INSTRUCTION
+    (5) statement -> . INSTRUCTION operands
+    (6) statement -> . INSTRUCTION operands DBLCOLON INSTRUCTION operands
+
+    INSTRUCTION     shift and go to state 4
+
+    program                        shift and go to state 1
+    statements                     shift and go to state 2
+    statement                      shift and go to state 3
+
+state 1
+
+    (0) S' -> program .
+
+
+
+state 2
+
+    (1) program -> statements .
+    (3) statements -> statements . statement
+    (4) statement -> . INSTRUCTION
+    (5) statement -> . INSTRUCTION operands
+    (6) statement -> . INSTRUCTION operands DBLCOLON INSTRUCTION operands
+
+    $end            reduce using rule 1 (program -> statements .)
+    INSTRUCTION     shift and go to state 4
+
+    statement                      shift and go to state 5
+
+state 3
+
+    (2) statements -> statement .
+
+    INSTRUCTION     reduce using rule 2 (statements -> statement .)
+    $end            reduce using rule 2 (statements -> statement .)
+
+
+state 4
+
+    (4) statement -> INSTRUCTION .
+    (5) statement -> INSTRUCTION . operands
+    (6) statement -> INSTRUCTION . operands DBLCOLON INSTRUCTION operands
+    (7) operands -> . operand
+    (8) operands -> . operands COMMA operand
+    (9) operands -> . operands OR operand
+    (10) operands -> . operands operand
+    (11) operand -> . SGPR
+    (12) operand -> . VGPR
+    (13) operand -> . INTEGER
+    (14) operand -> . FLOATING
+    (15) operand -> . SYMBOL
+    (16) operand -> . BINARY
+    (17) operand -> . func
+    (18) operand -> . modifier
+    (20) func -> . SYMBOL LPAREN SYMBOL RPAREN
+    (21) func -> . SYMBOL LPAREN INTEGER RPAREN
+    (19) modifier -> . LABEL INTEGER
+
+    INSTRUCTION     reduce using rule 4 (statement -> INSTRUCTION .)
+    $end            reduce using rule 4 (statement -> INSTRUCTION .)
+    SGPR            shift and go to state 8
+    VGPR            shift and go to state 9
+    INTEGER         shift and go to state 10
+    FLOATING        shift and go to state 11
+    SYMBOL          shift and go to state 12
+    BINARY          shift and go to state 13
+    LABEL           shift and go to state 16
+
+    operands                       shift and go to state 6
+    operand                        shift and go to state 7
+    func                           shift and go to state 14
+    modifier                       shift and go to state 15
+
+state 5
+
+    (3) statements -> statements statement .
+
+    INSTRUCTION     reduce using rule 3 (statements -> statements statement .)
+    $end            reduce using rule 3 (statements -> statements statement .)
+
+
+state 6
+
+    (5) statement -> INSTRUCTION operands .
+    (6) statement -> INSTRUCTION operands . DBLCOLON INSTRUCTION operands
+    (8) operands -> operands . COMMA operand
+    (9) operands -> operands . OR operand
+    (10) operands -> operands . operand
+    (11) operand -> . SGPR
+    (12) operand -> . VGPR
+    (13) operand -> . INTEGER
+    (14) operand -> . FLOATING
+    (15) operand -> . SYMBOL
+    (16) operand -> . BINARY
+    (17) operand -> . func
+    (18) operand -> . modifier
+    (20) func -> . SYMBOL LPAREN SYMBOL RPAREN
+    (21) func -> . SYMBOL LPAREN INTEGER RPAREN
+    (19) modifier -> . LABEL INTEGER
+
+    INSTRUCTION     reduce using rule 5 (statement -> INSTRUCTION operands .)
+    $end            reduce using rule 5 (statement -> INSTRUCTION operands .)
+    DBLCOLON        shift and go to state 17
+    COMMA           shift and go to state 18
+    OR              shift and go to state 20
+    SGPR            shift and go to state 8
+    VGPR            shift and go to state 9
+    INTEGER         shift and go to state 10
+    FLOATING        shift and go to state 11
+    SYMBOL          shift and go to state 12
+    BINARY          shift and go to state 13
+    LABEL           shift and go to state 16
+
+    operand                        shift and go to state 19
+    func                           shift and go to state 14
+    modifier                       shift and go to state 15
+
+state 7
+
+    (7) operands -> operand .
+
+    DBLCOLON        reduce using rule 7 (operands -> operand .)
+    COMMA           reduce using rule 7 (operands -> operand .)
+    OR              reduce using rule 7 (operands -> operand .)
+    SGPR            reduce using rule 7 (operands -> operand .)
+    VGPR            reduce using rule 7 (operands -> operand .)
+    INTEGER         reduce using rule 7 (operands -> operand .)
+    FLOATING        reduce using rule 7 (operands -> operand .)
+    SYMBOL          reduce using rule 7 (operands -> operand .)
+    BINARY          reduce using rule 7 (operands -> operand .)
+    LABEL           reduce using rule 7 (operands -> operand .)
+    INSTRUCTION     reduce using rule 7 (operands -> operand .)
+    $end            reduce using rule 7 (operands -> operand .)
+
+
+state 8
+
+    (11) operand -> SGPR .
+
+    DBLCOLON        reduce using rule 11 (operand -> SGPR .)
+    COMMA           reduce using rule 11 (operand -> SGPR .)
+    OR              reduce using rule 11 (operand -> SGPR .)
+    SGPR            reduce using rule 11 (operand -> SGPR .)
+    VGPR            reduce using rule 11 (operand -> SGPR .)
+    INTEGER         reduce using rule 11 (operand -> SGPR .)
+    FLOATING        reduce using rule 11 (operand -> SGPR .)
+    SYMBOL          reduce using rule 11 (operand -> SGPR .)
+    BINARY          reduce using rule 11 (operand -> SGPR .)
+    LABEL           reduce using rule 11 (operand -> SGPR .)
+    INSTRUCTION     reduce using rule 11 (operand -> SGPR .)
+    $end            reduce using rule 11 (operand -> SGPR .)
+
+
+state 9
+
+    (12) operand -> VGPR .
+
+    DBLCOLON        reduce using rule 12 (operand -> VGPR .)
+    COMMA           reduce using rule 12 (operand -> VGPR .)
+    OR              reduce using rule 12 (operand -> VGPR .)
+    SGPR            reduce using rule 12 (operand -> VGPR .)
+    VGPR            reduce using rule 12 (operand -> VGPR .)
+    INTEGER         reduce using rule 12 (operand -> VGPR .)
+    FLOATING        reduce using rule 12 (operand -> VGPR .)
+    SYMBOL          reduce using rule 12 (operand -> VGPR .)
+    BINARY          reduce using rule 12 (operand -> VGPR .)
+    LABEL           reduce using rule 12 (operand -> VGPR .)
+    INSTRUCTION     reduce using rule 12 (operand -> VGPR .)
+    $end            reduce using rule 12 (operand -> VGPR .)
+
+
+state 10
+
+    (13) operand -> INTEGER .
+
+    DBLCOLON        reduce using rule 13 (operand -> INTEGER .)
+    COMMA           reduce using rule 13 (operand -> INTEGER .)
+    OR              reduce using rule 13 (operand -> INTEGER .)
+    SGPR            reduce using rule 13 (operand -> INTEGER .)
+    VGPR            reduce using rule 13 (operand -> INTEGER .)
+    INTEGER         reduce using rule 13 (operand -> INTEGER .)
+    FLOATING        reduce using rule 13 (operand -> INTEGER .)
+    SYMBOL          reduce using rule 13 (operand -> INTEGER .)
+    BINARY          reduce using rule 13 (operand -> INTEGER .)
+    LABEL           reduce using rule 13 (operand -> INTEGER .)
+    INSTRUCTION     reduce using rule 13 (operand -> INTEGER .)
+    $end            reduce using rule 13 (operand -> INTEGER .)
+
+
+state 11
+
+    (14) operand -> FLOATING .
+
+    DBLCOLON        reduce using rule 14 (operand -> FLOATING .)
+    COMMA           reduce using rule 14 (operand -> FLOATING .)
+    OR              reduce using rule 14 (operand -> FLOATING .)
+    SGPR            reduce using rule 14 (operand -> FLOATING .)
+    VGPR            reduce using rule 14 (operand -> FLOATING .)
+    INTEGER         reduce using rule 14 (operand -> FLOATING .)
+    FLOATING        reduce using rule 14 (operand -> FLOATING .)
+    SYMBOL          reduce using rule 14 (operand -> FLOATING .)
+    BINARY          reduce using rule 14 (operand -> FLOATING .)
+    LABEL           reduce using rule 14 (operand -> FLOATING .)
+    INSTRUCTION     reduce using rule 14 (operand -> FLOATING .)
+    $end            reduce using rule 14 (operand -> FLOATING .)
+
+
+state 12
+
+    (15) operand -> SYMBOL .
+    (20) func -> SYMBOL . LPAREN SYMBOL RPAREN
+    (21) func -> SYMBOL . LPAREN INTEGER RPAREN
+
+    DBLCOLON        reduce using rule 15 (operand -> SYMBOL .)
+    COMMA           reduce using rule 15 (operand -> SYMBOL .)
+    OR              reduce using rule 15 (operand -> SYMBOL .)
+    SGPR            reduce using rule 15 (operand -> SYMBOL .)
+    VGPR            reduce using rule 15 (operand -> SYMBOL .)
+    INTEGER         reduce using rule 15 (operand -> SYMBOL .)
+    FLOATING        reduce using rule 15 (operand -> SYMBOL .)
+    SYMBOL          reduce using rule 15 (operand -> SYMBOL .)
+    BINARY          reduce using rule 15 (operand -> SYMBOL .)
+    LABEL           reduce using rule 15 (operand -> SYMBOL .)
+    INSTRUCTION     reduce using rule 15 (operand -> SYMBOL .)
+    $end            reduce using rule 15 (operand -> SYMBOL .)
+    LPAREN          shift and go to state 21
+
+
+state 13
+
+    (16) operand -> BINARY .
+
+    DBLCOLON        reduce using rule 16 (operand -> BINARY .)
+    COMMA           reduce using rule 16 (operand -> BINARY .)
+    OR              reduce using rule 16 (operand -> BINARY .)
+    SGPR            reduce using rule 16 (operand -> BINARY .)
+    VGPR            reduce using rule 16 (operand -> BINARY .)
+    INTEGER         reduce using rule 16 (operand -> BINARY .)
+    FLOATING        reduce using rule 16 (operand -> BINARY .)
+    SYMBOL          reduce using rule 16 (operand -> BINARY .)
+    BINARY          reduce using rule 16 (operand -> BINARY .)
+    LABEL           reduce using rule 16 (operand -> BINARY .)
+    INSTRUCTION     reduce using rule 16 (operand -> BINARY .)
+    $end            reduce using rule 16 (operand -> BINARY .)
+
+
+state 14
+
+    (17) operand -> func .
+
+    DBLCOLON        reduce using rule 17 (operand -> func .)
+    COMMA           reduce using rule 17 (operand -> func .)
+    OR              reduce using rule 17 (operand -> func .)
+    SGPR            reduce using rule 17 (operand -> func .)
+    VGPR            reduce using rule 17 (operand -> func .)
+    INTEGER         reduce using rule 17 (operand -> func .)
+    FLOATING        reduce using rule 17 (operand -> func .)
+    SYMBOL          reduce using rule 17 (operand -> func .)
+    BINARY          reduce using rule 17 (operand -> func .)
+    LABEL           reduce using rule 17 (operand -> func .)
+    INSTRUCTION     reduce using rule 17 (operand -> func .)
+    $end            reduce using rule 17 (operand -> func .)
+
+
+state 15
+
+    (18) operand -> modifier .
+
+    DBLCOLON        reduce using rule 18 (operand -> modifier .)
+    COMMA           reduce using rule 18 (operand -> modifier .)
+    OR              reduce using rule 18 (operand -> modifier .)
+    SGPR            reduce using rule 18 (operand -> modifier .)
+    VGPR            reduce using rule 18 (operand -> modifier .)
+    INTEGER         reduce using rule 18 (operand -> modifier .)
+    FLOATING        reduce using rule 18 (operand -> modifier .)
+    SYMBOL          reduce using rule 18 (operand -> modifier .)
+    BINARY          reduce using rule 18 (operand -> modifier .)
+    LABEL           reduce using rule 18 (operand -> modifier .)
+    INSTRUCTION     reduce using rule 18 (operand -> modifier .)
+    $end            reduce using rule 18 (operand -> modifier .)
+
+
+state 16
+
+    (19) modifier -> LABEL . INTEGER
+
+    INTEGER         shift and go to state 22
+
+
+state 17
+
+    (6) statement -> INSTRUCTION operands DBLCOLON . INSTRUCTION operands
+
+    INSTRUCTION     shift and go to state 23
+
+
+state 18
+
+    (8) operands -> operands COMMA . operand
+    (11) operand -> . SGPR
+    (12) operand -> . VGPR
+    (13) operand -> . INTEGER
+    (14) operand -> . FLOATING
+    (15) operand -> . SYMBOL
+    (16) operand -> . BINARY
+    (17) operand -> . func
+    (18) operand -> . modifier
+    (20) func -> . SYMBOL LPAREN SYMBOL RPAREN
+    (21) func -> . SYMBOL LPAREN INTEGER RPAREN
+    (19) modifier -> . LABEL INTEGER
+
+    SGPR            shift and go to state 8
+    VGPR            shift and go to state 9
+    INTEGER         shift and go to state 10
+    FLOATING        shift and go to state 11
+    SYMBOL          shift and go to state 12
+    BINARY          shift and go to state 13
+    LABEL           shift and go to state 16
+
+    operand                        shift and go to state 24
+    func                           shift and go to state 14
+    modifier                       shift and go to state 15
+
+state 19
+
+    (10) operands -> operands operand .
+
+    DBLCOLON        reduce using rule 10 (operands -> operands operand .)
+    COMMA           reduce using rule 10 (operands -> operands operand .)
+    OR              reduce using rule 10 (operands -> operands operand .)
+    SGPR            reduce using rule 10 (operands -> operands operand .)
+    VGPR            reduce using rule 10 (operands -> operands operand .)
+    INTEGER         reduce using rule 10 (operands -> operands operand .)
+    FLOATING        reduce using rule 10 (operands -> operands operand .)
+    SYMBOL          reduce using rule 10 (operands -> operands operand .)
+    BINARY          reduce using rule 10 (operands -> operands operand .)
+    LABEL           reduce using rule 10 (operands -> operands operand .)
+    INSTRUCTION     reduce using rule 10 (operands -> operands operand .)
+    $end            reduce using rule 10 (operands -> operands operand .)
+
+
+state 20
+
+    (9) operands -> operands OR . operand
+    (11) operand -> . SGPR
+    (12) operand -> . VGPR
+    (13) operand -> . INTEGER
+    (14) operand -> . FLOATING
+    (15) operand -> . SYMBOL
+    (16) operand -> . BINARY
+    (17) operand -> . func
+    (18) operand -> . modifier
+    (20) func -> . SYMBOL LPAREN SYMBOL RPAREN
+    (21) func -> . SYMBOL LPAREN INTEGER RPAREN
+    (19) modifier -> . LABEL INTEGER
+
+    SGPR            shift and go to state 8
+    VGPR            shift and go to state 9
+    INTEGER         shift and go to state 10
+    FLOATING        shift and go to state 11
+    SYMBOL          shift and go to state 12
+    BINARY          shift and go to state 13
+    LABEL           shift and go to state 16
+
+    operand                        shift and go to state 25
+    func                           shift and go to state 14
+    modifier                       shift and go to state 15
+
+state 21
+
+    (20) func -> SYMBOL LPAREN . SYMBOL RPAREN
+    (21) func -> SYMBOL LPAREN . INTEGER RPAREN
+
+    SYMBOL          shift and go to state 26
+    INTEGER         shift and go to state 27
+
+
+state 22
+
+    (19) modifier -> LABEL INTEGER .
+
+    DBLCOLON        reduce using rule 19 (modifier -> LABEL INTEGER .)
+    COMMA           reduce using rule 19 (modifier -> LABEL INTEGER .)
+    OR              reduce using rule 19 (modifier -> LABEL INTEGER .)
+    SGPR            reduce using rule 19 (modifier -> LABEL INTEGER .)
+    VGPR            reduce using rule 19 (modifier -> LABEL INTEGER .)
+    INTEGER         reduce using rule 19 (modifier -> LABEL INTEGER .)
+    FLOATING        reduce using rule 19 (modifier -> LABEL INTEGER .)
+    SYMBOL          reduce using rule 19 (modifier -> LABEL INTEGER .)
+    BINARY          reduce using rule 19 (modifier -> LABEL INTEGER .)
+    LABEL           reduce using rule 19 (modifier -> LABEL INTEGER .)
+    INSTRUCTION     reduce using rule 19 (modifier -> LABEL INTEGER .)
+    $end            reduce using rule 19 (modifier -> LABEL INTEGER .)
+
+
+state 23
+
+    (6) statement -> INSTRUCTION operands DBLCOLON INSTRUCTION . operands
+    (7) operands -> . operand
+    (8) operands -> . operands COMMA operand
+    (9) operands -> . operands OR operand
+    (10) operands -> . operands operand
+    (11) operand -> . SGPR
+    (12) operand -> . VGPR
+    (13) operand -> . INTEGER
+    (14) operand -> . FLOATING
+    (15) operand -> . SYMBOL
+    (16) operand -> . BINARY
+    (17) operand -> . func
+    (18) operand -> . modifier
+    (20) func -> . SYMBOL LPAREN SYMBOL RPAREN
+    (21) func -> . SYMBOL LPAREN INTEGER RPAREN
+    (19) modifier -> . LABEL INTEGER
+
+    SGPR            shift and go to state 8
+    VGPR            shift and go to state 9
+    INTEGER         shift and go to state 10
+    FLOATING        shift and go to state 11
+    SYMBOL          shift and go to state 12
+    BINARY          shift and go to state 13
+    LABEL           shift and go to state 16
+
+    operands                       shift and go to state 28
+    operand                        shift and go to state 7
+    func                           shift and go to state 14
+    modifier                       shift and go to state 15
+
+state 24
+
+    (8) operands -> operands COMMA operand .
+
+    DBLCOLON        reduce using rule 8 (operands -> operands COMMA operand .)
+    COMMA           reduce using rule 8 (operands -> operands COMMA operand .)
+    OR              reduce using rule 8 (operands -> operands COMMA operand .)
+    SGPR            reduce using rule 8 (operands -> operands COMMA operand .)
+    VGPR            reduce using rule 8 (operands -> operands COMMA operand .)
+    INTEGER         reduce using rule 8 (operands -> operands COMMA operand .)
+    FLOATING        reduce using rule 8 (operands -> operands COMMA operand .)
+    SYMBOL          reduce using rule 8 (operands -> operands COMMA operand .)
+    BINARY          reduce using rule 8 (operands -> operands COMMA operand .)
+    LABEL           reduce using rule 8 (operands -> operands COMMA operand .)
+    INSTRUCTION     reduce using rule 8 (operands -> operands COMMA operand .)
+    $end            reduce using rule 8 (operands -> operands COMMA operand .)
+
+
+state 25
+
+    (9) operands -> operands OR operand .
+
+    DBLCOLON        reduce using rule 9 (operands -> operands OR operand .)
+    COMMA           reduce using rule 9 (operands -> operands OR operand .)
+    OR              reduce using rule 9 (operands -> operands OR operand .)
+    SGPR            reduce using rule 9 (operands -> operands OR operand .)
+    VGPR            reduce using rule 9 (operands -> operands OR operand .)
+    INTEGER         reduce using rule 9 (operands -> operands OR operand .)
+    FLOATING        reduce using rule 9 (operands -> operands OR operand .)
+    SYMBOL          reduce using rule 9 (operands -> operands OR operand .)
+    BINARY          reduce using rule 9 (operands -> operands OR operand .)
+    LABEL           reduce using rule 9 (operands -> operands OR operand .)
+    INSTRUCTION     reduce using rule 9 (operands -> operands OR operand .)
+    $end            reduce using rule 9 (operands -> operands OR operand .)
+
+
+state 26
+
+    (20) func -> SYMBOL LPAREN SYMBOL . RPAREN
+
+    RPAREN          shift and go to state 29
+
+
+state 27
+
+    (21) func -> SYMBOL LPAREN INTEGER . RPAREN
+
+    RPAREN          shift and go to state 30
+
+
+state 28
+
+    (6) statement -> INSTRUCTION operands DBLCOLON INSTRUCTION operands .
+    (8) operands -> operands . COMMA operand
+    (9) operands -> operands . OR operand
+    (10) operands -> operands . operand
+    (11) operand -> . SGPR
+    (12) operand -> . VGPR
+    (13) operand -> . INTEGER
+    (14) operand -> . FLOATING
+    (15) operand -> . SYMBOL
+    (16) operand -> . BINARY
+    (17) operand -> . func
+    (18) operand -> . modifier
+    (20) func -> . SYMBOL LPAREN SYMBOL RPAREN
+    (21) func -> . SYMBOL LPAREN INTEGER RPAREN
+    (19) modifier -> . LABEL INTEGER
+
+    INSTRUCTION     reduce using rule 6 (statement -> INSTRUCTION operands DBLCOLON INSTRUCTION operands .)
+    $end            reduce using rule 6 (statement -> INSTRUCTION operands DBLCOLON INSTRUCTION operands .)
+    COMMA           shift and go to state 18
+    OR              shift and go to state 20
+    SGPR            shift and go to state 8
+    VGPR            shift and go to state 9
+    INTEGER         shift and go to state 10
+    FLOATING        shift and go to state 11
+    SYMBOL          shift and go to state 12
+    BINARY          shift and go to state 13
+    LABEL           shift and go to state 16
+
+    operand                        shift and go to state 19
+    func                           shift and go to state 14
+    modifier                       shift and go to state 15
+
+state 29
+
+    (20) func -> SYMBOL LPAREN SYMBOL RPAREN .
+
+    DBLCOLON        reduce using rule 20 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
+    COMMA           reduce using rule 20 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
+    OR              reduce using rule 20 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
+    SGPR            reduce using rule 20 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
+    VGPR            reduce using rule 20 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
+    INTEGER         reduce using rule 20 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
+    FLOATING        reduce using rule 20 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
+    SYMBOL          reduce using rule 20 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
+    BINARY          reduce using rule 20 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
+    LABEL           reduce using rule 20 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
+    INSTRUCTION     reduce using rule 20 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
+    $end            reduce using rule 20 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
+
+
+state 30
+
+    (21) func -> SYMBOL LPAREN INTEGER RPAREN .
+
+    DBLCOLON        reduce using rule 21 (func -> SYMBOL LPAREN INTEGER RPAREN .)
+    COMMA           reduce using rule 21 (func -> SYMBOL LPAREN INTEGER RPAREN .)
+    OR              reduce using rule 21 (func -> SYMBOL LPAREN INTEGER RPAREN .)
+    SGPR            reduce using rule 21 (func -> SYMBOL LPAREN INTEGER RPAREN .)
+    VGPR            reduce using rule 21 (func -> SYMBOL LPAREN INTEGER RPAREN .)
+    INTEGER         reduce using rule 21 (func -> SYMBOL LPAREN INTEGER RPAREN .)
+    FLOATING        reduce using rule 21 (func -> SYMBOL LPAREN INTEGER RPAREN .)
+    SYMBOL          reduce using rule 21 (func -> SYMBOL LPAREN INTEGER RPAREN .)
+    BINARY          reduce using rule 21 (func -> SYMBOL LPAREN INTEGER RPAREN .)
+    LABEL           reduce using rule 21 (func -> SYMBOL LPAREN INTEGER RPAREN .)
+    INSTRUCTION     reduce using rule 21 (func -> SYMBOL LPAREN INTEGER RPAREN .)
+    $end            reduce using rule 21 (func -> SYMBOL LPAREN INTEGER RPAREN .)
+
