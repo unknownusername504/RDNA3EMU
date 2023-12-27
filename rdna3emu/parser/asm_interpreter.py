@@ -48,33 +48,6 @@ class AsmInterpreter:
             tokens[i] = tokens[i].value[1:]
         return tokens
 
-    # Process a symbol token
-    def process_symbol_token(self, tokens):
-        symbol_token = tokens[0]
-        # Tokens are special symbols that need to be handled differently
-        # LexToken(SYMBOL,'exec',...)
-        if symbol_token.value == "exec":
-            self.process_exec()
-        # LexToken(SYMBOL,'global_load_b64',...)
-        elif symbol_token.value.contains("global_load"):
-            global_load_type = symbol_token.value.split("_")[-1]
-            self.process_global_load(global_load_type)
-        # LexToken(SYMBOL,'vmcnt',...)
-        elif symbol_token.value == "vmcnt":
-            self.process_vmcnt()
-        else:
-            raise Exception("Invalid symbol")
-
-    # Process a label token
-    def process_label_token(self, tokens):
-        label_token = tokens[0]
-        # LexToken(LABEL,'offset:',...)
-        if label_token.value.contains("offset"):
-            # Strip the colon
-            self.process_label(label_token.value[:-1])
-        else:
-            raise Exception("Invalid label")
-
     # Check if a token is a valid hex integer
     def is_valid_hex(self, token):
         if not token.startswith("0x"):
@@ -147,10 +120,21 @@ class AsmInterpreter:
                         self.process_instruction(tokens)
             # Process the symbol tokens
             elif tokens[i].type == "SYMBOL":
-                self.process_symbol_token(tokens)
+                # We can handle global_load and global_store here so don't preprocess them
+                if not (
+                    tokens[i].value.startswith("global_load")
+                    or tokens[i].value.startswith("global_store")
+                ):
+                    # Skip symbol tokens that are not global_load or global_store
+                    return
             # Process the label tokens
             elif tokens[i].type == "LABEL":
-                tokens[i] = self.process_label_token(tokens)
+                # We can handle offset labels but not other labels
+                if not tokens[i].value.startswith("offset"):
+                    # Skip label tokens that are not offset labels
+                    return
+                # Remove this token and the next token will be the offset as an integer
+                tokens = tokens.remove(tokens[i])
             # Preprocess the integer tokens
             elif tokens[i].type == "INTEGER":
                 tokens[i] = self.preprocess_integer_token(tokens[i])
@@ -170,6 +154,10 @@ class AsmInterpreter:
         elif op_token.startswith("V_"):
             instruction_func = self.isa.get_instruction_func(
                 op_token, instruction_types["VECTOR"]
+            )
+        elif op_token.startswith("GLOBAL_"):
+            instruction_func = self.isa.get_instruction_func(
+                op_token, instruction_types["MEMORY"]
             )
 
         if instruction_func is not None:

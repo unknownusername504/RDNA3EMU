@@ -20,6 +20,7 @@ class InstructionSet:
         self.instruction_type_map = {
             "SCALAR": ["SOP2", "SOP1", "SOPP", "SOPC", "SOPK", "SMEM"],
             "VECTOR": ["VOP2", "VOP1", "VOPC", "VOP3", "VOP3P", "VOPD"],
+            "MEMORY": ["FLAT", "GLOBAL", "SCRATCH", "LDS"],
         }
         self.instructions = {
             "SOP2": {
@@ -337,6 +338,25 @@ class InstructionSet:
                 "V_DUAL_MOV_B32": self.vector_ops.v_dual_mov_b32,  # 8
                 "V_DUAL_CNDMASK_B32": self.vector_ops.v_dual_cndmask_b32,  # 9
             },
+            "FLAT": {},
+            "GLOBAL": {
+                "GLOBAL_LOAD_U8": self.memory.global_load_u8,
+                "GLOBAL_LOAD_I8": self.memory.global_load_i8,
+                "GLOBAL_LOAD_U16": self.memory.global_load_u16,
+                "GLOBAL_LOAD_I16": self.memory.global_load_i16,
+                "GLOBAL_LOAD_B32": self.memory.global_load_b32,
+                "GLOBAL_LOAD_B64": self.memory.global_load_b64,
+                "GLOBAL_LOAD_B128": self.memory.global_load_b128,
+                "GLOBAL_LOAD_B256": self.memory.global_load_b256,
+                "GLOBAL_STORE_B8": self.memory.global_store_b8,
+                "GLOBAL_STORE_B16": self.memory.global_store_b16,
+                "GLOBAL_STORE_B32": self.memory.global_store_b32,
+                "GLOBAL_STORE_B64": self.memory.global_store_b64,
+                "GLOBAL_STORE_B128": self.memory.global_store_b128,
+                "GLOBAL_STORE_B256": self.memory.global_store_b256,
+            },
+            "SCRATCH": {},
+            "LDS": {},
         }
 
     def get_instruction_func(self, instruction_subtype, instruction):
