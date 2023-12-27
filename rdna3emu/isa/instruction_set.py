@@ -17,6 +17,10 @@ class InstructionSet:
         self.memory = Memory()
         self.vector_ops = VectorOps(self.registers, self.memory)
         self.scalar_ops = ScalarOps(self.registers, self.memory)
+        self.instruction_type_map = {
+            "SCALAR": ["SOP2", "SOP1", "SOPP", "SOPC", "SOPK"],
+            "VECTOR": ["VOP2", "VOP1", "VOPC", "VOP3", "VOP3P"],
+        }
         self.instructions = {
             "SOP2": {
                 "S_ADD_U32": self.scalar_ops.s_add_u32,  # 0
@@ -334,6 +338,21 @@ class InstructionSet:
                 "V_DUAL_CNDMASK_B32": self.vector_ops.v_dual_cndmask_b32,  # 9
             },
         }
+
+    def get_instruction_func(self, instruction_subtype, instruction):
+        return self.instructions[instruction_subtype][instruction]
+
+    def get_instruction_types(self):
+        return self.instruction_type_map.keys()
+
+    def find_instruction_func(self, instruction, instruction_type):
+        instruction_func = None
+        for instruction_subtype in self.instruction_type_map[instruction_type]:
+            if instruction in self.instructions[instruction_subtype]:
+                instruction_func = self.get_instruction_func(
+                    instruction_subtype, instruction
+                )
+        return instruction_func
 
 
 if __name__ == "__main__":
