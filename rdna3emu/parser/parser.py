@@ -1,5 +1,6 @@
 import yacc
 import lex
+import pprint
 
 def parse():
   with open('../../Data/tinyconvdump.txt', 'r') as f:
@@ -10,4 +11,5 @@ def parse():
 
 if __name__ == '__main__':
   result = parse()
-  print(result)
+  pp = pprint.PrettyPrinter(indent=4)
+  pp.pprint(result)

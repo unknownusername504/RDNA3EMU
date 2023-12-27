@@ -89,7 +89,7 @@ def t_SGPR(t):
   return t
 
 def t_INSTRUCTION(t):
-    r's_[a-zA-Z_\d+]+|v_[a-zA-Z_\d+]+'
+    r's_[a-zA-Z_\d+]+|v_[a-zA-Z_\d+]+|global_[a-zA-Z_\d+]+|ds_[a-zA-Z_\d+]+'
     return t
   
 def t_STRING(t):
