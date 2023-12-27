@@ -1,3 +1,9 @@
+# This file defines the instruction set for RNDA3.
+import sys
+
+# Add rdna3emu to path
+sys.path.append("../rdna3emu/")
+
 import ply.lex as lex
 from rdna3emu.isa.instruction_set import InstructionSet
 
@@ -127,6 +133,14 @@ class AsmInterpreter:
                 ):
                     # Skip symbol tokens that are not global_load or global_store
                     return
+                # The register array parsing will mean we should treat anything higher than 1 dword as 1 dword ops
+                # so we can just set the size part of the instruction to 32
+                if tokens[i].value.contains("64"):
+                    tokens[i].value = tokens[i].value.replace("64", "32")
+                elif tokens[i].value.contains("128"):
+                    tokens[i].value = tokens[i].value.replace("128", "32")
+                elif tokens[i].value.contains("256"):
+                    tokens[i].value = tokens[i].value.replace("256", "32")
             # Process the label tokens
             elif tokens[i].type == "LABEL":
                 # We can handle offset labels but not other labels

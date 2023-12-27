@@ -79,6 +79,8 @@ class Memory:
             raise Exception("Invalid memory access")
         return self.get_memory(address, size)
 
+    # Multi dword access is handles currently as split dword accesses through the parsing phase
+
     # Untyped buffer load unsigned byte, zero extend in data register.
     def global_load_u8(self, address):
         return self.get_global_memory(address, 1)
@@ -124,13 +126,26 @@ class Memory:
         self.set_memory(address, 4, value)
 
     # Untyped buffer store 2 dwords.
-    def global_store_b64(self, address, value: np.uint64):
-        self.set_memory(address, 8, value)
+    # Values is an array of 2 dwords.
+    def global_store_b64(self, address, values: np.ndarray.astype(np.uint64)):
+        # Sanity check the size of the array
+        if len(values) != 2:
+            raise Exception("Invalid array size")
+        for i in range(len(values)):
+            self.set_memory(address + i * 4, 4, values[i])
 
     # Untyped buffer store 3 dwords.
-    def global_store_b128(self, address, value: np.uint128):
-        self.set_memory(address, 16, value)
+    def global_store_b128(self, address, values: np.ndarray.astype(np.uint64)):
+        # Sanity check the size of the array
+        if len(values) != 3:
+            raise Exception("Invalid array size")
+        for i in range(len(values)):
+            self.set_memory(address + i * 4, 4, values[i])
 
     # Untyped buffer store 4 dwords.
-    def global_store_b256(self, address, value: np.uint256):
-        self.set_memory(address, 32, value)
+    def global_store_b256(self, address, values: np.ndarray.astype(np.uint64)):
+        # Sanity check the size of the array
+        if len(values) != 4:
+            raise Exception("Invalid array size")
+        for i in range(len(values)):
+            self.set_memory(address + i * 4, 4, values[i])
