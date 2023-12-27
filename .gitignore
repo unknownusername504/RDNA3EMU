@@ -7,10 +7,8 @@ notebooks
 .*.swo
 *.pyc
 *.so
-*.txt
 build
 /dist
 *.egg-info
 /env
 *.pyc
-rdna3emu/parser/lex.out
