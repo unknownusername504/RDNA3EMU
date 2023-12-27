@@ -126,17 +126,3 @@ def t_error(t):
 
 # Build the lexer
 lexer = lex.lex()
-
-# with open('../../Data/tinyconvdump.txt', 'r') as f:
-#   for _ in range(5):
-#      next(f)
-#   data = f.read() 
-# # Test it out with the file contents
-# lexer.input(data)
-
-# # Tokenize
-# while True:
-#     tok = lexer.token()
-#     if not tok:
-#         break  # No more input
-#     print(tok)
