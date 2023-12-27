@@ -18,8 +18,8 @@ class InstructionSet:
         self.vector_ops = VectorOps(self.registers, self.memory)
         self.scalar_ops = ScalarOps(self.registers, self.memory)
         self.instruction_type_map = {
-            "SCALAR": ["SOP2", "SOP1", "SOPP", "SOPC", "SOPK"],
-            "VECTOR": ["VOP2", "VOP1", "VOPC", "VOP3", "VOP3P"],
+            "SCALAR": ["SOP2", "SOP1", "SOPP", "SOPC", "SOPK", "SMEM"],
+            "VECTOR": ["VOP2", "VOP1", "VOPC", "VOP3", "VOP3P", "VOPD"],
         }
         self.instructions = {
             "SOP2": {
