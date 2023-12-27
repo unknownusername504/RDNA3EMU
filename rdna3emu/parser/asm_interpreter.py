@@ -46,28 +46,30 @@ class AsmInterpreter:
             tokens.append(token)
         return tokens
 
-    # Pre-Process a symbol token
-    def preprocess_symbol_token(self, token):
+    # Process a symbol token
+    def process_symbol_token(self, tokens):
+        symbol_token = tokens[0]
         # Tokens are special symbols that need to be handled differently
         # LexToken(SYMBOL,'exec',...)
-        if token.value == "exec":
+        if symbol_token.value == "exec":
             self.process_exec()
         # LexToken(SYMBOL,'global_load_b64',...)
-        elif token.value.contains("global_load"):
-            global_load_type = token.value.split("_")[-1]
+        elif symbol_token.value.contains("global_load"):
+            global_load_type = symbol_token.value.split("_")[-1]
             self.process_global_load(global_load_type)
         # LexToken(SYMBOL,'vmcnt',...)
-        elif token.value == "vmcnt":
+        elif symbol_token.value == "vmcnt":
             self.process_vmcnt()
         else:
             raise Exception("Invalid symbol")
 
-    # Pre-Process a label token
-    def preprocess_label_token(self, token):
+    # Process a label token
+    def process_label_token(self, tokens):
+        label_token = tokens[0]
         # LexToken(LABEL,'offset:',...)
-        if token.value.contains("offset"):
+        if label_token.value.contains("offset"):
             # Strip the colon
-            self.process_label(token.value[:-1])
+            self.process_label(label_token.value[:-1])
         else:
             raise Exception("Invalid label")
 
@@ -98,15 +100,35 @@ class AsmInterpreter:
             # Check that the integer is valid
             if not self.is_valid_hex(token.value):
                 raise Exception("Invalid hex integer")
-            self.process_integer(token.value)
+            return int(token.value, 16)
         # LexToken(INTEGER,'...',...)
         elif token.value == "0":
             # Check that the integer is valid
             if not self.is_valid_decimal(token.value):
                 raise Exception("Invalid decimal integer")
-            self.process_integer(token.value)
+            return int(token.value)
         else:
             raise Exception("Invalid integer")
+
+    # Check if a token is a valid floating point number
+    def is_valid_floating(self, token):
+        # Check that the integer is valid
+        try:
+            float(token.value)
+        except ValueError:
+            return False
+        return True
+
+    # Pre-Process a floating point token
+    def preprocess_floating_token(self, token):
+        # LexToken(FLOATING,'...',...)
+        if token.value.contains("."):
+            # Check that the float is valid
+            if not self.is_valid_floating(token):
+                raise Exception("Invalid floating point number")
+            return float(token.value)
+        else:
+            raise Exception("Invalid floating point number")
 
     # Execute an instruction
     def process_instruction(self, tokens):
@@ -121,6 +143,20 @@ class AsmInterpreter:
                     for reg_token in reg_tokens:
                         tokens[i] = lex.LexToken(tokens[i].type, reg_token)
                         self.process_instruction(tokens)
+            # Process the symbol tokens
+            elif tokens[i].type == "SYMBOL":
+                self.process_symbol_token(tokens)
+            # Process the label tokens
+            elif tokens[i].type == "LABEL":
+                tokens[i] = self.process_label_token(tokens)
+            # Preprocess the integer tokens
+            elif tokens[i].type == "INTEGER":
+                tokens[i] = self.preprocess_integer_token(tokens[i])
+            # Preprocess the floating point tokens
+            elif tokens[i].type == "FLOATING":
+                tokens[i] = self.preprocess_floating_token(tokens[i])
+            else:
+                raise Exception("Invalid token type")
         instruction_types = self.isa.get_instruction_types()
         instruction_func = None
         # Get the instruction type
@@ -165,8 +201,15 @@ class AsmInterpreter:
                 # Process the tokens for the previous instruction
                 self.process_instruction(tokens)
                 tokens = []
-            elif token.type not in ["VGPR", "SGPR", "SYMBOL", "LABEL", "INTEGER"]:
-                # Discard anything other than "INSTRUCTION", "VGPR", "SGPR", "SYMBOL", "LABEL", "INTEGER"
+            elif token.type not in [
+                "VGPR",
+                "SGPR",
+                "SYMBOL",
+                "LABEL",
+                "INTEGER",
+                "FLOATING",
+            ]:
+                # Discard anything other than "INSTRUCTION", "VGPR", "SGPR", "SYMBOL", "LABEL", "INTEGER", "FLOATING"
                 continue
 
             tokens.append(token)
