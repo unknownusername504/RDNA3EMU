@@ -1022,11 +1022,11 @@ class ScalarOps:
 
         # Execute the clause
         for i in range(clause_length):
-            self.execute_instruction(clause_code_block[i])
-            if (i + 1) % clause_break == 0:
-                self.registers.pc += 4
-
-        self.registers.pc += 4
+            # Call the code block function
+            clause_function = clause_code_block[i][0]
+            clause_args = clause_code_block[i][1]
+            print(clause_function, clause_args)
+            clause_function(*clause_args)
 
     def s_endpgm(self):
         pass

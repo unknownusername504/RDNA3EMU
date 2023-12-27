@@ -19,7 +19,7 @@ class InstructionSet:
         self.scalar_ops = ScalarOps(self.registers, self.memory)
         self.instruction_type_map = {
             "SCALAR": ["SOP2", "SOP1", "SOPP", "SOPC", "SOPK", "SMEM"],
-            "VECTOR": ["VOP2", "VOP1", "VOPC", "VOP3", "VOP3P", "VOPD"],
+            "VECTOR": ["VOP2", "VOP1", "VOPC", "VOP3", "VOP3SD", "VOPD"],
             "MEMORY": ["FLAT", "GLOBAL", "SCRATCH", "LDS"],
         }
         self.instructions = {
@@ -361,9 +361,6 @@ class InstructionSet:
 
     def get_instruction_func(self, instruction_subtype, instruction):
         return self.instructions[instruction_subtype][instruction]
-
-    def get_instruction_types(self):
-        return self.instruction_type_map.keys()
 
     def find_instruction_func(self, instruction, instruction_type):
         instruction_func = None

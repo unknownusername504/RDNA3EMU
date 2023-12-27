@@ -97,42 +97,34 @@ class VectorOps:
             reg_s1, signed=True, size=24, reg_type="VGPR_INT"
         )
         reg_d_value = (reg_s0_value * reg_s1_value) >> 32
-        self.registers.set_register(
-            reg_d, reg_d_value, signed=True, size=32, reg_type="VGPR_INT"
-        )
+        self.registers.set_vgpr_i32(reg_d, reg_d_value)
 
     # Multiply two unsigned 24 bit integer inputs and store the result as a unsigned 32 bit integer into a vector register.
     def v_mul_u32_u24(self, reg_d, reg_s0, reg_s1):
         reg_s0_value = self.registers.get_register(
-            reg_s0, signed=False, size=24, reg_type="VGPR_INT"
+            reg_id=reg_s0, signed=False, size=24, reg_type="VGPR_INT"
         )
         reg_s1_value = self.registers.get_register(
-            reg_s1, signed=False, size=24, reg_type="VGPR_INT"
+            reg_id=reg_s1, signed=False, size=24, reg_type="VGPR_INT"
         )
         reg_d_value = reg_s0_value * reg_s1_value
-        self.registers.set_register(
-            reg_d, reg_d_value, signed=False, size=32, reg_type="VGPR_INT"
-        )
+        self.registers.set_vgpr_u32(reg_d, reg_d_value)
 
     # Multiply two unsigned 24 bit integer inputs and store the high 32 bits of the result as a unsigned 32 bit integer into a vector register.
     def v_mul_hi_u32_u24(self, reg_d, reg_s0, reg_s1):
         reg_s0_value = self.registers.get_register(
-            reg_s0, signed=False, size=24, reg_type="VGPR_INT"
+            reg_id=reg_s0, signed=False, size=24, reg_type="VGPR_INT"
         )
         reg_s1_value = self.registers.get_register(
-            reg_s1, signed=False, size=24, reg_type="VGPR_INT"
+            reg_id=reg_s1, signed=False, size=24, reg_type="VGPR_INT"
         )
         reg_d_value = (reg_s0_value * reg_s1_value) >> 32
-        self.registers.set_register(
-            reg_d, reg_d_value, signed=False, size=32, reg_type="VGPR_INT"
-        )
+        self.registers.set_vgpr_u32(reg_d, reg_d_value)
 
     # Select the minimum of two floating point inputs and store the result into a vector register
     def v_min_f32(self, reg_d, reg_s0, reg_s1):
         reg_s0_value = self.registers.vgpr_f32(reg_s0)
-        reg_s1_value = self.registers.get_register(
-            reg_s1, signed=None, size=32, reg_type="VGPR_FLOAT"
-        )
+        reg_s1_value = self.registers.vgpr_f32(reg_s1)
         reg_d_value = min(reg_s0_value, reg_s1_value)
         self.registers.set_vgpr_f32(reg_d, reg_d_value)
 
@@ -274,9 +266,7 @@ class VectorOps:
     def v_fmamk_f32(self, reg_d, reg_s0, reg_s1):
         reg_s0_value = self.registers.vgpr_f32(reg_s0)
         reg_s1_value = self.registers.vgpr_f32(reg_s1)
-        reg_simm32_value = self.registers.get_register(
-            self.reg_simm, signed=None, size=32, reg_type="VGPR_FLOAT"
-        )
+        reg_simm32_value = self.registers.vgpr_f32(self.reg_simm)
         reg_d_value = reg_s1_value + (reg_s0_value * reg_simm32_value)
         self.registers.set_vgpr_f32(reg_d, reg_d_value)
 
@@ -284,9 +274,7 @@ class VectorOps:
     def v_fmaak_f32(self, reg_d, reg_s0, reg_s1):
         reg_s0_value = self.registers.vgpr_f32(reg_s0)
         reg_s1_value = self.registers.vgpr_f32(reg_s1)
-        reg_simm32_value = self.registers.get_register(
-            self.reg_simm, signed=None, size=32, reg_type="VGPR_FLOAT"
-        )
+        reg_simm32_value = self.registers.vgpr_f32(self.reg_simm)
         reg_d_value = reg_simm32_value + (reg_s0_value * reg_s1_value)
         self.registers.set_vgpr_f32(reg_d, reg_d_value)
 
@@ -380,9 +368,7 @@ class VectorOps:
     # Multiply the first input, a floating point value, by an integral power of 2 specified in the second input, a signed integer value, and store the floating point result into a vector register. Compare with the ldexp() function in C.
     def v_ldexp_f16(self, reg_d, reg_s0, reg_s1):
         reg_s0_value = utils.fp16_to_fp32(self.registers.vgpr_f32(reg_s0))
-        reg_s1_value = self.registers.get_register(
-            reg_s1, signed=None, size=32, reg_type="VGPR_FLOAT"
-        )
+        reg_s1_value = self.registers.vgpr_i32(reg_s1)
         reg_d_value = reg_s0_value * (2**reg_s1_value)
         reg_d_value = utils.fp32_to_fp16(reg_d_value)
         self.registers.set_vgpr_f16(reg_d, reg_d_value)
@@ -400,9 +386,7 @@ class VectorOps:
         reg_s1_value_lo = utils.fp32_to_fp16(reg_s1_value & 0xFFFF)
         reg_s1_value_hi = utils.fp32_to_fp16(reg_s1_value >> 16)
 
-        reg_d_value = self.registers.get_register(
-            reg_d, signed=None, size=32, reg_type="VGPR_FLOAT"
-        )
+        reg_d_value = self.registers.vgpr_f32(reg_d)
 
         # Extract the destination.
         reg_d_value_lo = utils.fp32_to_fp16(reg_d_value & 0xFFFF)

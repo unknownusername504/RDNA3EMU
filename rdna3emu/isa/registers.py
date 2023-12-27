@@ -253,7 +253,13 @@ class Registers:
             raise Exception(f"Float size {size} not supported.")
 
     def _get(self, reg_id, attr=None, signed=False, size=None, f=False):
-        val = getattr(self, attr)[reg_id]
+        attr_value = getattr(self, attr)
+        if reg_id < len(attr_value):
+            val = attr_value[reg_id]
+        else:
+            # Handle the case where reg_id is out of range
+            raise IndexError(f"Register {reg_id} is out of range for attribute {attr}.")
+        val = attr_value[reg_id]
         if f:
             return Registers.floating(val, size)
         if signed:
@@ -261,13 +267,18 @@ class Registers:
         return val % (2**size)
 
     def _set(self, reg_id, val, attr=None, signed=None, size=None, f=False):
-        reg = getattr(self, attr)
+        attr_value = getattr(self, attr)
+        if reg_id < len(attr_value):
+            val = attr_value[reg_id]
+        else:
+            # Handle the case where reg_id is out of range
+            raise IndexError(f"Register {reg_id} is out of range for attribute {attr}.")
         if f:
-            reg[reg_id] = Registers.floating(val, size)
+            attr_value[reg_id] = Registers.floating(val, size)
             return
         if signed:
             val = Registers._signed(val, size)
-        reg[reg_id] = val % (2**size)
+        attr_value[reg_id] = val % (2**size)
 
     def set_register(
         self, reg_type, reg_id, value, size=32, signed=True, floating=False
@@ -394,3 +405,19 @@ class Registers:
 
     sgpr_u128 = pm(_get, attr="_sgpr", signed=False, size=128)
     set_sgpr_u128 = pm(_set, attr="_sgpr", signed=False, size=128)
+
+    # Special 24-bit access
+    sgpr_u24 = pm(_get, attr="_sgpr", signed=False, size=24)
+    set_sgpr_u24 = pm(_set, attr="_sgpr", signed=False, size=24)
+
+    sgpr_i24 = pm(_get, attr="_sgpr", signed=True, size=24)
+    set_sgpr_i24 = pm(_set, attr="_sgpr", signed=True, size=24)
+
+    vgpr_u24 = pm(_get, attr="_vgpr", signed=False, size=24)
+    set_vgpr_u24 = pm(_set, attr="_vgpr", signed=False, size=24)
+
+    vgpr_i24 = pm(_get, attr="_vgpr", signed=True, size=24)
+    set_vgpr_i24 = pm(_set, attr="_vgpr", signed=True, size=24)
+
+    vgpr_f24 = pm(_get, attr="_vgpr", size=24, f=True)
+    set_vgpr_f24 = pm(_set, attr="_vgpr", size=24, f=True)
