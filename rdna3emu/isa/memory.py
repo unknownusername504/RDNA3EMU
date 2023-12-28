@@ -177,6 +177,11 @@ class Memory:
 
     # Load 32-bit data from a given memory location into a vector register.
     def global_load_b32(self, reg_d, reg_v0, reg_s0, reg_s1, offset=0):
+        # Force the offset to be an integer for now since that is not handled in the parser correctly
+        if not isinstance(offset, int):
+            offset = int(offset)
+            # Print a warning
+            print("Warning: Offset is not an integer")
         reg_d_value = self.registers.vgpr_u32(reg_d)
         reg_v0_value = self.registers.vgpr_u32(reg_v0)
         reg_s0_value = self.registers.sgpr_u32(reg_s0)
@@ -229,6 +234,11 @@ class Memory:
 
     # Store 32-bit data from a vector register into a given memory location.
     def global_store_b32(self, reg_d, reg_v0, reg_s0, reg_s1, offset=0):
+        # Force the offset to be an integer for now since that is not handled in the parser correctly
+        if not isinstance(offset, int):
+            offset = int(offset)
+            # Print a warning
+            print("Warning: Offset is not an integer")
         reg_d_value = self.registers.vgpr_u32(reg_d)
         reg_v0_value = self.registers.vgpr_u32(reg_v0)
         reg_s0_value = self.registers.sgpr_u32(reg_s0)
@@ -240,6 +250,11 @@ class Memory:
 
     # Store 32-bit data from a vector register into a given memory location.
     def ds_load_b32(self, reg_d, reg_s0, offset=0):
+        # Force the offset to be an integer for now since that is not handled in the parser correctly
+        if not isinstance(offset, int):
+            offset = int(offset)
+            # Print a warning
+            print("Warning: Offset is not an integer")
         reg_d_value = self.registers.vgpr_u32(reg_d)
 
         address = reg_d_value + offset
@@ -249,6 +264,11 @@ class Memory:
 
     # this instruction takes a 32-bit value from the register reg_s0 and stores it in the local data share at the address specified by the value in the register reg_d.
     def ds_store_b32(self, reg_d, reg_s0, offset=0):
+        # Force the offset to be an integer for now since that is not handled in the parser correctly
+        if not isinstance(offset, int):
+            offset = int(offset)
+            # Print a warning
+            print("Warning: Offset is not an integer")
         reg_d_value = self.registers.vgpr_u32(reg_d)
         reg_s0_value = self.registers.vgpr_u32(reg_s0)
 
