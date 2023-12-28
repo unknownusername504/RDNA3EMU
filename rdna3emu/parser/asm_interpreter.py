@@ -6,13 +6,16 @@ sys.path.append("../rdna3emu/")
 
 import ply.lex as lex
 from rdna3emu.isa.instruction_set import InstructionSet
-# CAUSING CIRCULAR IMPORT WITH PARSER.PY
-# from rdna3emu.parser.lex import Lexer
+
+from rdna3emu.parser.legacy_lex import Lexer
+
+# Declare type for register ids that is an int but won't be confused with other ints when using isinstance
+RegisterId = int
 
 
 class AsmInterpreter:
     def __init__(self):
-        self.lexer = Lexer("Data/simplified_optest.asm").get_lex()
+        self.lexer = Lexer("Data\\tinyconvdump.txt").get_lex()
         self.isa = InstructionSet()
         self.clause_code_block = []
         # The clause length is: (SIMM16[5:0] + 1)
@@ -71,7 +74,9 @@ class AsmInterpreter:
             if token_str.startswith("v") or token_str.startswith("s"):
                 token_str = token_str[1:]
             tokens.append(
-                self.make_token(token.type, int(token_str), token.lineno, token.lexpos)
+                self.make_token(
+                    token.type, RegisterId(token_str), token.lineno, token.lexpos
+                )
             )
         return tokens
 
@@ -148,11 +153,19 @@ class AsmInterpreter:
         for i in range(1, len(tokens)):
             if tokens[i].type == "VGPR" or tokens[i].type == "SGPR":
                 reg_tokens = self.preprocess_register_token(tokens[i])
-                # Replicate this entire instruction for each register if the register is an array
-                if len(reg_tokens) > 1:
+                # For global ops, the array of registers represents 2 scalar registers that are meant to be used as a 64-bit value
+                # Do not replicate the instruction for each register if the register is an array
+                if len(reg_tokens) > 1 and not op_token.value.startswith("GLOBAL_"):
                     for reg_token in reg_tokens:
                         tokens[i] = reg_token
                         self.process_instruction(tokens)
+                elif len(reg_tokens) > 1 and op_token.value.startswith("GLOBAL_"):
+                    # Append the second register to the tokens list and process the instruction
+                    tokens[i] = reg_tokens[0]
+                    tokens = tokens[:i] + [reg_tokens[1]] + tokens[i:]
+                    self.process_instruction(tokens)
+                    # No need to process the instruction again so return
+                    return
                 else:
                     tokens[i] = reg_tokens[0]
             # Process the symbol tokens
@@ -196,6 +209,8 @@ class AsmInterpreter:
             instruction_func = self.isa.find_instruction_func(op_token.value, "VECTOR")
         elif op_token.value.startswith("GLOBAL_"):
             instruction_func = self.isa.find_instruction_func(op_token.value, "MEMORY")
+        elif op_token.value.startswith("DS_"):
+            instruction_func = self.isa.find_instruction_func(op_token.value, "MEMORY")
 
         # Check if the instruction is s_clause
         if op_token.value == "S_CLAUSE":
@@ -227,11 +242,12 @@ class AsmInterpreter:
                 len(tokens) + num_optional_args
             ) == instruction_func.__code__.co_argcount - 1:
                 # Add the optional arguments to the end of the tokens list
+                # Probably not scalable when only some of the optional arguments are used
                 for i in range(num_optional_args):
                     tokens.append(instruction_func.__defaults__[i])
             if len(tokens) != instruction_func.__code__.co_argcount - 1:
                 raise Exception(
-                    f"Wrong number of arguments for instruction {op_token} (expected {instruction_func.__code__.co_argcount - 1}, got {len(tokens)})"
+                    f"Wrong number of arguments for instruction {op_token} (expected at least {instruction_func.__code__.co_argcount - 1 - num_optional_args}, got {len(tokens)})"
                 )
         else:
             raise Exception(f"Instruction {op_token} not implemented")
@@ -258,19 +274,22 @@ class AsmInterpreter:
 
     def interpret_asm(self):
         tokens = []
+        instruction_count = 1
         # Tokenize
         while True:
             token = self.lexer.token()
             if not token:
                 # Process the tokens for the last instruction
-                print(tokens)
+                print("Instruction {} : {}".format(instruction_count, tokens))
+                instruction_count += 1
                 self.process_instruction(tokens)
                 break  # No more input
             if token.type == "INSTRUCTION":
                 # Do not perform this step if it is the first instruction
                 if len(tokens) > 0:
                     # Process the tokens for the previous instruction
-                    print(tokens)
+                    print("Instruction {} : {}".format(instruction_count, tokens))
+                    instruction_count += 1
                     self.process_instruction(tokens)
                     tokens = []
             elif token.type not in [

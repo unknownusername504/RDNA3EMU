@@ -12,7 +12,7 @@ class Memory:
         self.size = size
         self.data = bytearray(size)
         self._data = np.zeros(size, dtype=np.uint8)
-        # CAUSING SOME KIND OF OOM and crashes vscode 
+        # CAUSING SOME KIND OF OOM and crashes vscode
         # self._data[:] = self.data[:]
         # self._data = self._data.view(dtype=np.uint32)
         # self._data = self._data.reshape(size // 4)
@@ -107,84 +107,151 @@ class Memory:
             raise Exception("Invalid memory access")
         return self.get_memory(address, size)
 
+    def set_global_memory(self, address, size, value):
+        # Check if the address is global
+        if not self.is_global(address):
+            raise Exception("Invalid memory access")
+        self.set_memory(address, size, value)
+
+    def get_local_memory(self, address, size):
+        # Check if the address is local
+        if not self.is_shared(address):
+            raise Exception("Invalid memory access")
+        return self.get_memory(address, size)
+
+    def set_local_memory(self, address, size, value):
+        # Check if the address is local
+        if not self.is_shared(address):
+            raise Exception("Invalid memory access")
+        self.set_memory(address, size, value)
+
     # Multi dword access is handles currently as split dword accesses through the parsing phase
 
     # Untyped buffer load unsigned byte, zero extend in data register.
-    def global_load_u8(self, reg_d, reg_s0, reg_s1, offset=0):
-        reg_s0_value = self.registers.sgpr_u32(reg_s0) + offset
-        reg_s1_value = self.registers.vgpr_u32(reg_s1)
+    def global_load_u8(self, reg_d, reg_v0, reg_s0, reg_s1, offset=0):
+        reg_d_value = self.registers.vgpr_u32(reg_d)
+        reg_v0_value = self.registers.vgpr_u32(reg_v0)
+        reg_s0_value = self.registers.sgpr_u32(reg_s0)
+        reg_s1_value = self.registers.sgpr_u32(reg_s1)
 
-        address = reg_s0_value + reg_s1_value
+        address = reg_v0_value + reg_s0_value + reg_s1_value + offset
 
         reg_d_value = self.get_global_memory(address, 1)
         self.registers.set_vgpr_u8(reg_d, reg_d_value)
 
     # Untyped buffer load signed byte, sign extend in data register.
-    def global_load_i8(self, reg_d, reg_s0, reg_s1, offset=0):
-        reg_s0_value = self.registers.sgpr_u32(reg_s0) + offset
-        reg_s1_value = self.registers.vgpr_u32(reg_s1)
+    def global_load_i8(self, reg_d, reg_v0, reg_s0, reg_s1, offset=0):
+        reg_d_value = self.registers.vgpr_u32(reg_d)
+        reg_v0_value = self.registers.vgpr_u32(reg_v0)
+        reg_s0_value = self.registers.sgpr_u32(reg_s0)
+        reg_s1_value = self.registers.sgpr_u32(reg_s1)
 
-        address = reg_s0_value + reg_s1_value
+        address = reg_v0_value + reg_s0_value + reg_s1_value + offset
 
         reg_d_value = self.get_global_memory(address, 1)
-        self.registers.set_vgpr_i8(reg_d, reg_d_value)
+        self.registers.set_vgpr_u8(reg_d, reg_d_value)
 
     # Untyped buffer load unsigned short, zero extend in data register.
-    def global_load_u16(self, reg_d, reg_s0, reg_s1, offset=0):
-        reg_s0_value = self.registers.sgpr_u32(reg_s0) + offset
-        reg_s1_value = self.registers.vgpr_u32(reg_s1)
+    def global_load_u16(self, reg_d, reg_v0, reg_s0, reg_s1, offset=0):
+        reg_d_value = self.registers.vgpr_u32(reg_d)
+        reg_v0_value = self.registers.vgpr_u32(reg_v0)
+        reg_s0_value = self.registers.sgpr_u32(reg_s0)
+        reg_s1_value = self.registers.sgpr_u32(reg_s1)
 
-        address = reg_s0_value + reg_s1_value
+        address = reg_v0_value + reg_s0_value + reg_s1_value + offset
 
         reg_d_value = self.get_global_memory(address, 2)
         self.registers.set_vgpr_u16(reg_d, reg_d_value)
 
     # Untyped buffer load signed short, sign extend in data register.
-    def global_load_i16(self, reg_d, reg_s0, reg_s1, offset=0):
-        reg_s0_value = self.registers.sgpr_u32(reg_s0) + offset
-        reg_s1_value = self.registers.vgpr_u32(reg_s1)
+    def global_load_i16(self, reg_d, reg_v0, reg_s0, reg_s1, offset=0):
+        reg_d_value = self.registers.vgpr_u32(reg_d)
+        reg_v0_value = self.registers.vgpr_u32(reg_v0)
+        reg_s0_value = self.registers.sgpr_u32(reg_s0)
+        reg_s1_value = self.registers.sgpr_u32(reg_s1)
 
-        address = reg_s0_value + reg_s1_value
+        address = reg_v0_value + reg_s0_value + reg_s1_value + offset
 
         reg_d_value = self.get_global_memory(address, 2)
-        self.registers.set_vgpr_i16(reg_d, reg_d_value)
+        self.registers.set_vgpr_u16(reg_d, reg_d_value)
 
-    # Untyped buffer load dword.
-    def global_load_b32(self, reg_d, reg_s0, reg_s1, offset=0):
-        reg_s0_value = self.registers.sgpr_u32(reg_s0) + offset
-        reg_s1_value = self.registers.vgpr_u32(reg_s1)
+    # Load 32-bit data from a given memory location into a vector register.
+    def global_load_b32(self, reg_d, reg_v0, reg_s0, reg_s1, offset=0):
+        reg_d_value = self.registers.vgpr_u32(reg_d)
+        reg_v0_value = self.registers.vgpr_u32(reg_v0)
+        reg_s0_value = self.registers.sgpr_u32(reg_s0)
+        reg_s1_value = self.registers.sgpr_u32(reg_s1)
 
-        address = reg_s0_value + reg_s1_value
+        address = reg_v0_value + reg_s0_value + reg_s1_value + offset
 
         reg_d_value = self.get_global_memory(address, 4)
         self.registers.set_vgpr_u32(reg_d, reg_d_value)
 
     # Untyped buffer store byte.
-    def global_store_b8(self, reg_d, reg_s0, reg_s1, offset=0):
+    def global_store_u8(self, reg_d, reg_v0, reg_s0, reg_s1, offset=0):
+        reg_d_value = self.registers.vgpr_u8(reg_d)
+        reg_v0_value = self.registers.vgpr_u32(reg_v0)
         reg_s0_value = self.registers.sgpr_u32(reg_s0)
-        reg_s1_value = self.registers.vgpr_u32(reg_s1) + offset
+        reg_s1_value = self.registers.sgpr_u32(reg_s1)
+        address = reg_v0_value + reg_s0_value + reg_s1_value + offset
 
-        address = reg_s0_value + reg_s1_value
+        self.set_global_memory(address, 1, reg_d_value)
 
-        value = self.registers.vgpr_u8(reg_d)
-        self.set_memory(address, 1, value)
+    # Signed byte store.
+    def global_store_i8(self, reg_d, reg_v0, reg_s0, reg_s1, offset=0):
+        reg_d_value = self.registers.vgpr_i8(reg_d)
+        reg_v0_value = self.registers.vgpr_u32(reg_v0)
+        reg_s0_value = self.registers.sgpr_u32(reg_s0)
+        reg_s1_value = self.registers.sgpr_u32(reg_s1)
+        address = reg_v0_value + reg_s0_value + reg_s1_value + offset
+
+        self.set_global_memory(address, 1, reg_d_value)
 
     # Untyped buffer store short.
-    def global_store_b16(self, reg_d, reg_s0, reg_s1, offset=0):
+    def global_store_u16(self, reg_d, reg_v0, reg_s0, reg_s1, offset=0):
+        reg_d_value = self.registers.vgpr_u16(reg_d)
+        reg_v0_value = self.registers.vgpr_u32(reg_v0)
         reg_s0_value = self.registers.sgpr_u32(reg_s0)
-        reg_s1_value = self.registers.vgpr_u32(reg_s1) + offset
+        reg_s1_value = self.registers.sgpr_u32(reg_s1)
+        address = reg_v0_value + reg_s0_value + reg_s1_value + offset
 
-        address = reg_s0_value + reg_s1_value
+        self.set_global_memory(address, 2, reg_d_value)
 
-        value = self.registers.vgpr_u16(reg_d)
-        self.set_memory(address, 2, value)
-
-    # Untyped buffer store dword.
-    def global_store_b32(self, reg_d, reg_s0, reg_s1, offset=0):
+    # Signed short store.
+    def global_store_i16(self, reg_d, reg_v0, reg_s0, reg_s1, offset=0):
+        reg_d_value = self.registers.vgpr_i16(reg_d)
+        reg_v0_value = self.registers.vgpr_u32(reg_v0)
         reg_s0_value = self.registers.sgpr_u32(reg_s0)
-        reg_s1_value = self.registers.vgpr_u32(reg_s1) + offset
+        reg_s1_value = self.registers.sgpr_u32(reg_s1)
+        address = reg_v0_value + reg_s0_value + reg_s1_value + offset
 
-        address = reg_s0_value + reg_s1_value
+        self.set_global_memory(address, 2, reg_d_value)
 
-        value = self.registers.vgpr_u32(reg_d)
-        self.set_memory(address, 4, value)
+    # Store 32-bit data from a vector register into a given memory location.
+    def global_store_b32(self, reg_d, reg_v0, reg_s0, reg_s1, offset=0):
+        reg_d_value = self.registers.vgpr_u32(reg_d)
+        reg_v0_value = self.registers.vgpr_u32(reg_v0)
+        reg_s0_value = self.registers.sgpr_u32(reg_s0)
+        reg_s1_value = self.registers.sgpr_u32(reg_s1)
+
+        address = reg_v0_value + reg_s0_value + reg_s1_value + offset
+
+        self.set_global_memory(address, 4, reg_d_value)
+
+    # Store 32-bit data from a vector register into a given memory location.
+    def ds_load_b32(self, reg_d, reg_s0, offset=0):
+        reg_d_value = self.registers.vgpr_u32(reg_d)
+
+        address = reg_d_value + offset
+
+        reg_s0_value = self.get_local_memory(address, 4)
+        self.registers.set_vgpr_u32(reg_s0, reg_s0_value)
+
+    # this instruction takes a 32-bit value from the register reg_s0 and stores it in the local data share at the address specified by the value in the register reg_d.
+    def ds_store_b32(self, reg_d, reg_s0, offset=0):
+        reg_d_value = self.registers.vgpr_u32(reg_d)
+        reg_s0_value = self.registers.vgpr_u32(reg_s0)
+
+        address = reg_d_value + offset
+
+        self.set_local_memory(address, 4, reg_s0_value)

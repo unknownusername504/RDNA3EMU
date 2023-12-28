@@ -3,7 +3,7 @@ import sys
 
 # Add rdna3emu to path
 # Set PYTHONPATH="." python3 file
-# sys.path.append("../rdna3emu/")
+sys.path.append("../rdna3emu/")
 
 from rdna3emu.isa.scalar_ops import ScalarOps
 from rdna3emu.isa.vector_ops import VectorOps
@@ -310,6 +310,7 @@ class InstructionSet:
                 "S_WAITCNT_VSCNT": self.scalar_ops.s_waitcnt_vscnt,  # 24
             },
             "VOP3": {
+                "V_FMA_F32": self.vector_ops.v_fma_f32,  # 531
                 "V_LSHL_ADD_U32": self.vector_ops.v_lshl_add_u32,  # 582
                 "V_AND_OR_B32": self.vector_ops.v_and_or_b32,  # 599
                 "V_OR3_B32": self.vector_ops.v_or3_b32,  # 600
@@ -339,8 +340,11 @@ class InstructionSet:
                 "V_CMP_EQ_U16": self.vector_ops.v_cmp_eq_u16,  # 224
             },
             "VOPD": {
+                "V_DUAL_FMAC_F32": self.vector_ops.v_dual_fmac_f32,  # 0
+                "V_DUAL_MUL_F32": self.vector_ops.v_dual_mul_f32,  # 3
                 "V_DUAL_MOV_B32": self.vector_ops.v_dual_mov_b32,  # 8
                 "V_DUAL_CNDMASK_B32": self.vector_ops.v_dual_cndmask_b32,  # 9
+                "V_DUAL_LSHLREV_B32": self.vector_ops.v_dual_lshlrev_b32,  # 17
             },
             "FLAT": {},
             "GLOBAL": {
@@ -349,12 +353,17 @@ class InstructionSet:
                 "GLOBAL_LOAD_U16": self.memory.global_load_u16,
                 "GLOBAL_LOAD_I16": self.memory.global_load_i16,
                 "GLOBAL_LOAD_B32": self.memory.global_load_b32,
-                "GLOBAL_STORE_B8": self.memory.global_store_b8,
-                "GLOBAL_STORE_B16": self.memory.global_store_b16,
+                "GLOBAL_STORE_U8": self.memory.global_store_u8,
+                "GLOBAL_STORE_I8": self.memory.global_store_i8,
+                "GLOBAL_STORE_U16": self.memory.global_store_u16,
+                "GLOBAL_STORE_I16": self.memory.global_store_i16,
                 "GLOBAL_STORE_B32": self.memory.global_store_b32,
             },
             "SCRATCH": {},
-            "LDS": {},
+            "LDS": {
+                "DS_STORE_B32": self.memory.ds_store_b32,  # 13
+                "DS_LOAD_B32": self.memory.ds_load_b32,  # 54
+            },
         }
 
     def get_instruction_func(self, instruction_subtype, instruction):

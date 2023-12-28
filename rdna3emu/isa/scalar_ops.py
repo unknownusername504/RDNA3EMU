@@ -10,7 +10,7 @@ class ScalarOps:
 
     # PRG_CTRL instructions
     def s_code_end(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     # SOP2 instructions
     # Add two unsigned inputs, store the result into a scalar register and store the carry-out bit into SCC.
@@ -933,11 +933,11 @@ class ScalarOps:
 
     def s_sendmsg_rtn_b32(self):
         # Implementation for S_SENDMSG_RTN_B32
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     def s_sendmsg_rtn_b64(self):
         # Implementation for S_SENDMSG_RTN_B64
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     # SOPP instructions
     def s_nop(self, simm16):
@@ -947,16 +947,16 @@ class ScalarOps:
         self.registers.pc += 4
 
     def s_sleep(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     def s_delay_alu(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     def s_waitcnt(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     def s_trap(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     def s_branch(self, simm16):
         offset = simm16 * 4
@@ -997,7 +997,7 @@ class ScalarOps:
     The clause length is: (SIMM16[5:0] + 1), and clauses must be between 2 and 63 instructions. 
     SIMM16[5:0] must be 1-62, not 0 or 63. 
     The clause breaks after every N instructions, N = simm[11:8] (0 - 15; 0 = no breaks)
-    We will just pass the max code block to this function and let it handle the rest.
+    We will just pass # raise Exception("OP... not implemented") the max code block to this function and let it handle the rest.
     """
 
     def s_clause(self, simm16, clause_code_block):
@@ -1032,10 +1032,10 @@ class ScalarOps:
             clause_function(*clause_args)
 
     def s_endpgm(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     def s_sendmsg(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     # SOPC instructions
     def s_cmp_eq_u32(self, reg_s0, reg_s1):
@@ -1084,4 +1084,4 @@ class ScalarOps:
 
     # SOPK instructions
     def s_waitcnt_vscnt(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
