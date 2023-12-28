@@ -14,15 +14,18 @@ from rdna3emu.isa.utils import populate_instruction_usage
 class InstructionSet:
     def __init__(self):
         self.registers = Registers()
-        self.memory = Memory()
+        self.memory = Memory(self.registers)
         self.vector_ops = VectorOps(self.registers, self.memory)
         self.scalar_ops = ScalarOps(self.registers, self.memory)
         self.instruction_type_map = {
-            "SCALAR": ["SOP2", "SOP1", "SOPP", "SOPC", "SOPK", "SMEM"],
+            "SCALAR": ["SOP2", "SOP1", "SOPP", "SOPC", "SOPK", "SMEM", "PRG_CTRL"],
             "VECTOR": ["VOP2", "VOP1", "VOPC", "VOP3", "VOP3SD", "VOPD"],
             "MEMORY": ["FLAT", "GLOBAL", "SCRATCH", "LDS"],
         }
         self.instructions = {
+            "PRG_CTRL": {
+                "S_CODE_END": self.scalar_ops.s_code_end,
+            },
             "SOP2": {
                 "S_ADD_U32": self.scalar_ops.s_add_u32,  # 0
                 "S_SUB_U32": self.scalar_ops.s_sub_u32,  # 1
@@ -345,15 +348,9 @@ class InstructionSet:
                 "GLOBAL_LOAD_U16": self.memory.global_load_u16,
                 "GLOBAL_LOAD_I16": self.memory.global_load_i16,
                 "GLOBAL_LOAD_B32": self.memory.global_load_b32,
-                "GLOBAL_LOAD_B64": self.memory.global_load_b64,
-                "GLOBAL_LOAD_B128": self.memory.global_load_b128,
-                "GLOBAL_LOAD_B256": self.memory.global_load_b256,
                 "GLOBAL_STORE_B8": self.memory.global_store_b8,
                 "GLOBAL_STORE_B16": self.memory.global_store_b16,
                 "GLOBAL_STORE_B32": self.memory.global_store_b32,
-                "GLOBAL_STORE_B64": self.memory.global_store_b64,
-                "GLOBAL_STORE_B128": self.memory.global_store_b128,
-                "GLOBAL_STORE_B256": self.memory.global_store_b256,
             },
             "SCRATCH": {},
             "LDS": {},

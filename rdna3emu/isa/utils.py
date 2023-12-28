@@ -241,7 +241,7 @@ def find_unused_instructions(asm_file, instructions):
 
 def populate_instruction_usage(instructions):
     cwd = os.getcwd()
-    asm_file = os.path.join(cwd, "Data/example_asm.asm")
+    asm_file = os.path.join(cwd, "Data/tinyconvdump.txt")
     find_used_instructions(asm_file, instructions)
     find_unimplemented_instructions(asm_file, instructions)
     find_unused_instructions(asm_file, instructions)

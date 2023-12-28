@@ -12,7 +12,7 @@ from rdna3emu.isa.instruction_set import InstructionSet
 
 class AsmInterpreter:
     def __init__(self):
-        self.lexer = Lexer().get_lex()
+        self.lexer = Lexer("Data/simplified_optest.asm").get_lex()
         self.isa = InstructionSet()
         self.clause_code_block = []
         # The clause length is: (SIMM16[5:0] + 1)
@@ -50,6 +50,8 @@ class AsmInterpreter:
         token_str = str(token.value)
         # Expand registers with array format [x:y] to individual registers
         if "[" in token_str:
+            # Get the register name
+            register_name = token_str.split("[")[0]
             # Get the register range
             register_range = token_str.split("[")[1][:-1]
             # Get the start and end of the range
@@ -60,10 +62,17 @@ class AsmInterpreter:
             # Add the registers to the tokens list
             for i in range(start, end + 1):
                 tokens.append(
-                    self.make_token(token.type, int(i), token.lineno, token.lexpos)
+                    self.make_token(
+                        token.type, register_name + str(i), token.lineno, token.lexpos
+                    )
                 )
         else:
-            tokens.append(token)
+            # Remove leading "v" or "s" if it exists
+            if token_str.startswith("v") or token_str.startswith("s"):
+                token_str = token_str[1:]
+            tokens.append(
+                self.make_token(token.type, int(token_str), token.lineno, token.lexpos)
+            )
         return tokens
 
     # Check if a token is a valid hex integer
@@ -99,8 +108,15 @@ class AsmInterpreter:
             return self.make_token(
                 token.type, int(token.value, 16), token.lineno, token.lexpos
             )
+        elif isinstance(token.value, str):
+            # Check that the integer is valid
+            if not self.is_valid_decimal(token.value):
+                raise Exception("Invalid decimal integer")
+            return self.make_token(
+                token.type, int(token.value), token.lineno, token.lexpos
+            )
         else:
-            raise Exception("Invalid integer")
+            raise Exception("Invalid integer", token.value)
 
     # Check if a token is a valid floating point number
     def is_valid_floating(self, token):
@@ -137,6 +153,8 @@ class AsmInterpreter:
                     for reg_token in reg_tokens:
                         tokens[i] = reg_token
                         self.process_instruction(tokens)
+                else:
+                    tokens[i] = reg_tokens[0]
             # Process the symbol tokens
             elif tokens[i].type == "SYMBOL":
                 # We can handle global_load and global_store here so don't preprocess them
@@ -152,8 +170,6 @@ class AsmInterpreter:
                 if not tokens[i].value.startswith("offset"):
                     # Skip label tokens that are not offset labels
                     return
-                # Remove this token and the next token will be the offset as an integer
-                tokens = tokens.remove(tokens[i])
             # Preprocess the integer tokens
             elif tokens[i].type == "INTEGER":
                 tokens[i] = self.preprocess_integer_token(tokens[i])
@@ -162,6 +178,14 @@ class AsmInterpreter:
                 tokens[i] = self.preprocess_floating_token(tokens[i])
             else:
                 raise Exception("Invalid token type")
+
+        for i in range(len(tokens)):
+            # Remove the offset label tokens
+            if tokens[i].type == "LABEL":
+                # Remove this token and the next token will be the offset as an integer
+                tokens = tokens[:i] + tokens[i + 1 :]
+                print(tokens)
+                break
 
         instruction_func = None
         # Get the instruction type
@@ -188,14 +212,23 @@ class AsmInterpreter:
         if instruction_func is not None:
             # Remove the instruction token
             tokens = tokens[1:]
-            print(tokens)
             # Get the values of the tokens if they are LexTokens
             for i in range(len(tokens)):
                 if isinstance(tokens[i], lex.LexToken):
                     tokens[i] = tokens[i].value
-            print(tokens)
             # Call the instruction function
             # Check that we have the right number of tokens
+            num_optional_args = (
+                len(instruction_func.__defaults__)
+                if instruction_func.__defaults__
+                else 0
+            )
+            if (
+                len(tokens) + num_optional_args
+            ) == instruction_func.__code__.co_argcount - 1:
+                # Add the optional arguments to the end of the tokens list
+                for i in range(num_optional_args):
+                    tokens.append(instruction_func.__defaults__[i])
             if len(tokens) != instruction_func.__code__.co_argcount - 1:
                 raise Exception(
                     f"Wrong number of arguments for instruction {op_token} (expected {instruction_func.__code__.co_argcount - 1}, got {len(tokens)})"
@@ -233,7 +266,6 @@ class AsmInterpreter:
                 print(tokens)
                 self.process_instruction(tokens)
                 break  # No more input
-            print(token)
             if token.type == "INSTRUCTION":
                 # Do not perform this step if it is the first instruction
                 if len(tokens) > 0:
