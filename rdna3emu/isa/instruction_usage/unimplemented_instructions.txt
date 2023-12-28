@@ -1,3 +1,4 @@
-V_DUAL_FMAC_F32
-V_DUAL_MUL_F32
-V_FMA_F32
+File: C:\Users\bunni\OneDrive\Desktop\RDNA3EMU\Data\tinyconvdump.txt
+DS_LOAD_B128
+DS_STORE_B32
+GLOBAL_LOAD_B128

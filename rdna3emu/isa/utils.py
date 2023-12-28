@@ -140,25 +140,40 @@ def bitcnt(x, bit=0, sz=32):
     return tmp
 
 
-# Function to parse the asm file and output used instructions
-def find_used_instructions(asm_file, instructions):
+def parse_instructions(asm_file, instructions):
     parsed_instructions = set()
     with open(asm_file, "r") as f:
         lines = f.readlines()
+        # Some instructions are duals which are seperated by "::" and need to be split into two instructions
+        # Add these lines to the list of lines and remove the old line
+        for i in range(len(lines)):
+            line = lines[i]
+            if "::" in line:
+                lines[i] = line.split("::")[0]
+                lines.insert(i + 1, line.split("::")[1])
         for line in lines:
             # Trim whitespace
             line = line.strip()
-            if line.startswith("s_") or line.startswith("v_"):
+            if (
+                line.startswith("s_")
+                or line.startswith("v_")
+                or line.startswith("global_")
+                or line.startswith("ds_")
+            ):
                 op_token = line.split()[0]
                 # Convert to uppercase
                 op_token = op_token.upper()
                 # Remove "_e32" or "_e64" from the end of the instruction
                 if op_token.endswith("_E32") or op_token.endswith("_E64"):
                     op_token = op_token[:-4]
-                # Check if the instruction is in the instruction set
-                for instruction in instructions:
-                    if op_token in instructions[instruction]:
-                        parsed_instructions.add(op_token)
+                parsed_instructions.add(op_token)
+
+    return parsed_instructions
+
+
+# Function to parse the asm file and output used instructions
+def find_used_instructions(asm_file, instructions):
+    parsed_instructions = parse_instructions(asm_file, instructions)
 
     # Go through the instruction set and find the used instructions
     used_instructions = []
@@ -172,6 +187,8 @@ def find_used_instructions(asm_file, instructions):
     folder_path = os.path.join(folder_path, "instruction_usage")
     save_path = os.path.join(folder_path, "used_instructions.txt")
     with open(save_path, "w") as f:
+        # Write the file that this script was run on
+        f.write("File: " + asm_file + "\n")
         for instruction in used_instructions:
             f.write(instruction + "\n")
 
@@ -180,27 +197,15 @@ def find_used_instructions(asm_file, instructions):
 
 # Function to parse the asm file and output unimplemented instructions
 def find_unimplemented_instructions(asm_file, instructions):
-    parsed_instructions = set()
-    with open(asm_file, "r") as f:
-        lines = f.readlines()
-        for line in lines:
-            # Trim whitespace
-            line = line.strip()
-            if line.startswith("s_") or line.startswith("v_"):
-                op_token = line.split()[0]
-                # Convert to uppercase
-                op_token = op_token.upper()
-                # Remove "_e32" or "_e64" from the end of the instruction
-                if op_token.endswith("_E32") or op_token.endswith("_E64"):
-                    op_token = op_token[:-4]
-                parsed_instructions.add(op_token)
+    parsed_instructions = parse_instructions(asm_file, instructions)
 
     # Get the used instructions
     used_instructions = find_used_instructions(asm_file, instructions)
 
     # Remove used instructions from parsed instructions
     for instruction in used_instructions:
-        parsed_instructions.remove(instruction)
+        if instruction in parsed_instructions:
+            parsed_instructions.remove(instruction)
 
     # Unimplemented instructions are left in parsed_instructions
     unimplemented_instructions = list(parsed_instructions)
@@ -213,6 +218,8 @@ def find_unimplemented_instructions(asm_file, instructions):
     folder_path = os.path.join(folder_path, "instruction_usage")
     save_path = os.path.join(folder_path, "unimplemented_instructions.txt")
     with open(save_path, "w") as f:
+        # Write the file that this script was run on
+        f.write("File: " + asm_file + "\n")
         for instruction in unimplemented_instructions:
             f.write(instruction + "\n")
 
@@ -233,6 +240,8 @@ def find_unused_instructions(asm_file, instructions):
     folder_path = os.path.join(folder_path, "instruction_usage")
     save_path = os.path.join(folder_path, "unused_instructions.txt")
     with open(save_path, "w") as f:
+        # Write the file that this script was run on
+        f.write("File: " + asm_file + "\n")
         for instruction in unused_instructions:
             f.write(instruction + "\n")
 
@@ -241,7 +250,7 @@ def find_unused_instructions(asm_file, instructions):
 
 def populate_instruction_usage(instructions):
     cwd = os.getcwd()
-    asm_file = os.path.join(cwd, "Data/tinyconvdump.txt")
+    asm_file = os.path.join(cwd, "Data\\tinyconvdump.txt")
     find_used_instructions(asm_file, instructions)
     find_unimplemented_instructions(asm_file, instructions)
     find_unused_instructions(asm_file, instructions)

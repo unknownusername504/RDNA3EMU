@@ -9,6 +9,15 @@ class VectorOps:
         self.registers = registers
         self.memory = memory
 
+    def try_get_literal(self, arg, get_reg_func):
+        # Argument could be a register or a literal
+        if isinstance(arg, int) or isinstance(arg, float):
+            # Literal
+            return arg
+        else:
+            # Register, let the caller handle the type
+            return get_reg_func(arg)
+
     # VOP2 instructions
     # Copy data from one of two inputs based on the vector condition code and store the result into a vector register.
     def v_cndmask_b32(self, reg_d, reg_s0, reg_s1):
@@ -71,10 +80,10 @@ class VectorOps:
         self.registers.set_vgpr_f32(reg_d, reg_d_value)
 
     # Multiply two floating point inputs and store the result into a vector register.
-    def v_mul_f32(self, reg_d, reg_s0, reg_s1):
-        reg_s0_value = self.registers.vgpr_f32(reg_s0)
-        reg_s1_value = self.registers.vgpr_f32(reg_s1)
-        reg_d_value = reg_s0_value * reg_s1_value
+    def v_mul_f32(self, reg_d, arg_0, arg_1):
+        arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_f32)
+        arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_f32)
+        reg_d_value = arg_0_value * arg_1_value
         self.registers.set_vgpr_f32(reg_d, reg_d_value)
 
     # Multiply two signed 24 bit integer inputs and store the result as a signed 32 bit integer into a vector register.
@@ -403,11 +412,11 @@ class VectorOps:
     # VOP1 instructions
     # Do nothing.
     def v_nop(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     # Move data from a vector input into a vector register.
     def v_mov_b32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     # Read the scalar value in the lowest active lane of the input vector register and store it into a scalar register.
     def v_readfirstlane_b32(self, reg_d, reg_s0):
@@ -479,7 +488,7 @@ class VectorOps:
 
     # Convert from a signed 4-bit integer to a single-precision float using an offset table and store the result into a vector register.
     def v_cvt_off_f32_i4(self, reg_d, reg_s):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     # Convert from a double-precision float input to a single-precision float and store the result into a vector register.
     def v_cvt_f32_f64(self, reg_d, reg_s):
@@ -519,364 +528,410 @@ class VectorOps:
 
     # Convert from a double-precision float input to an unsigned 32-bit integer and store the result into a vector register.
     def v_cvt_u32_f64(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     # Convert from an unsigned 32-bit integer input to a double-precision float and store the result into a vector register.
     def v_cvt_f64_u32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     # Compute the integer part of a double-precision float input with round-toward-zero semantics and store the result in floating point format into a vector register.
     def v_trunc_f64(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     # Round the double-precision float input up to next integer and store the result in floating point format into a vector register.
     def v_ceil_f64(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     # Round the double-precision float input to the nearest even integer and store the result in floating point format into a vector register.
     def v_rndne_f64(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     # Round the double-precision float input down to previous integer and store the result in floating point format into a vector register.
     def v_floor_f64(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     # Flush the VALU destination cache.
     def v_pipeflush(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     # Move data to a VGPR.
     def v_mov_b16(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     # Compute the fractional portion of a single-precision float input and store the result in floating point format into a vector register.
     def v_fract_f32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     # Compute the integer part of a single-precision float input with round-toward-zero semantics and store the result in floating point format into a vector register.
     def v_trunc_f32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     # Round the single-precision float input up to next integer and store the result in floating point format into a vector register.
     def v_ceil_f32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     # Round the single-precision float input to the nearest even integer and store the result in floating point format into a vector register.
     def v_rndne_f32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     # Round the single-precision float input down to previous integer and store the result in floating point format into a vector register.
     def v_floor_f32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     # Calculate 2 raised to the power of the single-precision float input and store the result into a vector register.
     def v_exp_f32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     # Calculate the base 2 logarithm of the single-precision float input and store the result into a vector register.
     def v_log_f32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     # Calculate the reciprocal of the single-precision float input using IEEE rules and store the result into a vector register.
     def v_rcp_f32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     # Calculate the reciprocal of the vector float input in a manner suitable for integer division and store the result into a vector register. This opcode is intended for use as part of an integer division macro.
     def v_rcp_iflag_f32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_rsq_f32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_rcp_f64(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_rsq_f64(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_sqrt_f32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_sqrt_f64(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_sin_f32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_cos_f32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_not_b32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_bfrev_b32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_clz_i32_u32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_ctz_i32_b32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_cls_i32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_frexp_exp_i32_f64(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_frexp_mant_f64(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_fract_f64(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_frexp_exp_i32_f32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_frexp_mant_f32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_movreld_b32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_movrels_b32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_movrelsd_b32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_movrelsd_2_b32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_cvt_f16_u16(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_cvt_f16_i16(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_cvt_u16_f16(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_cvt_i16_f16(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_rcp_f16(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_sqrt_f16(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_rsq_f16(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_log_f16(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_exp_f16(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_frexp_mant_f16(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_frexp_exp_i16_f16(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_floor_f16(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_ceil_f16(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_trunc_f16(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_rndne_f16(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_fract_f16(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_sin_f16(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_cos_f16(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_sat_pk_u8_i16(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_cvt_norm_i16_f16(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_cvt_norm_u16_f16(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_swap_b32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_swap_b16(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_permlane64_b32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_swaprel_b32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_not_b16(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_cvt_i32_i16(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_cvt_u32_u16(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     # VOP3 instructions
+    def unpack_f32(self, arg_0):
+        arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_f32)
+        arg_0_value_lo = np.float16(np.uint32(arg_0_value) & 0xFFFF)
+        arg_0_value_hi = np.float16(np.uint32(arg_0_value) >> 16)
+        return arg_0_value_lo, arg_0_value_hi
+
+    def pack_f32(self, lo, hi):
+        lo = np.uint32(lo)
+        hi = np.uint32(hi)
+        fused = lo | (hi << 16)
+        return np.float32(fused)
+
+    # v_fma_f32 could call with either a literal or a register. We need to handle both cases.
+    # Fused single precision multiply add.
+    def v_fma_f32(self, reg_d, reg_s0, arg_0, arg_1):
+        # Unpack the input register
+        reg_s0_value_lo, reg_s0_value_hi = self.unpack_f32(reg_s0)
+
+        # Unpack the literal or register.
+        imm_0_value_lo, imm_0_value_hi = self.unpack_f32(arg_0)
+        imm_1_value_lo, imm_1_value_hi = self.unpack_f32(arg_1)
+
+        # Perform the fused multiply add.
+        reg_d_value_lo = reg_s0_value_lo * imm_0_value_lo + imm_1_value_lo
+        reg_d_value_hi = reg_s0_value_hi * imm_0_value_hi + imm_1_value_hi
+
+        # Pack the result.
+        reg_d_value = self.pack_f32(reg_d_value_lo, reg_d_value_hi)
+        self.registers.set_vgpr_f32(reg_d, reg_d_value)
+
     #
     def v_lshl_add_u32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_and_or_b32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_or3_b32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_mbcnt_lo_u32_b32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_mul_lo_u32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_mul_hi_u32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_lshlrev_b16(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_lshlrev_b64(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_writelane_b32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     # VOP3SD instructions
     #
     def v_mad_u64_u32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_add_co_u32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_sub_co_u32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     # VOPC instructions
     #
     def v_cmp_eq_u32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_cmp_ne_u32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_cmp_lt_u64(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_cmp_eq_u64(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_cmp_gt_u64(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_cmp_ne_u64(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_cmpx_eq_u32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_cmpx_gt_u32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_cmpx_ne_u32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_cmpx_ne_u64(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     #
     def v_cmp_eq_u16(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
 
     # VOPD instructions
+    # Multiply two floating point inputs and accumulate the result into the destination register using fused multiply add.
+    def v_dual_fmac_f32(self, reg_d, reg_s0, reg_s1):
+        reg_s0_value = self.registers.vgpr_f32(reg_s0)
+        reg_s1_value = self.registers.vgpr_f32(reg_s1)
+        reg_d_value = self.registers.vgpr_f32(reg_d)
+        reg_d_value = reg_d_value + (reg_s0_value * reg_s1_value)
+        self.registers.set_vgpr_f32(reg_d, reg_d_value)
+
+    # Multiply two floating point inputs and store the result into a vector register.
+    def v_dual_mul_f32(self, reg_d, arg_0, arg_1):
+        arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_f32)
+        arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_f32)
+
+        reg_d_value = arg_0_value * arg_1_value
+        self.registers.set_vgpr_f32(reg_d, reg_d_value)
+
     # Move data from a vector input into a vector register.
     def v_dual_mov_b32(self, reg_d, reg_s0):
         reg_s0_value = self.registers.vgpr_u32(reg_s0)
@@ -884,4 +939,11 @@ class VectorOps:
 
     #
     def v_dual_cndmask_b32(self):
-        pass
+        pass  # raise Exception("OP... not implemented")
+
+    # Given a shift count in the first vector input, calculate the logical shift left of the second vector input and store the result into a vector register
+    def v_dual_lshlrev_b32(self, reg_d, arg_0, arg_1):
+        arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_u32) & 0x1F
+        arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_u32)
+        reg_d_value = arg_1_value << arg_0_value
+        self.registers.set_vgpr_u32(reg_d, reg_d_value)
