@@ -51,8 +51,7 @@ class ScalarOps:
     def s_addc_u32(self, reg_d, reg_s0, reg_s1):
         reg_s0_value = self.registers.sgpr_u32(reg_s0)
         reg_s1_value = self.registers.sgpr_u32(reg_s1)
-        reg_scc_value = self.registers._status.scc
-        ()
+        reg_scc_value = self.registers._status.scc()
         reg_d_value = reg_s0_value + reg_s1_value + reg_scc_value
         reg_scc_value = 1 if (reg_d_value >= 2**32) else 0
         self.registers._status.set_scc(reg_scc_value)
