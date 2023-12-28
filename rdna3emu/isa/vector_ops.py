@@ -877,9 +877,10 @@ class VectorOps:
         pass
 
     # VOPD instructions
-    #
-    def v_dual_mov_b32(self):
-        pass
+    # Move data from a vector input into a vector register.
+    def v_dual_mov_b32(self, reg_d, reg_s0):
+        reg_s0_value = self.registers.vgpr_u32(reg_s0)
+        self.registers.set_vgpr_u32(reg_d, reg_s0_value)
 
     #
     def v_dual_cndmask_b32(self):

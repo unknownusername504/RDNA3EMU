@@ -18,11 +18,14 @@ class InstructionSet:
         self.vector_ops = VectorOps(self.registers, self.memory)
         self.scalar_ops = ScalarOps(self.registers, self.memory)
         self.instruction_type_map = {
-            "SCALAR": ["SOP2", "SOP1", "SOPP", "SOPC", "SOPK", "SMEM"],
+            "SCALAR": ["SOP2", "SOP1", "SOPP", "SOPC", "SOPK", "SMEM", "PRG_CTRL"],
             "VECTOR": ["VOP2", "VOP1", "VOPC", "VOP3", "VOP3SD", "VOPD"],
             "MEMORY": ["FLAT", "GLOBAL", "SCRATCH", "LDS"],
         }
         self.instructions = {
+            "PRG_CTRL": {
+                "S_CODE_END": self.scalar_ops.s_code_end,
+            },
             "SOP2": {
                 "S_ADD_U32": self.scalar_ops.s_add_u32,  # 0
                 "S_SUB_U32": self.scalar_ops.s_sub_u32,  # 1

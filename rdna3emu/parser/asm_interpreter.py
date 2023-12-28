@@ -11,7 +11,7 @@ from rdna3emu.parser.lex import Lexer
 
 class AsmInterpreter:
     def __init__(self):
-        self.lexer = Lexer().get_lex()
+        self.lexer = Lexer("Data/simplified_optest.asm").get_lex()
         self.isa = InstructionSet()
         self.clause_code_block = []
         # The clause length is: (SIMM16[5:0] + 1)

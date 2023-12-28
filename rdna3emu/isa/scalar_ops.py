@@ -8,6 +8,10 @@ class ScalarOps:
         self.registers = registers
         self.memory = memory
 
+    # PRG_CTRL instructions
+    def s_code_end(self):
+        pass
+
     # SOP2 instructions
     # Add two unsigned inputs, store the result into a scalar register and store the carry-out bit into SCC.
     def s_add_u32(self, reg_d, reg_s0, reg_s1):
