@@ -18,6 +18,26 @@ class Memory:
 
         self.legal_sizes = [1, 2, 4, 8, 16, 32]
 
+        # Track the memory accesses
+        self.accesses = set()
+
+    def dump_memory(self):
+        print("==== Memory: ====")
+        # Sort the accesses by address
+        self.accesses = sorted(self.accesses)
+        for access in self.accesses:
+            # Read the current value given the address and size
+            value = self.get_memory(access, 4)
+            print(f"Address: {access:#x} Value: {value:#x}")
+
+    def add_access(self, address, size):
+        # Add the access to the set and if size > 4 add the next address
+        self.accesses.add(address)
+        while size > 4:
+            address += 4
+            self.accesses.add(address)
+            size -= 4
+
     def is_global(self, address):
         #  Addr[48] == 0
         return ((address >> 48) & 0x1) == 0
@@ -66,6 +86,7 @@ class Memory:
             self._data[address // 4] = value
         else:
             raise Exception("Invalid memory access size")
+        self.add_access(address, size)
 
     # Write to the memory structure
     def get_memory(self, address, size):

@@ -289,6 +289,8 @@ class AsmInterpreter:
 def run():
     asm_interpreter = AsmInterpreter()
     asm_interpreter.interpret_asm()
+    asm_interpreter.isa.dump_registers()
+    asm_interpreter.isa.dump_memory()
 
 
 if __name__ == "__main__":

@@ -368,6 +368,12 @@ class InstructionSet:
                 )
         return instruction_func
 
+    def dump_registers(self):
+        self.registers.dump_registers()
+
+    def dump_memory(self):
+        self.memory.dump_memory()
+
 
 if __name__ == "__main__":
     populate_instruction_usage(InstructionSet().instructions)

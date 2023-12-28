@@ -16,13 +16,26 @@ class Bitfield:
         f_val = (val << pos) & m
         self._bitfield = (self._bitfield & ~m) | f_val
 
+    # Get all the bitfields as a dictionary keyed by the bitfield name
+    def get_all(self):
+        return {
+            name: getattr(self, name)()
+            for name in dir(self)
+            if not name.startswith("_")
+            if not name.startswith("pm")
+            if not name.startswith("partialmethod")
+            and not name.startswith("set_")
+            and name not in ["get_all"]
+            and callable(getattr(self, name))
+        }
+
 
 class StatusRegister(Bitfield):
     def __init__(self):
         super().__init__()
         self.read, self.write = True, self._writeable()
         # Set the default values
-        self.set_scc(0)
+        self._bitfield = 0
 
     def _writeable(self):
         return self.priv() == 1
@@ -91,6 +104,8 @@ class StatusRegister(Bitfield):
 class ModeRegister(Bitfield):
     def __init__(self):
         self.read, self.write = True, True
+        # Set the default values
+        self._bitfield = 0
 
     pm = partialmethod
 
@@ -123,6 +138,8 @@ class ModeRegister(Bitfield):
 class TrapStatusRegister(Bitfield):
     def __init__(self):
         self.read, self.write = True, True
+        # Set the default values
+        self._bitfield = 0
 
     pm = partialmethod
 
@@ -180,12 +197,22 @@ class Registers:
         self._expcnt = 0  # 3-bit
         self._lgrmcnt = 0  # 6-bit
 
+        # Track accesses to vgpr and sgpr as a dictionary of tuples keyed by register ID
+        self.vgpr_accesses = {}
+        self.sgpr_accesses = {}
+
     pc = property(lambda self: self._pc, lambda self, val: setattr(self, "_pc", val))
     exec = property(
         lambda self: self._exec, lambda self, val: setattr(self, "_exec", val)
     )
     status = property(
         lambda self: self._status, lambda self, val: setattr(self, "_status", val)
+    )
+    mode = property(
+        lambda self: self._mode, lambda self, val: setattr(self, "_mode", val)
+    )
+    trap_sts = property(
+        lambda self: self._trap_sts, lambda self, val: setattr(self, "_trap_sts", val)
     )
     vcc = property(lambda self: self._vcc, lambda self, val: setattr(self, "_vcc", val))
     flat_scratch = property(
@@ -281,6 +308,17 @@ class Registers:
         if signed:
             val = Registers._signed(val, size)
         attr_value[reg_id] = val % (2**size)
+        # Track the access
+        if attr == "_vgpr":
+            # Only replace the size if it is bigger than the current size
+            old_size = self.vgpr_accesses.get(reg_id, (attr, signed, size, f))[2]
+            new_size = max(old_size, size)
+            self.vgpr_accesses[reg_id] = (attr, signed, new_size, f)
+        elif attr == "_sgpr":
+            # Only replace the size if it is bigger than the current size
+            old_size = self.vgpr_accesses.get(reg_id, (attr, signed, size, f))[2]
+            new_size = max(old_size, size)
+            self.sgpr_accesses[reg_id] = (attr, signed, new_size, f)
 
     def set_register(
         self, reg_type, reg_id, value, size=32, signed=True, floating=False
@@ -340,6 +378,52 @@ class Registers:
 
         # Call the appropriate method to get the register value
         return getattr(self, method_name)(reg_id)
+
+    def dump_registers(self):
+        """
+        Dump the register values to the console.
+        """
+        print("==== State Registers: ====")
+        print("PC: ", self.pc)
+        print("Exec: ", self.exec)
+        print("VCC: ", self.vcc)
+        print("Flat Scratch: ", self.flat_scratch)
+        print("M0: ", self.m0)
+        print("TBA: ", self.tba)
+        print("TMA: ", self.tma)
+        print("Ttmp: ", self.ttmp)
+        print("Flush IB: ", self.flush_ib)
+        print("SH_MEM_BASES: ", self.sh_mem_bases)
+        print("Flat Scratch Lo: ", self.flat_scratch_lo)
+        print("Flat Scratch Hi: ", self.flat_scratch_hi)
+        print("HW_ID1: ", self.hw_id1)
+        print("HW_ID2: ", self.hw_id2)
+        print("Shader Cycles: ", self.shader_cycles)
+        print("VMCNT: ", self.vmcnt)
+        print("VSCNT: ", self.vscnt)
+        print("EXPCNT: ", self.expcnt)
+        print("LGRMCNT: ", self.lgrmcnt)
+
+        print("==== Field Registers: ====")
+        print("Status: ", self.status.get_all())
+        print("Mode: ", self.mode.get_all())
+        print("Trap Status: ", self.trap_sts.get_all())
+
+        print("==== VGPRs: ====")
+        # Sort the accesses by register ID
+        vgpr_accesses = sorted(self.vgpr_accesses.items(), key=lambda x: x[0])
+        for reg_id, (attr, signed, size, f) in vgpr_accesses:
+            # Read the current value given the register ID and size
+            value = self._get(reg_id, attr=attr, signed=signed, size=size, f=f)
+            print(f"Register: {reg_id} Value: {value:#x}")
+
+        print("==== SGPRs: ====")
+        # Sort the accesses by register ID
+        spgr_accesses = sorted(self.sgpr_accesses.items(), key=lambda x: x[0])
+        for reg_id, (attr, signed, size, f) in spgr_accesses:
+            # Read the current value given the register ID and size
+            value = self._get(reg_id, attr=attr, signed=signed, size=size, f=f)
+            print(f"Register: {reg_id} Value: {value:#x}")
 
     pm = partialmethod
     vgpr_i8 = pm(_get, attr="_vgpr", signed=True, size=8)
