@@ -21,6 +21,7 @@ class AsmInterpreter:
         # The clause length is: (SIMM16[5:0] + 1)
         self.clause_simm16 = 0
         self.clause_code_block_length = 0
+        self.instruction_count = 1
 
     def make_token(self, type, value, lineno, lexpos):
         token = lex.LexToken()
@@ -110,16 +111,22 @@ class AsmInterpreter:
             # Check that the integer is valid
             if not self.is_valid_hex(token.value):
                 raise Exception("Invalid hex integer")
-            return self.make_token(
+            print("Hex integer detected for token {}".format(token))
+            new_token = self.make_token(
                 token.type, int(token.value, 16), token.lineno, token.lexpos
             )
+            print("New token {}".format(new_token))
+            return new_token
         elif isinstance(token.value, str):
             # Check that the integer is valid
             if not self.is_valid_decimal(token.value):
                 raise Exception("Invalid decimal integer")
-            return self.make_token(
+            print("Decimal integer detected for token {}".format(token))
+            new_token = self.make_token(
                 token.type, int(token.value), token.lineno, token.lexpos
             )
+            print("New token {}".format(new_token))
+            return new_token
         else:
             raise Exception("Invalid integer", token.value)
 
@@ -145,26 +152,51 @@ class AsmInterpreter:
         else:
             raise Exception("Invalid floating point number")
 
+    def preprocess_global(self, tokens):
+        # Split the scalar register array into 2 scalar registers
+        # The first register is the lower 32 bits and the second register is the upper 32 bits
+        # Find the register array
+        for i in range(1, len(tokens)):
+            if tokens[i].type == "SGPR":
+                reg_tokens = self.preprocess_register_token(tokens[i])
+                # Check that the register is an array
+                if len(reg_tokens) == 2:
+                    reg_token_s0 = self.preprocess_register_token(reg_tokens[0])[0]
+                    reg_token_s1 = self.preprocess_register_token(reg_tokens[1])[0]
+                    # Prepend the second register to the tokens list
+                    tokens = tokens[:i] + [reg_token_s1] + tokens[i:]
+                    # Replace the first register with the first 32 bits of the second register
+                    tokens[i] = reg_token_s0
+                    break
+                else:
+                    # Probably already processed so just return
+                    break
+        return tokens
+
     # Execute an instruction
     def process_instruction(self, tokens):
         # Preprocess the token
         op_token = self.preprocess_op_token(tokens[0])
+        # Preprocess the global_* instructions
+        if op_token.value.startswith("GLOBAL_"):
+            tokens = self.preprocess_global(tokens)
+        for i in range(len(tokens)):
+            # Remove the offset label tokens
+            if tokens[i].type == "LABEL":
+                if tokens[i].value.startswith("offset"):
+                    # Remove this token and the next token will be the offset as an integer
+                    tokens = tokens[:i] + tokens[i + 1 :]
+                    break
+
         # Preprocess the register tokents if they are VGPR or SGPR
         for i in range(1, len(tokens)):
             if tokens[i].type == "VGPR" or tokens[i].type == "SGPR":
                 reg_tokens = self.preprocess_register_token(tokens[i])
-                # For global ops, the array of registers represents 2 scalar registers that are meant to be used as a 64-bit value
-                # Do not replicate the instruction for each register if the register is an array
-                if len(reg_tokens) > 1 and not op_token.value.startswith("GLOBAL_"):
+                # Replicate the instruction for each register
+                if len(reg_tokens) > 1:
                     for reg_token in reg_tokens:
                         tokens[i] = reg_token
                         self.process_instruction(tokens)
-                elif len(reg_tokens) > 1 and op_token.value.startswith("GLOBAL_"):
-                    # Append the second register to the tokens list and process the instruction
-                    tokens[i] = reg_tokens[0]
-                    tokens = tokens[:i] + [reg_tokens[1]] + tokens[i:]
-                    self.process_instruction(tokens)
-                    # No need to process the instruction again so return
                     return
                 else:
                     tokens[i] = reg_tokens[0]
@@ -181,7 +213,6 @@ class AsmInterpreter:
             elif tokens[i].type == "LABEL":
                 # We can handle offset labels but not other labels
                 if not tokens[i].value.startswith("offset"):
-                    # Skip label tokens that are not offset labels
                     return
             # Preprocess the integer tokens
             elif tokens[i].type == "INTEGER":
@@ -192,13 +223,8 @@ class AsmInterpreter:
             else:
                 raise Exception("Invalid token type")
 
-        for i in range(len(tokens)):
-            # Remove the offset label tokens
-            if tokens[i].type == "LABEL":
-                # Remove this token and the next token will be the offset as an integer
-                tokens = tokens[:i] + tokens[i + 1 :]
-                print(tokens)
-                break
+        print("Instruction {} : {}".format(self.instruction_count, tokens))
+        self.instruction_count += 1
 
         instruction_func = None
         # Get the instruction type
@@ -274,22 +300,17 @@ class AsmInterpreter:
 
     def interpret_asm(self):
         tokens = []
-        instruction_count = 1
         # Tokenize
         while True:
             token = self.lexer.token()
             if not token:
                 # Process the tokens for the last instruction
-                print("Instruction {} : {}".format(instruction_count, tokens))
-                instruction_count += 1
                 self.process_instruction(tokens)
                 break  # No more input
             if token.type == "INSTRUCTION":
                 # Do not perform this step if it is the first instruction
                 if len(tokens) > 0:
                     # Process the tokens for the previous instruction
-                    print("Instruction {} : {}".format(instruction_count, tokens))
-                    instruction_count += 1
                     self.process_instruction(tokens)
                     tokens = []
             elif token.type not in [

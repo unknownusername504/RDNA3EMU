@@ -39,11 +39,11 @@ class Memory:
             self.accesses.add(address)
             size -= 4
 
-    def is_global(self, address):
+    def flat_is_global(self, address):
         #  Addr[48] == 0
         return ((address >> 48) & 0x1) == 0
 
-    def is_private(self, address):
+    def flat_is_private(self, address):
         #  Addr[48] == 1, Addr[47] == 0, Addr[46] == 0
         return (
             ((address >> 48) & 0x1) == 1
@@ -51,7 +51,7 @@ class Memory:
             and ((address >> 46) & 0x1) == 0
         )
 
-    def is_shared(self, address):
+    def flat_is_shared(self, address):
         #  Addr[48] == 1, Addr[47] == 0, Addr[46] == 1
         return (
             ((address >> 48) & 0x1) == 1
@@ -59,15 +59,18 @@ class Memory:
             and ((address >> 46) & 0x1) == 1
         )
 
-    def is_invalid(self, address):
+    def flat_is_invalid(self, address):
         #  Addr[48] == 1, Addr[47] == 1
         return ((address >> 48) & 0x1) == 1 and ((address >> 47) & 0x1) == 1
 
     # Sanitize the address
     def sanitize_address(self, address, size):
-        # Check if the address is valid
-        if self.is_invalid(address):
-            raise Exception("Invalid memory access")
+        # Check that the address is a valid integer
+        if not isinstance(address, int):
+            raise Exception("Invalid memory access address type")
+        # Check that the address is within the memory range
+        if address < 0 or address > self.size:
+            raise Exception(f"Invalid memory access address {address:#x} is invalid")
         if size == 1:
             return address
         elif size in self.legal_sizes:
@@ -102,27 +105,15 @@ class Memory:
             raise Exception("Invalid memory access size")
 
     def get_global_memory(self, address, size):
-        # Check if the address is global
-        if not self.is_global(address):
-            raise Exception("Invalid memory access")
         return self.get_memory(address, size)
 
     def set_global_memory(self, address, size, value):
-        # Check if the address is global
-        if not self.is_global(address):
-            raise Exception("Invalid memory access")
         self.set_memory(address, size, value)
 
     def get_local_memory(self, address, size):
-        # Check if the address is local
-        if not self.is_shared(address):
-            raise Exception("Invalid memory access")
         return self.get_memory(address, size)
 
     def set_local_memory(self, address, size, value):
-        # Check if the address is local
-        if not self.is_shared(address):
-            raise Exception("Invalid memory access")
         self.set_memory(address, size, value)
 
     # Multi dword access is handles currently as split dword accesses through the parsing phase
@@ -177,6 +168,11 @@ class Memory:
 
     # Load 32-bit data from a given memory location into a vector register.
     def global_load_b32(self, reg_d, reg_v0, reg_s0, reg_s1, offset=0):
+        # Force the offset to be an integer for now since that is not handled in the parser correctly
+        if not isinstance(offset, int):
+            offset = int(offset)
+            # Print a warning
+            print("Warning: Offset is not an integer")
         reg_d_value = self.registers.vgpr_u32(reg_d)
         reg_v0_value = self.registers.vgpr_u32(reg_v0)
         reg_s0_value = self.registers.sgpr_u32(reg_s0)
@@ -229,6 +225,11 @@ class Memory:
 
     # Store 32-bit data from a vector register into a given memory location.
     def global_store_b32(self, reg_d, reg_v0, reg_s0, reg_s1, offset=0):
+        # Force the offset to be an integer for now since that is not handled in the parser correctly
+        if not isinstance(offset, int):
+            offset = int(offset)
+            # Print a warning
+            print("Warning: Offset is not an integer")
         reg_d_value = self.registers.vgpr_u32(reg_d)
         reg_v0_value = self.registers.vgpr_u32(reg_v0)
         reg_s0_value = self.registers.sgpr_u32(reg_s0)
@@ -240,6 +241,11 @@ class Memory:
 
     # Store 32-bit data from a vector register into a given memory location.
     def ds_load_b32(self, reg_d, reg_s0, offset=0):
+        # Force the offset to be an integer for now since that is not handled in the parser correctly
+        if not isinstance(offset, int):
+            offset = int(offset)
+            # Print a warning
+            print("Warning: Offset is not an integer")
         reg_d_value = self.registers.vgpr_u32(reg_d)
 
         address = reg_d_value + offset
@@ -249,6 +255,11 @@ class Memory:
 
     # this instruction takes a 32-bit value from the register reg_s0 and stores it in the local data share at the address specified by the value in the register reg_d.
     def ds_store_b32(self, reg_d, reg_s0, offset=0):
+        # Force the offset to be an integer for now since that is not handled in the parser correctly
+        if not isinstance(offset, int):
+            offset = int(offset)
+            # Print a warning
+            print("Warning: Offset is not an integer")
         reg_d_value = self.registers.vgpr_u32(reg_d)
         reg_s0_value = self.registers.vgpr_u32(reg_s0)
 

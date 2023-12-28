@@ -963,31 +963,31 @@ class ScalarOps:
         self.registers.pc += offset + 4
 
     def s_cbranch_scc1(self, simm16):
-        if self.registers._status.get_scc == 1:
+        if self.registers._status.scc == 1:
             offset = simm16 * 4
             self.registers.pc += offset
         self.registers.pc += 4
 
     def s_cbranch_vccz(self, simm16):
-        if self.registers._status.get_vccz == 1:
+        if self.registers._status.vccz == 1:
             offset = simm16 * 4
             self.registers.pc += offset
         self.registers.pc += 4
 
     def s_cbranch_vccnz(self, simm16):
-        if self.registers._status.get_vccz == 0:
+        if self.registers._status.vccz == 0:
             offset = simm16 * 4
             self.registers.pc += offset
         self.registers.pc += 4
 
     def s_cbranch_execz(self, simm16):
-        if self.registers._status.get_execz == 1:
+        if self.registers._status.execz == 1:
             offset = simm16 * 4
             self.registers.pc += offset
         self.registers.pc += 4
 
     def s_cbranch_execnz(self, simm16):
-        if self.registers._status.get_execz == 0:
+        if self.registers._status.execz == 0:
             offset = simm16 * 4
             self.registers.pc += offset
         self.registers.pc += 4
