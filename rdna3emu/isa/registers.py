@@ -174,7 +174,7 @@ class Registers:
         self._pc = 0
         self._vgpr = [0] * 256
         self._sgpr = [0] * 106
-        self._exec = 0  # 64-bit
+        self._exec = [0]  # 64-bit
         self._status = StatusRegister()
         self._vcc = 0  # 64-bit
         self._flat_scratch = 0  # 48-bit
@@ -276,10 +276,27 @@ class Registers:
             return np.float32(val)
         elif size == 64:
             return np.float64(val)
-        elif size == 128:
-            return np.float128(val)
         else:
             raise Exception(f"Float size {size} not supported.")
+
+    def integer(val, size, signed):
+        val = int(val) % (2**size)
+        if signed:
+            val = Registers._signed(val, size)
+        if size == 8:
+            val = np.int8(val) if signed else np.uint8(val)
+        elif size == 16:
+            val = np.int16(val) if signed else np.uint16(val)
+        elif size == 24:
+            val = np.int32(val & 0xFFFFFF) if signed else np.uint32(val & 0xFFFFFF)
+        elif size == 32:
+            val = np.int32(val) if signed else np.uint32(val)
+        elif size == 64:
+            val = np.int64(val) if signed else np.uint64(val)
+        else:
+            raise Exception(f"Integer size {size} not supported.")
+        # Cast back to int so that we can use native Python functions
+        return int(val)
 
     def _get(self, reg_id, attr=None, signed=False, size=None, f=False):
         attr_value = getattr(self, attr)
@@ -291,9 +308,8 @@ class Registers:
         val = attr_value[reg_id]
         if f:
             return Registers.floating(val, size)
-        if signed:
-            val = Registers._signed(val, size)
-        return val % (2**size)
+        else:
+            return Registers.integer(val, size, signed)
 
     def _set(self, reg_id, val, attr=None, signed=None, size=None, f=False):
         attr_value = getattr(self, attr)
@@ -303,11 +319,10 @@ class Registers:
             # Handle the case where reg_id is out of range
             raise IndexError(f"Register {reg_id} is out of range for attribute {attr}.")
         if f:
-            attr_value[reg_id] = Registers.floating(val, size)
-            return
-        if signed:
-            val = Registers._signed(val, size)
-        attr_value[reg_id] = val % (2**size)
+            val = Registers.floating(val, size)
+        else:
+            val = Registers.integer(val, size, signed)
+        attr_value[reg_id] = val
         # Track the access
         if attr == "_vgpr":
             # Only replace the size if it is bigger than the current size
@@ -316,7 +331,7 @@ class Registers:
             self.vgpr_accesses[reg_id] = (attr, signed, new_size, f)
         elif attr == "_sgpr":
             # Only replace the size if it is bigger than the current size
-            old_size = self.vgpr_accesses.get(reg_id, (attr, signed, size, f))[2]
+            old_size = self.sgpr_accesses.get(reg_id, (attr, signed, size, f))[2]
             new_size = max(old_size, size)
             self.sgpr_accesses[reg_id] = (attr, signed, new_size, f)
 
@@ -415,15 +430,21 @@ class Registers:
         for reg_id, (attr, signed, size, f) in vgpr_accesses:
             # Read the current value given the register ID and size
             value = self._get(reg_id, attr=attr, signed=signed, size=size, f=f)
-            print(f"Register: {reg_id} Value: {value:#x}")
+            if type(value) not in [float, np.float16, np.float32, np.float64]:
+                print(f"Register: {reg_id} Value: {value:#x}")
+            else:
+                print(f"Register: {reg_id} Value: {value}")
 
         print("==== SGPRs: ====")
         # Sort the accesses by register ID
-        spgr_accesses = sorted(self.sgpr_accesses.items(), key=lambda x: x[0])
-        for reg_id, (attr, signed, size, f) in spgr_accesses:
+        sgpr_accesses = sorted(self.sgpr_accesses.items(), key=lambda x: x[0])
+        for reg_id, (attr, signed, size, f) in sgpr_accesses:
             # Read the current value given the register ID and size
             value = self._get(reg_id, attr=attr, signed=signed, size=size, f=f)
-            print(f"Register: {reg_id} Value: {value:#x}")
+            if type(value) not in [float, np.float16, np.float32, np.float64]:
+                print(f"Register: {reg_id} Value: {value:#x}")
+            else:
+                print(f"Register: {reg_id} Value: {value}")
 
     pm = partialmethod
     vgpr_i8 = pm(_get, attr="_vgpr", signed=True, size=8)
@@ -450,9 +471,6 @@ class Registers:
     vgpr_u64 = pm(_get, attr="_vgpr", signed=False, size=64)
     set_vgpr_u64 = pm(_set, attr="_vgpr", signed=False, size=64)
 
-    vgpr_u128 = pm(_get, attr="_vgpr", signed=False, size=128)
-    set_vgpr_u128 = pm(_set, attr="_vgpr", signed=False, size=128)
-
     vgpr_f16 = pm(_get, attr="_vgpr", size=16, f=True)
     set_vgpr_f16 = pm(_set, attr="_vgpr", size=16, f=True)
 
@@ -461,9 +479,6 @@ class Registers:
 
     vgpr_f64 = pm(_get, attr="_vgpr", size=64, f=True)
     set_vgpr_f64 = pm(_set, attr="_vgpr", size=64, f=True)
-
-    vgpr_f128 = pm(_get, attr="_vgpr", size=128, f=True)
-    set_vgpr_f128 = pm(_set, attr="_vgpr", size=128, f=True)
 
     sgpr_i8 = pm(_get, attr="_sgpr", signed=True, size=8)
     set_sgpr_i8 = pm(_set, attr="_sgpr", signed=True, size=8)
@@ -489,9 +504,6 @@ class Registers:
     sgpr_u64 = pm(_get, attr="_sgpr", signed=False, size=64)
     set_sgpr_u64 = pm(_set, attr="_sgpr", signed=False, size=64)
 
-    sgpr_u128 = pm(_get, attr="_sgpr", signed=False, size=128)
-    set_sgpr_u128 = pm(_set, attr="_sgpr", signed=False, size=128)
-
     # Special 24-bit access
     sgpr_u24 = pm(_get, attr="_sgpr", signed=False, size=24)
     set_sgpr_u24 = pm(_set, attr="_sgpr", signed=False, size=24)
@@ -505,5 +517,5 @@ class Registers:
     vgpr_i24 = pm(_get, attr="_vgpr", signed=True, size=24)
     set_vgpr_i24 = pm(_set, attr="_vgpr", signed=True, size=24)
 
-    vgpr_f24 = pm(_get, attr="_vgpr", size=24, f=True)
-    set_vgpr_f24 = pm(_set, attr="_vgpr", size=24, f=True)
+    # Others
+    set_exec = pm(_set, attr="_exec", signed=False, size=64)

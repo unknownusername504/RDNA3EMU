@@ -39,11 +39,11 @@ class Memory:
             self.accesses.add(address)
             size -= 4
 
-    def is_global(self, address):
+    def flat_is_global(self, address):
         #  Addr[48] == 0
         return ((address >> 48) & 0x1) == 0
 
-    def is_private(self, address):
+    def flat_is_private(self, address):
         #  Addr[48] == 1, Addr[47] == 0, Addr[46] == 0
         return (
             ((address >> 48) & 0x1) == 1
@@ -51,7 +51,7 @@ class Memory:
             and ((address >> 46) & 0x1) == 0
         )
 
-    def is_shared(self, address):
+    def flat_is_shared(self, address):
         #  Addr[48] == 1, Addr[47] == 0, Addr[46] == 1
         return (
             ((address >> 48) & 0x1) == 1
@@ -59,15 +59,18 @@ class Memory:
             and ((address >> 46) & 0x1) == 1
         )
 
-    def is_invalid(self, address):
+    def flat_is_invalid(self, address):
         #  Addr[48] == 1, Addr[47] == 1
         return ((address >> 48) & 0x1) == 1 and ((address >> 47) & 0x1) == 1
 
     # Sanitize the address
     def sanitize_address(self, address, size):
-        # Check if the address is valid
-        if self.is_invalid(address):
-            raise Exception("Invalid memory access")
+        # Check that the address is a valid integer
+        if not isinstance(address, int):
+            raise Exception("Invalid memory access address type")
+        # Check that the address is within the memory range
+        if address < 0 or address > self.size:
+            raise Exception(f"Invalid memory access address {address:#x} is invalid")
         if size == 1:
             return address
         elif size in self.legal_sizes:
@@ -102,27 +105,15 @@ class Memory:
             raise Exception("Invalid memory access size")
 
     def get_global_memory(self, address, size):
-        # Check if the address is global
-        if not self.is_global(address):
-            raise Exception("Invalid memory access")
         return self.get_memory(address, size)
 
     def set_global_memory(self, address, size, value):
-        # Check if the address is global
-        if not self.is_global(address):
-            raise Exception("Invalid memory access")
         self.set_memory(address, size, value)
 
     def get_local_memory(self, address, size):
-        # Check if the address is local
-        if not self.is_shared(address):
-            raise Exception("Invalid memory access")
         return self.get_memory(address, size)
 
     def set_local_memory(self, address, size, value):
-        # Check if the address is local
-        if not self.is_shared(address):
-            raise Exception("Invalid memory access")
         self.set_memory(address, size, value)
 
     # Multi dword access is handles currently as split dword accesses through the parsing phase
