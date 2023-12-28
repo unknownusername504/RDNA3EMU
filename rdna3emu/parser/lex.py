@@ -139,6 +139,8 @@ def t_INSTRUCTION(t):
     elif instr.startswith("global_"):
         instruction_func = rdna3.find_instruction_func(instr.upper(), "MEMORY")
     t.value = instruction_func
+    if t.value == None:
+      t.value = instr
     return t
 
 def t_STRING(t):
