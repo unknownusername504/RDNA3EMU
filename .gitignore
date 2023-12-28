@@ -12,3 +12,5 @@ build
 *.egg-info
 /env
 *.pyc
+lex.out
+parse.out

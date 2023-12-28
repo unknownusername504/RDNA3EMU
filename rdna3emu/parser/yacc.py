@@ -1,6 +1,6 @@
 import ply.yacc as yacc
 
-from lex import tokens
+from rdna3emu.parser.lex import tokens
 
 # Parsing rules
 def p_program(p):
@@ -40,21 +40,26 @@ def p_operands(p):
 def p_operand(p):
     '''operand : SGPR 
                | VGPR 
-               | INTEGER 
                | FLOATING
+               | DECIMAL
                | SYMBOL
                | BINARY
+               | HEX
+               | OCTAL
                | func
                | modifier'''
     p[0] = p[1]
 
 def p_modifier(p):
-    '''modifier : LABEL INTEGER'''
+    '''modifier : LABEL DECIMAL'''
     p[0] = (p[1], p[2])
   
 def p_func(p):
   ''' func : SYMBOL LPAREN SYMBOL RPAREN
-           | SYMBOL LPAREN INTEGER RPAREN'''
+           | SYMBOL LPAREN DECIMAL RPAREN
+           | SYMBOL LPAREN OCTAL RPAREN
+           | SYMBOL LPAREN FLOATING RPAREN
+           | SYMBOL LPAREN HEX RPAREN'''
   p[0] = [p[1], p[3]]
 
 

@@ -2,7 +2,8 @@
 import sys
 
 # Add rdna3emu to path
-sys.path.append("../rdna3emu/")
+# Set PYTHONPATH="." python3 file
+# sys.path.append("../rdna3emu/")
 
 from rdna3emu.isa.scalar_ops import ScalarOps
 from rdna3emu.isa.vector_ops import VectorOps
