@@ -169,8 +169,6 @@ class AsmInterpreter:
                 if not tokens[i].value.startswith("offset"):
                     # Skip label tokens that are not offset labels
                     return
-                # Remove this token and the next token will be the offset as an integer
-                tokens = tokens.remove(tokens[i])
             # Preprocess the integer tokens
             elif tokens[i].type == "INTEGER":
                 tokens[i] = self.preprocess_integer_token(tokens[i])
@@ -179,6 +177,14 @@ class AsmInterpreter:
                 tokens[i] = self.preprocess_floating_token(tokens[i])
             else:
                 raise Exception("Invalid token type")
+
+        for i in range(len(tokens)):
+            # Remove the offset label tokens
+            if tokens[i].type == "LABEL":
+                # Remove this token and the next token will be the offset as an integer
+                tokens = tokens[:i] + tokens[i + 1 :]
+                print(tokens)
+                break
 
         instruction_func = None
         # Get the instruction type
@@ -211,6 +217,17 @@ class AsmInterpreter:
                     tokens[i] = tokens[i].value
             # Call the instruction function
             # Check that we have the right number of tokens
+            num_optional_args = (
+                len(instruction_func.__defaults__)
+                if instruction_func.__defaults__
+                else 0
+            )
+            if (
+                len(tokens) + num_optional_args
+            ) == instruction_func.__code__.co_argcount - 1:
+                # Add the optional arguments to the end of the tokens list
+                for i in range(num_optional_args):
+                    tokens.append(instruction_func.__defaults__[i])
             if len(tokens) != instruction_func.__code__.co_argcount - 1:
                 raise Exception(
                     f"Wrong number of arguments for instruction {op_token} (expected {instruction_func.__code__.co_argcount - 1}, got {len(tokens)})"

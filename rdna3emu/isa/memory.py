@@ -1,8 +1,14 @@
 import numpy as np
+import sys
+
+# Add rdna3emu to path
+sys.path.append("../rdna3emu/")
+from rdna3emu.isa.registers import Registers as Re
 
 
 class Memory:
-    def __init__(self, size=2**32):
+    def __init__(self, registers: Re, size=2**32):
+        self.registers = registers
         self.size = size
         self.data = bytearray(size)
         self._data = np.zeros(size, dtype=np.uint8)
@@ -82,73 +88,81 @@ class Memory:
     # Multi dword access is handles currently as split dword accesses through the parsing phase
 
     # Untyped buffer load unsigned byte, zero extend in data register.
-    def global_load_u8(self, address):
-        return self.get_global_memory(address, 1)
+    def global_load_u8(self, reg_d, reg_s0, reg_s1, offset=0):
+        reg_s0_value = self.registers.sgpr_u32(reg_s0) + offset
+        reg_s1_value = self.registers.vgpr_u32(reg_s1)
+
+        address = reg_s0_value + reg_s1_value
+
+        reg_d_value = self.get_global_memory(address, 1)
+        self.registers.set_vgpr_u8(reg_d, reg_d_value)
 
     # Untyped buffer load signed byte, sign extend in data register.
-    def global_load_i8(self, address):
-        return np.int8(self.get_global_memory(address, 1))
+    def global_load_i8(self, reg_d, reg_s0, reg_s1, offset=0):
+        reg_s0_value = self.registers.sgpr_u32(reg_s0) + offset
+        reg_s1_value = self.registers.vgpr_u32(reg_s1)
+
+        address = reg_s0_value + reg_s1_value
+
+        reg_d_value = self.get_global_memory(address, 1)
+        self.registers.set_vgpr_i8(reg_d, reg_d_value)
 
     # Untyped buffer load unsigned short, zero extend in data register.
-    def global_load_u16(self, address):
-        return self.get_global_memory(address, 2)
+    def global_load_u16(self, reg_d, reg_s0, reg_s1, offset=0):
+        reg_s0_value = self.registers.sgpr_u32(reg_s0) + offset
+        reg_s1_value = self.registers.vgpr_u32(reg_s1)
+
+        address = reg_s0_value + reg_s1_value
+
+        reg_d_value = self.get_global_memory(address, 2)
+        self.registers.set_vgpr_u16(reg_d, reg_d_value)
 
     # Untyped buffer load signed short, sign extend in data register.
-    def global_load_i16(self, address):
-        return np.int16(self.get_global_memory(address, 2))
+    def global_load_i16(self, reg_d, reg_s0, reg_s1, offset=0):
+        reg_s0_value = self.registers.sgpr_u32(reg_s0) + offset
+        reg_s1_value = self.registers.vgpr_u32(reg_s1)
+
+        address = reg_s0_value + reg_s1_value
+
+        reg_d_value = self.get_global_memory(address, 2)
+        self.registers.set_vgpr_i16(reg_d, reg_d_value)
 
     # Untyped buffer load dword.
-    def global_load_b32(self, address):
-        return self.get_global_memory(address, 4)
+    def global_load_b32(self, reg_d, reg_s0, reg_s1, offset=0):
+        reg_s0_value = self.registers.sgpr_u32(reg_s0) + offset
+        reg_s1_value = self.registers.vgpr_u32(reg_s1)
 
-    # Untyped buffer load 2 dwords
-    def global_load_b64(self, address):
-        return self.get_global_memory(address, 8)
+        address = reg_s0_value + reg_s1_value
 
-    # Untyped buffer load 3 dwords
-    def global_load_b128(self, address):
-        return self.get_global_memory(address, 16)
-
-    # Untyped buffer load 4 dwords
-    def global_load_b256(self, address):
-        return self.get_global_memory(address, 32)
+        reg_d_value = self.get_global_memory(address, 4)
+        self.registers.set_vgpr_u32(reg_d, reg_d_value)
 
     # Untyped buffer store byte.
-    def global_store_b8(self, address, value: np.uint8):
+    def global_store_b8(self, reg_d, reg_s0, reg_s1, offset=0):
+        reg_s0_value = self.registers.sgpr_u32(reg_s0)
+        reg_s1_value = self.registers.vgpr_u32(reg_s1) + offset
+
+        address = reg_s0_value + reg_s1_value
+
+        value = self.registers.vgpr_u8(reg_d)
         self.set_memory(address, 1, value)
 
     # Untyped buffer store short.
-    def global_store_b16(self, address, value: np.uint16):
+    def global_store_b16(self, reg_d, reg_s0, reg_s1, offset=0):
+        reg_s0_value = self.registers.sgpr_u32(reg_s0)
+        reg_s1_value = self.registers.vgpr_u32(reg_s1) + offset
+
+        address = reg_s0_value + reg_s1_value
+
+        value = self.registers.vgpr_u16(reg_d)
         self.set_memory(address, 2, value)
 
     # Untyped buffer store dword.
-    def global_store_b32(self, address, value: np.uint32):
+    def global_store_b32(self, reg_d, reg_s0, reg_s1, offset=0):
+        reg_s0_value = self.registers.sgpr_u32(reg_s0)
+        reg_s1_value = self.registers.vgpr_u32(reg_s1) + offset
+
+        address = reg_s0_value + reg_s1_value
+
+        value = self.registers.vgpr_u32(reg_d)
         self.set_memory(address, 4, value)
-
-    # Untyped buffer store 2 dwords.
-    # Values is an array of 2 dwords.
-    def global_store_b64(self, address, values: np.ndarray):
-        values = values.astype(np.uint64)
-        # Sanity check the size of the array
-        if len(values) != 2:
-            raise Exception("Invalid array size")
-        for i in range(len(values)):
-            self.set_memory(address + i * 4, 4, values[i])
-
-    # Untyped buffer store 3 dwords.
-    def global_store_b128(self, address, values: np.ndarray):
-        values = values.astype(np.uint64)
-        # Sanity check the size of the array
-        if len(values) != 3:
-            raise Exception("Invalid array size")
-        for i in range(len(values)):
-            self.set_memory(address + i * 4, 4, values[i])
-
-    # Untyped buffer store 4 dwords.
-    def global_store_b256(self, address, values: np.ndarray):
-        values = values.astype(np.uint64)
-        # Sanity check the size of the array
-        if len(values) != 4:
-            raise Exception("Invalid array size")
-        for i in range(len(values)):
-            self.set_memory(address + i * 4, 4, values[i])
