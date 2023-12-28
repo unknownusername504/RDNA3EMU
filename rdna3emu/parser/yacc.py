@@ -1,6 +1,6 @@
 import ply.yacc as yacc
 
-from lex import tokens
+from rdna3emu.parser.lex import tokens
 
 # Parsing rules
 def p_program(p):

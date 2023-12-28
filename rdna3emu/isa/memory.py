@@ -2,7 +2,7 @@ import numpy as np
 import sys
 
 # Add rdna3emu to path
-sys.path.append("../rdna3emu/")
+# sys.path.append("../rdna3emu/")
 from rdna3emu.isa.registers import Registers as Re
 
 
@@ -12,9 +12,10 @@ class Memory:
         self.size = size
         self.data = bytearray(size)
         self._data = np.zeros(size, dtype=np.uint8)
-        self._data[:] = self.data[:]
-        self._data = self._data.view(dtype=np.uint32)
-        self._data = self._data.reshape(size // 4)
+        # CAUSING SOME KIND OF OOM and crashes vscode 
+        # self._data[:] = self.data[:]
+        # self._data = self._data.view(dtype=np.uint32)
+        # self._data = self._data.reshape(size // 4)
 
         self.legal_sizes = [1, 2, 4, 8, 16, 32]
 
