@@ -21,12 +21,14 @@ class StatusRegister(Bitfield):
     def __init__(self):
         super().__init__()
         self.read, self.write = True, self._writeable()
+        # Set the default values
+        self.set_scc(0)
 
     def _writeable(self):
         return self.priv() == 1
 
     def _get(self, meta):
-        super()._get(meta)
+        return super()._get(meta)
 
     def _set(self, meta, val):
         super()._set(meta, val)
@@ -93,7 +95,7 @@ class ModeRegister(Bitfield):
     pm = partialmethod
 
     def _get(self, meta):
-        super()._get(meta)
+        return super()._get(meta)
 
     def _set(self, meta, val):
         super()._set(meta, val)
@@ -125,7 +127,7 @@ class TrapStatusRegister(Bitfield):
     pm = partialmethod
 
     def _get(self, meta):
-        super()._get(meta)
+        return super()._get(meta)
 
     def _set(self, meta, val):
         super()._set(meta, val)
