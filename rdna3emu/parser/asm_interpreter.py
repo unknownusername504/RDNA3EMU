@@ -6,7 +6,8 @@ sys.path.append("../rdna3emu/")
 
 import ply.lex as lex
 from rdna3emu.isa.instruction_set import InstructionSet
-from rdna3emu.parser.lex import Lexer
+# CAUSING CIRCULAR IMPORT WITH PARSER.PY
+# from rdna3emu.parser.lex import Lexer
 
 
 class AsmInterpreter:
