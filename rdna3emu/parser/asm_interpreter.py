@@ -370,8 +370,9 @@ def extract_text_section(test_file_path):
 
 
 def run():
-    print_passing_dumps = False
+    print_passing_dumps = True
     any_failed = False
+    non_zero = True
     test_file_names = [
         "add_tensors.txt",
         "exp_tensors.txt",
@@ -390,12 +391,13 @@ def run():
         print("Running test file {}".format(path))
         extract_text_section(path)
         asm_interpreter.set_lexer(path)
+        asm_interpreter.isa.reset()
         try:
             asm_interpreter.interpret_asm()
             print("!!! Passed interpret asm !!!")
             if print_passing_dumps:
-                asm_interpreter.isa.dump_registers()
-                asm_interpreter.isa.dump_memory()
+                asm_interpreter.isa.dump_registers(non_zero)
+                asm_interpreter.isa.dump_memory(non_zero)
         except Exception as e:
             print("!!! Failed interpret asm !!!")
             print(e)

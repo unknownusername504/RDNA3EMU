@@ -394,7 +394,7 @@ class Registers:
         # Call the appropriate method to get the register value
         return getattr(self, method_name)(reg_id)
 
-    def dump_registers(self):
+    def dump_registers(self, non_zero=False):
         # Lambda function to output to file using the same format as the print statements
         # fprint = lambda x: print(x, file=open("registers.txt", "a"))
         """
@@ -432,6 +432,8 @@ class Registers:
         for reg_id, (attr, signed, size, f) in vgpr_accesses:
             # Read the current value given the register ID and size
             value = self._get(reg_id, attr=attr, signed=signed, size=size, f=f)
+            if non_zero and value == 0:
+                continue
             if type(value) not in [float, np.float16, np.float32, np.float64]:
                 print(f"Register: {reg_id} Value: {value:#x}")
             else:
@@ -443,6 +445,8 @@ class Registers:
         for reg_id, (attr, signed, size, f) in sgpr_accesses:
             # Read the current value given the register ID and size
             value = self._get(reg_id, attr=attr, signed=signed, size=size, f=f)
+            if non_zero and value == 0:
+                continue
             if type(value) not in [float, np.float16, np.float32, np.float64]:
                 print(f"Register: {reg_id} Value: {value:#x}")
             else:

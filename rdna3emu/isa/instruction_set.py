@@ -408,11 +408,17 @@ class InstructionSet:
                 )
         return instruction_func
 
-    def dump_registers(self):
-        self.registers.dump_registers()
+    def dump_registers(self, non_zero=False):
+        self.registers.dump_registers(non_zero)
 
-    def dump_memory(self):
-        self.memory.dump_memory()
+    def dump_memory(self, non_zero=False):
+        self.memory.dump_memory(non_zero)
+
+    def reset(self):
+        del self.registers
+        del self.memory
+        self.registers = Registers()
+        self.memory = Memory(self.registers)
 
 
 if __name__ == "__main__":

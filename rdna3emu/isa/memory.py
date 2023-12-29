@@ -13,16 +13,16 @@ class Memory:
         self.data = bytearray(size)
         self._data = np.zeros(size, dtype=np.uint8)
         # CAUSING SOME KIND OF OOM and crashes vscode
-        # self._data[:] = self.data[:]
-        # self._data = self._data.view(dtype=np.uint32)
-        # self._data = self._data.reshape(size // 4)
+        self._data[:] = self.data[:]
+        self._data = self._data.view(dtype=np.uint32)
+        self._data = self._data.reshape(size // 4)
 
         self.legal_sizes = [1, 2, 4, 8, 16, 32]
 
         # Track the memory accesses
         self.accesses = set()
 
-    def dump_memory(self):
+    def dump_memory(self, non_zero=False):
         # Lambda function to output to file using the same format as the print statements
         # fprint = lambda x: print(x, file=open("memory.txt", "a"))
         print("==== Memory: ====")
@@ -31,6 +31,8 @@ class Memory:
         for access in self.accesses:
             # Read the current value given the address and size
             value = self.get_memory(access, 4)
+            if non_zero and value == 0:
+                continue
             print(f"Address: {access:#x} Value: {value:#x}")
 
     def add_access(self, address, size):
