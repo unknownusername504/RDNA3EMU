@@ -203,7 +203,10 @@ class Registers:
 
     pc = property(lambda self: self._pc, lambda self, val: setattr(self, "_pc", val))
     exec = property(
-        lambda self: self._exec, lambda self, val: setattr(self, "_exec", val)
+        lambda self: self._exec[0] if self._exec else None,
+        lambda self, val: setattr(self, "_exec", [val])
+        if isinstance(val, int)
+        else None,
     )
     status = property(
         lambda self: self._status, lambda self, val: setattr(self, "_status", val)

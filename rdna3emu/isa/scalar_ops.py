@@ -833,6 +833,10 @@ class ScalarOps:
         self.registers.set_sgpr_u32(reg_d, original_exec & 0xFFFFFFFF)
         self.registers._status.set_scc(1 if new_exec != 0 else 0)
 
+    # Calculate bitwise AND on the scalar input and the negation of the EXEC mask, store the calculated result into
+    # the EXEC mask, set SCC iff the calculated result is nonzero and store the original value of the EXEC mask into
+    # the scalar destination register.
+    # The original EXEC mask is saved to the destination SGPRs before the bitwise operation is performed.
     def s_and_not1_saveexec_b32(self, reg_d, reg_s0):
         original_exec = ~self.registers.exec & 0xFFFFFFFF00000000
         s0_val = self.registers.sgpr_u32(reg_s0) & 0xFFFFFFFF

@@ -310,8 +310,11 @@ class InstructionSet:
                 "S_WAITCNT_VSCNT": self.scalar_ops.s_waitcnt_vscnt,  # 24
             },
             "VOP3": {
+                "V_BFE_U32": self.vector_ops.v_bfe_u32,  # 528
                 "V_FMA_F32": self.vector_ops.v_fma_f32,  # 531
+                "V_ALIGNBIT_B32": self.vector_ops.v_alignbit_b32,  # 534
                 "V_LSHL_ADD_U32": self.vector_ops.v_lshl_add_u32,  # 582
+                "V_ADD_LSHL_U32": self.vector_ops.v_add_lshl_u32,  # 583
                 "V_AND_OR_B32": self.vector_ops.v_and_or_b32,  # 599
                 "V_OR3_B32": self.vector_ops.v_or3_b32,  # 600
                 "V_MBCNT_LO_U32_B32": self.vector_ops.v_mbcnt_lo_u32_b32,  # 799
@@ -341,12 +344,24 @@ class InstructionSet:
                 "V_CMPX_NE_U64": self.vector_ops.v_cmpx_ne_u64,  # 221
                 "V_CMP_EQ_U16": self.vector_ops.v_cmp_eq_u16,  # 224
             },
+            # VOPD instructions simply call the non-dual version of the instruction.
             "VOPD": {
-                "V_DUAL_FMAC_F32": self.vector_ops.v_dual_fmac_f32,  # 0
-                "V_DUAL_MUL_F32": self.vector_ops.v_dual_mul_f32,  # 3
-                "V_DUAL_MOV_B32": self.vector_ops.v_dual_mov_b32,  # 8
-                "V_DUAL_CNDMASK_B32": self.vector_ops.v_dual_cndmask_b32,  # 9
-                "V_DUAL_LSHLREV_B32": self.vector_ops.v_dual_lshlrev_b32,  # 17
+                "V_DUAL_FMAC_F32": self.vector_ops.v_fmac_f32,  # 0
+                "V_DUAL_FMAAK_F32": self.vector_ops.v_fmaak_f32,  # 1
+                "V_DUAL_FMAMK_F32": self.vector_ops.v_fmamk_f32,  # 2
+                "V_DUAL_MUL_F32": self.vector_ops.v_mul_f32,  # 3
+                "V_DUAL_ADD_F32": self.vector_ops.v_add_f32,  # 4
+                "V_DUAL_SUB_F32": self.vector_ops.v_sub_f32,  # 5
+                "V_DUAL_SUBREV_F32": self.vector_ops.v_subrev_f32,  # 6
+                "V_DUAL_MUL_DX9_ZERO_F32": self.vector_ops.v_mul_dx9_zero_f32,  # 7
+                "V_DUAL_MOV_B32": self.vector_ops.v_mov_b32,  # 8
+                "V_DUAL_CNDMASK_B32": self.vector_ops.v_cndmask_b32,  # 9
+                "V_DUAL_MAX_F32": self.vector_ops.v_max_f32,  # 10
+                "V_DUAL_MIN_F32": self.vector_ops.v_min_f32,  # 11
+                "V_DUAL_DOT2ACC_F32_F16": self.vector_ops.v_dot2acc_f32_f16,  # 12
+                "V_DUAL_ADD_NC_U32": self.vector_ops.v_add_nc_u32,  # 16
+                "V_DUAL_LSHLREV_B32": self.vector_ops.v_lshlrev_b32,  # 17
+                "V_DUAL_AND_B32": self.vector_ops.v_and_b32,  # 18
             },
             "FLAT": {},
             "GLOBAL": {
