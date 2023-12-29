@@ -2,7 +2,8 @@ import ply.yacc as yacc
 
 from rdna3emu.parser.lex import tokens
 
-# Parsing rules
+
+# Parsing ruls
 def p_program(p):
     'program : statements'
     p[0] = p[1]
