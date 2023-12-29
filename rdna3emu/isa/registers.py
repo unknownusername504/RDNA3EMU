@@ -395,6 +395,8 @@ class Registers:
         return getattr(self, method_name)(reg_id)
 
     def dump_registers(self):
+        # Lambda function to output to file using the same format as the print statements
+        # fprint = lambda x: print(x, file=open("registers.txt", "a"))
         """
         Dump the register values to the console.
         """

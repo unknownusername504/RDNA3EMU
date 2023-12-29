@@ -23,6 +23,8 @@ class Memory:
         self.accesses = set()
 
     def dump_memory(self):
+        # Lambda function to output to file using the same format as the print statements
+        # fprint = lambda x: print(x, file=open("memory.txt", "a"))
         print("==== Memory: ====")
         # Sort the accesses by address
         self.accesses = sorted(self.accesses)

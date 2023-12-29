@@ -4,6 +4,8 @@ import sys
 # Add rdna3emu to path
 sys.path.append("../rdna3emu/")
 
+import os
+
 import ply.lex as lex
 from rdna3emu.isa.instruction_set import InstructionSet
 
@@ -14,14 +16,18 @@ RegisterId = int
 
 
 class AsmInterpreter:
-    def __init__(self):
-        self.lexer = Lexer("Data\\tinyconvdump.txt").get_lex()
+    def __init__(self, test_file_name=None):
+        if test_file_name is not None:
+            self.set_lexer(test_file_name)
         self.isa = InstructionSet()
         self.clause_code_block = []
         # The clause length is: (SIMM16[5:0] + 1)
         self.clause_simm16 = 0
         self.clause_code_block_length = 0
         self.instruction_count = 1
+
+    def set_lexer(self, test_file_path):
+        self.lexer = Lexer(test_file_path).get_lex()
 
     def make_token(self, type, value, lineno, lexpos):
         token = lex.LexToken()
@@ -111,21 +117,21 @@ class AsmInterpreter:
             # Check that the integer is valid
             if not self.is_valid_hex(token.value):
                 raise Exception("Invalid hex integer")
-            print("Hex integer detected for token {}".format(token))
+            # print("Hex integer detected for token {}".format(token))
             new_token = self.make_token(
                 token.type, int(token.value, 16), token.lineno, token.lexpos
             )
-            print("New token {}".format(new_token))
+            # print("New token {}".format(new_token))
             return new_token
         elif isinstance(token.value, str):
             # Check that the integer is valid
             if not self.is_valid_decimal(token.value):
                 raise Exception("Invalid decimal integer")
-            print("Decimal integer detected for token {}".format(token))
+            # print("Decimal integer detected for token {}".format(token))
             new_token = self.make_token(
                 token.type, int(token.value), token.lineno, token.lexpos
             )
-            print("New token {}".format(new_token))
+            # print("New token {}".format(new_token))
             return new_token
         else:
             raise Exception("Invalid integer", token.value)
@@ -223,7 +229,7 @@ class AsmInterpreter:
             else:
                 raise Exception("Invalid token type")
 
-        print("Instruction {} : {}".format(self.instruction_count, tokens))
+        # print("Instruction {} : {}".format(self.instruction_count, tokens))
         self.instruction_count += 1
 
         instruction_func = None
@@ -327,11 +333,62 @@ class AsmInterpreter:
             tokens.append(token)
 
 
+def extract_text_section(test_file_path):
+    with open(test_file_path, "r") as file:
+        lines = file.readlines()
+
+    # Find the line with "Disassembly of section .text:"
+    for i, line in enumerate(lines):
+        if "Disassembly of section .text:" in line:
+            start_index = i
+            break
+
+    # Find the line with "s_code_end"
+    for i, line in enumerate(lines[start_index:]):
+        if "s_code_end" in line:
+            end_index = i + start_index + 1
+            break
+
+    # Extract the section between "Disassembly of section .text:" and "s_code_end"
+    text_section = lines[start_index:end_index]
+
+    # Prepend:
+    # <stdin>:	file format elf64-amdgpu
+    # to the start of the text section
+    text_section = ["\n", "<stdin>:	file format elf64-amdgpu\n", "\n"] + text_section
+
+    # Overwrite the file with the text section
+    with open(test_file_path, "w") as file:
+        file.writelines(text_section)
+
+
 def run():
+    test_file_names = [
+        "add_tensors.txt",
+        "exp_tensors.txt",
+        "log_tensors.txt",
+        "mul_tensors.txt",
+        "neg_tensors.txt",
+        "reciprocal_tensors.txt",
+        "sin_tensors.txt",
+        "sqrt_tensors.txt",
+        "sub_tensors.txt",
+        "zero_tensors.txt",
+    ]
     asm_interpreter = AsmInterpreter()
-    asm_interpreter.interpret_asm()
-    asm_interpreter.isa.dump_registers()
-    asm_interpreter.isa.dump_memory()
+    for test_file_name in test_file_names:
+        path = os.path.join("Data\\", test_file_name)
+        print("Running test file {}".format(path))
+        extract_text_section(path)
+        asm_interpreter.set_lexer(path)
+        try:
+            asm_interpreter.interpret_asm()
+            print("!!! Passed interpret asm !!!")
+        except Exception as e:
+            print("!!! Failed interpret asm !!!")
+            print(e)
+        # asm_interpreter.isa.dump_registers()
+        # asm_interpreter.isa.dump_memory()
 
 
 if __name__ == "__main__":

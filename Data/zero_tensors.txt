@@ -19,5 +19,3 @@ Disassembly of section .text:
     s_sendmsg sendmsg(MSG_DEALLOC_VGPRS)                       // 000000001648: BFB60003
     s_endpgm                                                   // 00000000164C: BFB00000
     s_code_end                                                 // 000000001650: BF9F0000
-    s_code_end                                                 // 000000001654: BF9F0000
-    s_code_end                                                 // 000000001658: BF9F0000
