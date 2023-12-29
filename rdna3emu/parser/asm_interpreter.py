@@ -25,6 +25,10 @@ class AsmInterpreter:
         self.clause_simm16 = 0
         self.clause_code_block_length = 0
         self.instruction_count = 1
+        self.last_instruction = None
+
+    def print_last_instruction(self):
+        print(self.last_instruction)
 
     def set_lexer(self, test_file_path):
         self.lexer = Lexer(test_file_path).get_lex()
@@ -229,7 +233,10 @@ class AsmInterpreter:
             else:
                 raise Exception("Invalid token type")
 
-        # print("Instruction {} : {}".format(self.instruction_count, tokens))
+        # Save last instruction for debugging
+        self.last_instruction = "Instruction {} : {}".format(
+            self.instruction_count, tokens
+        )
         self.instruction_count += 1
 
         instruction_func = None
@@ -363,6 +370,7 @@ def extract_text_section(test_file_path):
 
 
 def run():
+    print_passing_dumps = False
     test_file_names = [
         "add_tensors.txt",
         "exp_tensors.txt",
@@ -384,11 +392,13 @@ def run():
         try:
             asm_interpreter.interpret_asm()
             print("!!! Passed interpret asm !!!")
-            asm_interpreter.isa.dump_registers()
-            asm_interpreter.isa.dump_memory()
+            if print_passing_dumps:
+                asm_interpreter.isa.dump_registers()
+                asm_interpreter.isa.dump_memory()
         except Exception as e:
             print("!!! Failed interpret asm !!!")
             print(e)
+            asm_interpreter.print_last_instruction()
 
 
 if __name__ == "__main__":

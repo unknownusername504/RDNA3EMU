@@ -1028,7 +1028,7 @@ class ScalarOps:
             # Call the code block function
             clause_function = clause_code_block[i][0]
             clause_args = clause_code_block[i][1]
-            print(clause_function, clause_args)
+            # print(clause_function, clause_args)
             clause_function(*clause_args)
 
     def s_endpgm(self):
