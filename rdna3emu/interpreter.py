@@ -1,12 +1,4 @@
-from rdna3emu.parser.ir import Instruction
-
-class Clause:
-  def __init__(self, length, simm16):
-    self.executable = []
-    self.length = length 
-    self.simm16 = simm16 
-  def __repr__(self):
-    return f'Clause[len={self.length} instr={self.executable} simm16={self.simm16}]'
+from rdna3emu.parser.ir import Instruction, isa
 
 def build_executable(stmts):
   exec = []
@@ -17,42 +9,27 @@ def build_executable(stmts):
     if isinstance(stmt, list):
       instr = stmt[0]
       operands = stmt[1:]
-      # s_clause instr
-      if instr.clause:
-        simm16 = operands[0][0].value
-        length = (simm16 & 0x3F) + 1
-        clause = Clause(length=length, simm16=simm16)
-        clause_instr = stmts[i+1:i+1+length]
-        for instr_op in clause_instr:
-          if isinstance(instr_op, list):
-            executable = extract_exec(instr_op[0], instr_op[1:])
+      if instr.name.startswith('V_DUAL'):
+        next_operands = []
+        for j, oper in enumerate(operands):
+          if isinstance(oper, Instruction): 
+            exec.append(extract_exec(instr, next_operands))
+            exec.append(extract_exec(oper, operands[j+1:]))
+            break
           else:
-            executable = instr_op.fx
-          clause.executable.append(executable)
-        i += 1 + length
-        exec.append(clause)
+            next_operands.append(oper)
       else:
-        if instr.name.startswith('V_DUAL'):
-          next_operands = []
-          for j, oper in enumerate(operands):
-            if isinstance(oper, Instruction): 
-              exec.append(extract_exec(instr, next_operands))
-              exec.append(extract_exec(oper, operands[j+1:]))
-              break
-            else:
-              next_operands.append(oper)
-        else:
-          r = extract_exec(instr, operands)
-          if r:
-            exec.append(r)
-        i+=1
+        r = extract_exec(instr, operands)
+        if r:
+          exec.append(r)
+      i+=1
     else:
      exec.append(stmt.fx)
      i+=1
   return exec
 
 
-ignore_instr = {'S_DELAY_ALU', 'S_WAITCNT', 'S_SENDMSG'}
+ignore_instr = {'S_DELAY_ALU', 'S_WAITCNT', 'S_SENDMSG', 'S_CLAUSE'}
 
 def extract_exec(instr, operands):
   if instr.name in ignore_instr:
@@ -83,8 +60,7 @@ def extract_exec(instr, operands):
 
 def run(executable):    
   for instr in executable:
-    if isinstance(instr, Clause):
-      for clause_instr, args in instr.executable:
-        clause_instr(*args)
-    else:
+      print(instr[0], instr[1])
       instr[0](*instr[1])
+      isa.dump_memory() 
+      isa.dump_registers()

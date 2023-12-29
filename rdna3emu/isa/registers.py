@@ -293,8 +293,8 @@ class Registers:
             val = np.int32(val) if signed else np.uint32(val)
         elif size == 64:
             val = np.int64(val) if signed else np.uint64(val)
-        else:
-            raise Exception(f"Integer size {size} not supported.")
+        # else:
+        #     raise Exception(f"Integer size {size} not supported.")
         # Cast back to int so that we can use native Python functions
         return int(val)
 
