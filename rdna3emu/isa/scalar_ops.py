@@ -999,7 +999,6 @@ class ScalarOps:
     The clause breaks after every N instructions, N = simm[11:8] (0 - 15; 0 = no breaks)
     We will just pass # raise Exception("OP... not implemented") the max code block to this function and let it handle the rest.
     """
-
     def s_clause(self, simm16, clause_code_block):
         clause_length = (simm16 & 0x3F) + 1
         # Check between 1 and 62
@@ -1028,7 +1027,7 @@ class ScalarOps:
             # Call the code block function
             clause_function = clause_code_block[i][0]
             clause_args = clause_code_block[i][1]
-            # print(clause_function, clause_args)
+            print(clause_function, clause_args)
             clause_function(*clause_args)
 
     def s_endpgm(self):

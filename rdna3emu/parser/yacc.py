@@ -2,7 +2,9 @@ import ply.yacc as yacc
 
 from rdna3emu.parser.lex import tokens
 
-# Parsing rules
+s_clause_length = -1 
+
+# Parsing ruls
 def p_program(p):
     'program : statements'
     p[0] = p[1]
@@ -20,7 +22,14 @@ def p_statement(p):
                  | INSTRUCTION operands
                  | INSTRUCTION operands DBLCOLON INSTRUCTION operands
     '''
+    global s_clause_length
+    if p[1] and p[1].name == 'S_CLAUSE':
+      simm16 = (p[2][0].value & 0xCFF) + 1
+      s_clause_length = simm16 
     if len(p) == 2 or len(p) == 3:
+      if s_clause_length > -1:
+        p[1].clause = True
+        s_clause_length -= 1
       p[0] = [p[1], p[2]] if len(p) == 3 else p[1]
     else:
       p[0] = [p[1], p[2], p[4], p[5]]

@@ -63,5 +63,6 @@ class Instruction:
       else:
          print(f"Unbound function: {instr}")
       self.fx = instruction_func
+      self.clause = False
   def __repr__(self):
-    return f'Instruction[name={self.name} fx={self.fx}]'
+    return f'Instruction[name={self.name} fx={self.fx} clause={self.clause}]'

@@ -55,7 +55,6 @@ t_AT = r"@"
 t_OR = r"\|"
 t_HASH = r"\#"
 
-
 def t_HEX(t):
     r"[-]?0x[0-9a-fA-F]+ | [-]?[0x]?[0-9][0-9a-fA-F]*[hH]"
     t.value = ir.Operand(type="Hex", value=int(t.value, base=16))
