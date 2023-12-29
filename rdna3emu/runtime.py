@@ -1,6 +1,6 @@
 from rdna3emu.isa.instruction_set import InstructionSet
 from rdna3emu.parser.parser import parse
-from rdna3emu.interpreter import interpret
+from rdna3emu.interpreter import build_executable, run
 import argparse
 from pathlib import Path
 import pprint
@@ -29,7 +29,7 @@ def main():
     pp.pprint(instructions)
   
   if args.exec:
-    interpret(instructions)
+    run(build_executable(instructions))
 
 if __name__ == "__main__":
     main()

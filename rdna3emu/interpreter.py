@@ -1,10 +1,66 @@
+from rdna3emu.parser.ir import Instruction, isa
 
-def interpret(stmts):
-  for stmt in stmts:
+def build_executable(stmts):
+  exec = []
+  clause = None 
+  i = 0
+  while i < len(stmts):
+    stmt = stmts[i]
     if isinstance(stmt, list):
       instr = stmt[0]
       operands = stmt[1:]
-      print(instr, operands)
+      if instr.name.startswith('V_DUAL'):
+        next_operands = []
+        for j, oper in enumerate(operands):
+          if isinstance(oper, Instruction): 
+            exec.append(extract_exec(instr, next_operands))
+            exec.append(extract_exec(oper, operands[j+1:]))
+            break
+          else:
+            next_operands.append(oper)
+      else:
+        r = extract_exec(instr, operands)
+        if r:
+          exec.append(r)
+      i+=1
     else:
-      print(stmt)
-     
+     exec.append(stmt.fx)
+     i+=1
+  return exec
+
+
+ignore_instr = {'S_DELAY_ALU', 'S_WAITCNT', 'S_SENDMSG', 'S_CLAUSE'}
+
+def extract_exec(instr, operands):
+  if instr.name in ignore_instr:
+    return
+  args = [] 
+  for operand in operands:
+    # TODO: Deal with null and operand strings
+    if isinstance(operand, str): 
+      continue
+    if isinstance(operand, list):
+      for sub_operand in operand: 
+        if isinstance(sub_operand, tuple):
+          # Offsets
+          args.append(sub_operand[1].value)
+        elif isinstance(sub_operand, str):
+          continue
+        elif sub_operand.registers:
+          for reg in sub_operand.registers: args.append(int(reg[1:]))
+        else:
+          args.append(sub_operand.value)
+    else:
+        if operand.registers:
+          for reg in operand.registers: args.append(int(reg[1:]))
+        else:
+          args.append(operand.value)
+  
+  return (instr.fx, args)
+
+def run(executable):    
+  for instr in executable:
+      print(instr[0], instr[1])
+      instr[0](*instr[1])
+      isa.dump_memory() 
+      isa.dump_registers()
