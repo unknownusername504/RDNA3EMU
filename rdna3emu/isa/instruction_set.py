@@ -310,6 +310,7 @@ class InstructionSet:
                 "S_WAITCNT_VSCNT": self.scalar_ops.s_waitcnt_vscnt,  # 24
             },
             "VOP3": {
+                "V_CMP_CLASS_F32": self.vector_ops.v_cmp_class_f32,  # 126
                 "V_BFE_U32": self.vector_ops.v_bfe_u32,  # 528
                 "V_FMA_F32": self.vector_ops.v_fma_f32,  # 531
                 "V_ALIGNBIT_B32": self.vector_ops.v_alignbit_b32,  # 534

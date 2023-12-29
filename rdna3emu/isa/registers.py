@@ -174,7 +174,7 @@ class Registers:
         self._pc = 0
         self._vgpr = [0] * 256
         self._sgpr = [0] * 106
-        self._exec = [0]  # 64-bit
+        self._exec = 0  # 64-bit
         self._status = StatusRegister()
         self._vcc = 0  # 64-bit
         self._flat_scratch = 0  # 48-bit
@@ -203,10 +203,7 @@ class Registers:
 
     pc = property(lambda self: self._pc, lambda self, val: setattr(self, "_pc", val))
     exec = property(
-        lambda self: self._exec[0] if self._exec else None,
-        lambda self, val: setattr(self, "_exec", [val])
-        if isinstance(val, int)
-        else None,
+        lambda self: self._exec, lambda self, val: setattr(self, "_exec", val)
     )
     status = property(
         lambda self: self._status, lambda self, val: setattr(self, "_status", val)
@@ -521,6 +518,3 @@ class Registers:
 
     vgpr_i24 = pm(_get, attr="_vgpr", signed=True, size=24)
     set_vgpr_i24 = pm(_set, attr="_vgpr", signed=True, size=24)
-
-    # Others
-    set_exec = pm(_set, attr="_exec", signed=False, size=64)

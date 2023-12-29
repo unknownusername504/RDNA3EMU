@@ -237,7 +237,7 @@ class VectorOps:
         reg_vcc_value = self.registers.vcc
         reg_d_value = reg_v0_value + reg_v1_value + reg_vcc_value
         reg_vcc_value = 1 if reg_d_value > 0xFFFFFFFF else 0
-        self.registers.vcc(reg_vcc_value)
+        self.registers.vcc = reg_vcc_value
         self.registers.set_vgpr_u32(reg_d, reg_d_value)
 
     # Subtract the second unsigned input from the first input, subtract a bit from the carry-in mask, store the result into a vector register and store the carry-out mask to a scalar register
@@ -247,7 +247,7 @@ class VectorOps:
         reg_vcc_value = self.registers.vcc
         reg_d_value = reg_v0_value - reg_v1_value - reg_vcc_value
         reg_vcc_value = 1 if reg_d_value < 0 else 0
-        self.registers.vcc(reg_vcc_value)
+        self.registers.vcc = reg_vcc_value
         self.registers.set_vgpr_u32(reg_d, reg_d_value)
 
     # Subtract the first unsigned input from the second input, subtract a bit from the carry-in mask, store the result into a vector register and store the carry-out mask to a scalar register.
@@ -819,6 +819,45 @@ class VectorOps:
         pass  # raise Exception("OP... not implemented")
 
     # VOP3 instructions
+    # IEEE numeric class function specified in S1.u, performed on S0.f.
+    # The function reports true if the floating point value is any of the numeric types selected in S1.u according to the
+    # following list:
+    # S1.u[0] -- value is a signaling NAN.
+    # S1.u[1] -- value is a quiet NAN.
+    # S1.u[2] -- value is negative infinity.
+    # S1.u[3] -- value is a negative normal value.
+    # S1.u[4] -- value is a negative denormal value.
+    # S1.u[5] -- value is negative zero.
+    # S1.u[6] -- value is positive zero.
+    # S1.u[7] -- value is a positive denormal value.
+    # S1.u[8] -- value is a positive normal value.
+    # S1.u[9] -- value is positive infinity.
+    def v_cmp_class_f32(self, reg_d, reg_s0, reg_s1):
+        s0_value = self.registers.vgpr_f32(reg_s0)
+        s1_value = self.registers.vgpr_u32(reg_s1)
+        d_value = 0
+        if np.isnan(s0_value):
+            if s1_value & 0x2:
+                d_value = 1
+        elif np.isinf(s0_value):
+            if s1_value & 0x200:
+                d_value = 1
+        elif s0_value == 0:
+            if s1_value & 0x40:
+                d_value = 1
+        elif s0_value == -0:
+            if s1_value & 0x20:
+                d_value = 1
+        elif s0_value < 0:
+            if s1_value & 0x10:
+                d_value = 1
+        else:
+            if s1_value & 0x8:
+                d_value = 1
+        # Set vcc
+        self.registers.vcc = d_value
+        self.registers.set_vgpr_u32(reg_d, d_value)
+
     # Bitfield extract. Extract unsigned bitfield from first operand using field offset in second operand and field size in third operand.
     # D0.u = ((S0.u >> S1.u[4 : 0].u) & 32'U((1 << S2.u[4 : 0].u) - 1))
     def v_bfe_u32(self, reg_d, arg_0, arg_1, arg_2):
@@ -950,7 +989,7 @@ class VectorOps:
             arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_u32)
             arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_u32)
 
-        self.registers.set_exec(0, arg_0_value < arg_1_value)
+        self.registers.exec = arg_0_value < arg_1_value
         if arg_2 is not None:
             self.registers.set_vgpr_u32(reg_d, arg_0_value < arg_1_value)
 
@@ -968,7 +1007,7 @@ class VectorOps:
             arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_u32)
             arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_u32)
 
-        self.registers.set_exec(0, arg_0_value == arg_1_value)
+        self.registers.exec = arg_0_value == arg_1_value
         if arg_2 is not None:
             self.registers.set_vgpr_u32(reg_d, arg_0_value == arg_1_value)
 
@@ -997,7 +1036,7 @@ class VectorOps:
         arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_f32)
         arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_f32)
 
-        self.registers.set_exec(0, arg_0_value <= arg_1_value)
+        self.registers.exec = arg_0_value <= arg_1_value
 
     # Return 1 iff A equal to B.
     # Write only EXEC. SDST must be set to EXEC_LO. Signal 'invalid' on sNAN's, and also on qNAN's if clamp is set.
@@ -1005,7 +1044,7 @@ class VectorOps:
         arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_u32)
         arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_u32)
 
-        self.registers.set_exec(0, arg_0_value == arg_1_value)
+        self.registers.exec = arg_0_value == arg_1_value
 
     #
     def v_cmpx_gt_u32(self):
