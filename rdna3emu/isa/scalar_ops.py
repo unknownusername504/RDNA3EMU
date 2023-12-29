@@ -965,8 +965,10 @@ class ScalarOps:
     def s_delay_alu(self):
         pass  # raise Exception("OP... not implemented")
 
-    def s_waitcnt(self):
-        pass  # raise Exception("OP... not implemented")
+    # Do nothing funtion that should ignore any input and do nothing
+    def s_waitcnt(self, simm16=0):
+        simm16 = simm16 & 0xFFFF
+        pass
 
     def s_trap(self):
         pass  # raise Exception("OP... not implemented")
@@ -1096,5 +1098,12 @@ class ScalarOps:
         self.registers.set_sgpr_u128(reg_d, reg_d_value)
 
     # SOPK instructions
-    def s_waitcnt_vscnt(self):
-        pass  # raise Exception("OP... not implemented")
+    # Do nothing funtion that should ignore any input and do nothing
+    def s_waitcnt_any(self, simm16=0):
+        simm16 = simm16 & 0xFFFF
+        pass
+
+    # Sign extend a literal 16-bit constant and store the result into a scalar register.
+    def s_movk_i32(self, reg_d, simm16):
+        simm32 = utils.sext_i32(simm16, 16)
+        self.registers.set_sgpr_i32(reg_d, simm32)

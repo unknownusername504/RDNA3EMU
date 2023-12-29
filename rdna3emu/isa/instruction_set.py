@@ -20,7 +20,7 @@ class InstructionSet:
         self.scalar_ops = ScalarOps(self.registers, self.memory)
         self.instruction_type_map = {
             "SCALAR": ["SOP2", "SOP1", "SOPP", "SOPC", "SOPK", "SMEM", "PRG_CTRL"],
-            "VECTOR": ["VOP2", "VOP1", "VOPC", "VOP3", "VOP3SD", "VOPD"],
+            "VECTOR": ["VOP2", "VOP1", "VOPC", "VOP3", "VOP3P", "VOP3SD", "VOPD"],
             "MEMORY": ["FLAT", "GLOBAL", "SCRATCH", "LDS"],
         }
         self.instructions = {
@@ -287,6 +287,7 @@ class InstructionSet:
                 "S_SLEEP": self.scalar_ops.s_sleep,  # 3
                 "S_DELAY_ALU": self.scalar_ops.s_delay_alu,  # 7
                 "S_WAITCNT": self.scalar_ops.s_waitcnt,  # 9
+                "S_WAITCNT_DEPCTR": self.scalar_ops.s_waitcnt,
                 "S_TRAP": self.scalar_ops.s_trap,  # 16
                 "S_BRANCH": self.scalar_ops.s_branch,  # 32
                 "S_CBRANCH_SCC1": self.scalar_ops.s_cbranch_scc1,  # 34
@@ -307,15 +308,19 @@ class InstructionSet:
                 "S_LOAD_B128": self.scalar_ops.s_load_b128,  # 2
             },
             "SOPK": {
-                "S_WAITCNT_VSCNT": self.scalar_ops.s_waitcnt_vscnt,  # 24
+                "S_WAITCNT_VSCNT": self.scalar_ops.s_waitcnt_any,  # 24
+                "S_MOVK_I32": self.scalar_ops.s_movk_i32,  # 32
             },
             "VOP3": {
                 "V_CMP_CLASS_F32": self.vector_ops.v_cmp_class_f32,  # 126
                 "V_BFE_U32": self.vector_ops.v_bfe_u32,  # 528
                 "V_FMA_F32": self.vector_ops.v_fma_f32,  # 531
                 "V_ALIGNBIT_B32": self.vector_ops.v_alignbit_b32,  # 534
+                "V_XOR3_B32": self.vector_ops.v_xor3_b32,  # 535
                 "V_LSHL_ADD_U32": self.vector_ops.v_lshl_add_u32,  # 582
                 "V_ADD_LSHL_U32": self.vector_ops.v_add_lshl_u32,  # 583
+                "V_FMA_F16": self.vector_ops.v_fma_f16,  # 584
+                "V_DIV_FIXUP_F16": self.vector_ops.v_div_fixup_f16,  # 585
                 "V_AND_OR_B32": self.vector_ops.v_and_or_b32,  # 599
                 "V_OR3_B32": self.vector_ops.v_or3_b32,  # 600
                 "V_MBCNT_LO_U32_B32": self.vector_ops.v_mbcnt_lo_u32_b32,  # 799
@@ -325,12 +330,18 @@ class InstructionSet:
                 "V_LSHLREV_B64": self.vector_ops.v_lshlrev_b64,  # 828
                 "V_WRITELANE_B32": self.vector_ops.v_writelane_b32,  # 865
             },
+            "VOP3P": {
+                "V_FMA_MIXLO_F16": self.vector_ops.v_fma_mixlo_f16,  # 33
+            },
             "VOP3SD": {
                 "V_MAD_U64_U32": self.vector_ops.v_mad_u64_u32,  # 766
                 "V_ADD_CO_U32": self.vector_ops.v_add_co_u32,  # 768
                 "V_SUB_CO_U32": self.vector_ops.v_sub_co_u32,  # 769
             },
             "VOPC": {
+                "V_CMP_LT_F32": self.vector_ops.v_cmp_lt_f32,  # 17
+                "V_CMP_GT_F32": self.vector_ops.v_cmp_gt_f32,  # 20
+                "V_CMP_GE_F32": self.vector_ops.v_cmp_ge_f32,  # 22
                 "V_CMP_LT_U32": self.vector_ops.v_cmp_lt_u32,  # 73
                 "V_CMP_EQ_U32": self.vector_ops.v_cmp_eq_u32,  # 74
                 "V_CMP_NE_U32": self.vector_ops.v_cmp_ne_u32,  # 75
@@ -339,6 +350,7 @@ class InstructionSet:
                 "V_CMP_GT_U64": self.vector_ops.v_cmp_gt_u64,  # 92
                 "V_CMP_NE_U64": self.vector_ops.v_cmp_ne_u64,  # 93
                 "V_CMPX_NGT_F32": self.vector_ops.v_cmpx_ngt_f32,  # 96
+                "V_CMP_CLASS_F16": self.vector_ops.v_cmp_class_f16,  # 125
                 "V_CMPX_EQ_U32": self.vector_ops.v_cmpx_eq_u32,  # 202
                 "V_CMPX_GT_U32": self.vector_ops.v_cmpx_gt_u32,  # 204
                 "V_CMPX_NE_U32": self.vector_ops.v_cmpx_ne_u32,  # 205

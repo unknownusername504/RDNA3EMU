@@ -1,3 +1,4 @@
+import math
 import rdna3emu.isa.utils as utils
 from rdna3emu.isa.registers import Registers as Re
 from rdna3emu.isa.memory import Memory as Me
@@ -605,12 +606,35 @@ class VectorOps:
         pass  # raise Exception("OP... not implemented")
 
     # Calculate the base 2 logarithm of the single-precision float input and store the result into a vector register.
-    def v_log_f32(self):
-        pass  # raise Exception("OP... not implemented")
+    def v_log_f32(self, reg_d, arg_0):
+        arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_f32)
+        neg_zero = 0x80000000
+        pos_zero = 0x00000000
+        neg_inf = 0xFF800000
+        pos_inf = 0x7F800000
+        nan = 0xFFC00000
+        if (arg_0_value == neg_zero) or (arg_0_value == pos_zero):
+            # log(-0.0) = -INF
+            # log(+0.0) = -INF
+            reg_d_value = neg_inf
+        elif (arg_0_value == neg_inf) or (arg_0_value < 0) or (arg_0_value == nan):
+            # log(-INF) = NAN
+            # log(-1) = NAN
+            # log(NAN) = NAN
+            reg_d_value = nan
+        elif arg_0_value == pos_inf:
+            # log(+INF) = +INF
+            reg_d_value = pos_inf
+        else:
+            reg_d_value = math.log2(arg_0_value)
+
+        self.registers.set_vgpr_f32(reg_d, reg_d_value)
 
     # Calculate the reciprocal of the single-precision float input using IEEE rules and store the result into a vector register.
-    def v_rcp_f32(self):
-        pass  # raise Exception("OP... not implemented")
+    def v_rcp_f32(self, reg_d, arg_0):
+        arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_f32)
+        d_value = 1 / arg_0_value
+        self.registers.set_vgpr_f32(reg_d, d_value)
 
     # Calculate the reciprocal of the vector float input in a manner suitable for integer division and store the result into a vector register. This opcode is intended for use as part of an integer division macro.
     def v_rcp_iflag_f32(self):
@@ -628,9 +652,11 @@ class VectorOps:
     def v_rsq_f64(self):
         pass  # raise Exception("OP... not implemented")
 
-    #
-    def v_sqrt_f32(self):
-        pass  # raise Exception("OP... not implemented")
+    # Calculate the square root of the single-precision float input using IEEE rules and store the result into a vector register.
+    def v_sqrt_f32(self, reg_d, arg_0):
+        arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_f32)
+        d_value = math.sqrt(arg_0_value)
+        self.registers.set_vgpr_f32(reg_d, d_value)
 
     #
     def v_sqrt_f64(self):
@@ -726,21 +752,46 @@ class VectorOps:
     def v_rcp_f16(self):
         pass  # raise Exception("OP... not implemented")
 
-    #
-    def v_sqrt_f16(self):
-        pass  # raise Exception("OP... not implemented")
+    # Calculate the square root of the half-precision float input using IEEE rules and store the result into a vector register.
+    def v_sqrt_f16(self, reg_d, arg_0):
+        arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_f16)
+        d_value = math.sqrt(arg_0_value)
+        self.registers.set_vgpr_f16(reg_d, d_value)
 
     #
     def v_rsq_f16(self):
         pass  # raise Exception("OP... not implemented")
 
-    #
-    def v_log_f16(self):
-        pass  # raise Exception("OP... not implemented")
+    # Calculate the base 2 logarithm of the half-precision float input and store the result into a vector register
+    def v_log_f16(self, reg_d, arg_0):
+        arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_f16)
+        neg_zero = 0x8000
+        pos_zero = 0x0000
+        neg_inf = 0xFC00
+        pos_inf = 0x7C00
+        nan = 0xFE00
+        if (arg_0_value == neg_zero) or (arg_0_value == pos_zero):
+            # log(-0.0) = -INF
+            # log(+0.0) = -INF
+            reg_d_value = neg_inf
+        elif (arg_0_value == neg_inf) or (arg_0_value < 0) or (arg_0_value == nan):
+            # log(-INF) = NAN
+            # log(-1) = NAN
+            # log(NAN) = NAN
+            reg_d_value = nan
+        elif arg_0_value == pos_inf:
+            # log(+INF) = +INF
+            reg_d_value = pos_inf
+        else:
+            reg_d_value = math.log2(arg_0_value)
 
-    #
-    def v_exp_f16(self):
-        pass  # raise Exception("OP... not implemented")
+        self.registers.set_vgpr_f16(reg_d, reg_d_value)
+
+    # Calculate 2 raised to the power of the half-precision float input and store the result into a vector register.
+    def v_exp_f16(self, reg_d, arg_0):
+        arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_f16)
+        d_value = 2**arg_0_value
+        self.registers.set_vgpr_f16(reg_d, d_value)
 
     #
     def v_frexp_mant_f16(self):
@@ -832,31 +883,36 @@ class VectorOps:
     # S1.u[7] -- value is a positive denormal value.
     # S1.u[8] -- value is a positive normal value.
     # S1.u[9] -- value is positive infinity.
-    def v_cmp_class_f32(self, reg_d, reg_s0, reg_s1):
-        s0_value = self.registers.vgpr_f32(reg_s0)
-        s1_value = self.registers.vgpr_u32(reg_s1)
+    def v_cmp_class_f32(self, reg_d, arg_0, arg_1=None):
+        if arg_1 is None:
+            arg_1 = arg_0
+            arg_0 = reg_d
+            reg_d = None
+        arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_f32)
+        arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_u32)
         d_value = 0
-        if np.isnan(s0_value):
-            if s1_value & 0x2:
+        if np.isnan(arg_0_value):
+            if arg_1_value & 0x2:
                 d_value = 1
-        elif np.isinf(s0_value):
-            if s1_value & 0x200:
+        elif np.isinf(arg_0_value):
+            if arg_1_value & 0x200:
                 d_value = 1
-        elif s0_value == 0:
-            if s1_value & 0x40:
+        elif arg_0_value == 0:
+            if arg_1_value & 0x40:
                 d_value = 1
-        elif s0_value == -0:
-            if s1_value & 0x20:
+        elif arg_0_value == -0:
+            if arg_1_value & 0x20:
                 d_value = 1
-        elif s0_value < 0:
-            if s1_value & 0x10:
+        elif arg_0_value < 0:
+            if arg_1_value & 0x10:
                 d_value = 1
         else:
-            if s1_value & 0x8:
+            if arg_1_value & 0x8:
                 d_value = 1
         # Set vcc
         self.registers.vcc = d_value
-        self.registers.set_vgpr_u32(reg_d, d_value)
+        if reg_d is not None:
+            self.registers.set_vgpr_u32(reg_d, d_value)
 
     # Bitfield extract. Extract unsigned bitfield from first operand using field offset in second operand and field size in third operand.
     # D0.u = ((S0.u >> S1.u[4 : 0].u) & 32'U((1 << S2.u[4 : 0].u) - 1))
@@ -908,6 +964,14 @@ class VectorOps:
         reg_d_value = ((arg_0_value << 32) | arg_1_value) >> arg_2_value
         self.registers.set_vgpr_u32(reg_d, reg_d_value)
 
+    # Calculate the bitwise XOR of three vector inputs and store the result into a vector register.
+    def v_xor3_b32(self, reg_d, arg_0, arg_1, arg_2):
+        arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_u32)
+        arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_u32)
+        arg_2_value = self.try_get_literal(arg_2, self.registers.vgpr_u32)
+        reg_d_value = arg_0_value ^ arg_1_value ^ arg_2_value
+        self.registers.set_vgpr_u32(reg_d, reg_d_value)
+
     # Given a shift count in the second input, calculate the logical shift left of the first input, then add the third input to the intermediate result, then store the final result into a vector register.
     # D0.u = (S0.u << S1.u[4 : 0].u) + S2.u
     def v_lshl_add_u32(self, reg_d, arg_0, arg_1, arg_2):
@@ -928,6 +992,96 @@ class VectorOps:
         reg_d_value = (arg_0_value + arg_1_value) << arg_2_value
         self.registers.set_vgpr_u32(reg_d, reg_d_value)
 
+    # Fused half precision multiply add.
+    def v_fma_f16(self, reg_d, reg_v0, arg_0, arg_1):
+        # Unpack the input register
+        reg_v0_value_lo, reg_v0_value_hi = self.unpack_f32(reg_v0)
+
+        # Unpack the literal or register.
+        imm_0_value_lo, imm_0_value_hi = self.unpack_f32(arg_0)
+        imm_1_value_lo, imm_1_value_hi = self.unpack_f32(arg_1)
+
+        # Perform the fused multiply add.
+        reg_d_value_lo = reg_v0_value_lo * imm_0_value_lo + imm_1_value_lo
+        reg_d_value_hi = reg_v0_value_hi * imm_0_value_hi + imm_1_value_hi
+
+        # Pack the result.
+        reg_d_value = self.pack_f32(reg_d_value_lo, reg_d_value_hi)
+        self.registers.set_vgpr_f16(reg_d, reg_d_value)
+
+    # Half precision division fixup.
+    # S0 = Quotient, S1 = Denominator, S2 = Numerator.
+    # Given a numerator, denominator, and quotient from a divide, this opcode detects and applies specific case
+    # numerics, touching up the quotient if necessary. This opcode also generates invalid, denorm and divide by
+    # zero exceptions caused by the division.
+    # sign_out = (sign(S1.f16) ^ sign(S2.f16));
+    # if isNAN(64'F(S2.f16)) then
+    #     D0.f16 = 16'F(cvtToQuietNAN(64'F(S2.f16)))
+    # elsif isNAN(64'F(S1.f16)) then
+    #     D0.f16 = 16'F(cvtToQuietNAN(64'F(S1.f16)))
+    # elsif ((64'F(S1.f16) == 0.0) && (64'F(S2.f16) == 0.0)) then
+    #     // 0/0
+    #     D0.f16 = 16'F(0xfe00)
+    # elsif ((64'F(abs(S1.f16)) == +INF) && (64'F(abs(S2.f16)) == +INF)) then
+    #     // inf/inf
+    #     D0.f16 = 16'F(0xfe00)
+    # elsif ((64'F(S1.f16) == 0.0) || (64'F(abs(S2.f16)) == +INF)) then
+    #     // x/0, or inf/y
+    #     D0.f16 = sign_out ? -INF.f16 : +INF.f16
+    # elsif ((64'F(abs(S1.f16)) == +INF) || (64'F(S2.f16) == 0.0)) then
+    #     // x/inf, 0/y
+    #     D0.f16 = sign_out ? -16'0.0 : 16'0.0
+    # else
+    #     D0.f16 = sign_out ? -abs(S0.f16) : abs(S0.f16)
+    # endif
+    def v_div_fixup_f16(self, reg_d, arg_0, arg_1, arg_2):
+        arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_f16)
+        arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_f16)
+        arg_2_value = self.try_get_literal(arg_2, self.registers.vgpr_f16)
+
+        nan = 0xFE00
+        neg_inf = 0xFC00
+        pos_inf = 0x7C00
+        neg_zero = 0x8000
+        pos_zero = 0x0000
+
+        sign_out = (arg_1_value < 0) ^ (arg_2_value < 0)
+
+        if arg_1_value == nan:
+            # Nan / anything = Nan
+            reg_d_value = np.float16(nan)
+        elif arg_2_value == nan:
+            # Anything / Nan = Nan
+            reg_d_value = np.float16(nan)
+        elif (arg_1_value == 0) and (arg_2_value == 0):
+            # 0 / 0 = Nan
+            reg_d_value = np.float16(nan)
+        elif ((arg_1_value == pos_inf) or (arg_1_value == neg_inf)) and (
+            (arg_2_value == pos_inf) or (arg_2_value == neg_inf)
+        ):
+            # (+/-)Inf / (+/-)Inf = Nan
+            reg_d_value = np.float16(nan)
+        elif (arg_1_value == 0) or (
+            (arg_2_value == pos_inf) or (arg_2_value == neg_inf)
+        ):
+            # x / 0 = Inf
+            # (+/-)Inf / y = Inf
+            reg_d_value = np.float16(neg_inf) if sign_out else np.float16(pos_inf)
+        elif ((arg_1_value == pos_inf) or (arg_1_value == neg_inf)) or (
+            arg_2_value == 0
+        ):
+            # x / (+/-)Inf = 0
+            # 0 / y = 0
+            reg_d_value = np.float16(neg_zero) if sign_out else np.float16(pos_zero)
+        else:
+            reg_d_value = (
+                np.float16(-abs(arg_0_value))
+                if sign_out
+                else np.float16(abs(arg_0_value))
+            )
+
+        self.registers.set_vgpr_f16(reg_d, reg_d_value)
+
     # Calculate bitwise AND on the first two vector inputs, then compute the bitwise OR of the intermediate result and the third vector input, then store the result into a vector register.
     # ISA does not imply this format of the arguments, but it is the only one used.
     def v_and_or_b32(self, reg_d, reg_v0, reg_s0, arg_0):
@@ -936,9 +1090,13 @@ class VectorOps:
         reg_d_value = (reg_v0_value & reg_s0_value) | arg_0
         self.registers.set_vgpr_u32(reg_d, reg_d_value)
 
-    #
-    def v_or3_b32(self):
-        pass  # raise Exception("OP... not implemented")
+    # Calculate the bitwise OR of three vector inputs and store the result into a vector register.
+    def v_or3_b32(self, reg_d, arg_0, arg_1, arg_2):
+        arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_u32)
+        arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_u32)
+        arg_2_value = self.try_get_literal(arg_2, self.registers.vgpr_u32)
+        reg_d_value = arg_0_value | arg_1_value | arg_2_value
+        self.registers.set_vgpr_u32(reg_d, reg_d_value)
 
     #
     def v_mbcnt_lo_u32_b32(self):
@@ -952,9 +1110,13 @@ class VectorOps:
     def v_mul_hi_u32(self):
         pass  # raise Exception("OP... not implemented")
 
-    #
-    def v_lshlrev_b16(self):
-        pass  # raise Exception("OP... not implemented")
+    # Given a shift count in the first vector input, calculate the logical shift left of the second vector input and store the result into a vector register
+    def v_lshlrev_b16(self, reg_d, arg_0, arg_1):
+        arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_u16) & 0xF
+        arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_u16)
+
+        reg_d_value = arg_1_value << arg_0_value
+        self.registers.set_vgpr_u16(reg_d, reg_d_value)
 
     #
     def v_lshlrev_b64(self):
@@ -964,18 +1126,119 @@ class VectorOps:
     def v_writelane_b32(self):
         pass  # raise Exception("OP... not implemented")
 
+    # VOP3P instructions
+    # Fused-multiply-add of FP16 values with MIX encoding, result stored in low 16 bits of destination.
+    # Size and location of S0, S1 and S2 controlled by OPSEL: 0=src[31:0], 1=src[31:0], 2=src[15:0], 3=src[31:16]. Also,
+    # for FMA_MIX, the NEG_HI field acts instead as an absolute-value modifier.
+    # declare in : 32'F[3];
+    # declare S : 32'B[3];
+    # for i in 0 : 2 do
+    #   if !OPSEL_HI.u3[i] then
+    #       in[i] = S[i].f
+    #   elsif OPSEL.u3[i] then
+    #       in[i] = f16_to_f32(S[i][31 : 16].f16)
+    #   else
+    #       in[i] = f16_to_f32(S[i][15 : 0].f16)
+    #   endif
+    # endfor;
+    # D0[15 : 0].f16 = f32_to_f16(fma(in[0], in[1], in[2]))
+    def v_fma_mixlo_f16(self, reg_d, arg_0, arg_1, arg_2, opsel=0):
+        inputs = [arg_0, arg_1, arg_2]
+        opsel_lo = opsel & 0x1
+        opsel_hi = (opsel >> 1) & 0x1
+        for i in range(3):
+            # Unpack the literal or register.
+            imm_value_lo, imm_value_hi = self.unpack_f32(inputs[i])
+            if not opsel_hi:
+                inputs[i] = imm_value_hi
+            elif opsel_lo:
+                inputs[i] = imm_value_lo
+            else:
+                inputs[i] = self.pack_f32(imm_value_lo, imm_value_hi)
+
+        # Unpack the destination register.
+        reg_d_value_lo, reg_d_value_hi = self.unpack_f32(reg_d)
+
+        # Perform the fused multiply add.
+        reg_d_value_lo = inputs[0] * inputs[1] + inputs[2]
+        reg_d_value_hi = reg_d_value_hi
+
+        reg_d_value = self.pack_f32(reg_d_value_lo, reg_d_value_hi)
+        self.registers.set_vgpr_f32(reg_d, reg_d_value)
+
     # VOP3SD instructions
     #
     def v_mad_u64_u32(self):
         pass  # raise Exception("OP... not implemented")
 
-    #
-    def v_add_co_u32(self):
-        pass  # raise Exception("OP... not implemented")
+    # Add two unsigned inputs, store the result into a vector register and store the carry-out mask into a scalar register.
+    # Example: v_add_co_u32 v0, vcc_lo, s4, v0
+    # In the example vcc_lo will fail to parse and is interpreted as only storing the carry-out mask into vcc.
+    def v_add_co_u32(self, reg_d, arg_0, arg_1, arg_2=None):
+        if arg_2 is None:
+            arg_2 = arg_1
+            arg_1 = arg_0
+            arg_0 = None
+        arg_1_value = self.try_get_literal(arg_1, self.registers.sgpr_u32)
+        arg_2_value = self.try_get_literal(arg_2, self.registers.vgpr_u32)
+        d_value = arg_1_value + arg_2_value
+        self.registers.vcc = d_value > 0xFFFFFFFF
+        if arg_0 is not None:
+            self.registers.set_vgpr_u32(arg_0, d_value)
+        self.registers.set_vgpr_u32(reg_d, d_value)
 
     #
     def v_sub_co_u32(self):
         pass  # raise Exception("OP... not implemented")
+
+    # Return 1 iff A less than B.
+    def v_cmp_lt_f32(self, arg_0, arg_1, arg_2=None):
+        # If there are three arguments, the result is supposed to be written to the first argument.
+        if arg_2 is not None:
+            reg_d = arg_0
+            arg_0_value = self.try_get_literal(arg_1, self.registers.vgpr_f32)
+            arg_1_value = self.try_get_literal(arg_2, self.registers.vgpr_f32)
+        else:
+            # If there are two arguments, the result is supposed to be written to EXEC.
+            arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_f32)
+            arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_f32)
+
+        self.registers.exec = arg_0_value < arg_1_value
+        if arg_2 is not None:
+            self.registers.set_vgpr_u32(reg_d, arg_0_value < arg_1_value)
+
+    # Return 1 iff A greater than B.
+    # D0 = VCC in VOPC encoding.
+    def v_cmp_gt_f32(self, arg_0, arg_1, arg_2=None):
+        # If there are three arguments, the result is supposed to be written to the first argument.
+        if arg_2 is not None:
+            reg_d = arg_0
+            arg_0_value = self.try_get_literal(arg_1, self.registers.vgpr_f32)
+            arg_1_value = self.try_get_literal(arg_2, self.registers.vgpr_f32)
+        else:
+            # If there are two arguments, the result is supposed to be written to EXEC.
+            arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_f32)
+            arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_f32)
+
+        self.registers.exec = arg_0_value > arg_1_value
+        if arg_2 is not None:
+            self.registers.set_vgpr_u32(reg_d, arg_0_value > arg_1_value)
+
+    # Return 1 iff A greater than or equal to B.
+    def v_cmp_ge_f32(self, arg_0, arg_1, arg_2=None):
+        # If there are three arguments, the result is supposed to be written to the first argument.
+        if arg_2 is not None:
+            reg_d = arg_0
+            arg_0_value = self.try_get_literal(arg_1, self.registers.vgpr_f32)
+            arg_1_value = self.try_get_literal(arg_2, self.registers.vgpr_f32)
+        else:
+            # If there are two arguments, the result is supposed to be written to EXEC.
+            arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_f32)
+            arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_f32)
+
+        self.registers.exec = arg_0_value >= arg_1_value
+        if arg_2 is not None:
+            self.registers.set_vgpr_u32(reg_d, arg_0_value >= arg_1_value)
 
     # Return 1 iff A less than B.
     def v_cmp_lt_u32(self, arg_0, arg_1, arg_2=None):
@@ -1037,6 +1300,50 @@ class VectorOps:
         arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_f32)
 
         self.registers.exec = arg_0_value <= arg_1_value
+
+    # IEEE numeric class function specified in S1.u, performed on S0.f16.
+    # The function reports true if the floating point value is any of the numeric types selected in S1.u according to the
+    # following list:
+    # S1.u[0] -- value is a signaling NAN.
+    # S1.u[1] -- value is a quiet NAN.
+    # S1.u[2] -- value is negative infinity.
+    # S1.u[3] -- value is a negative normal value.
+    # S1.u[4] -- value is a negative denormal value.
+    # S1.u[5] -- value is negative zero.
+    # S1.u[6] -- value is positive zero.
+    # S1.u[7] -- value is a positive denormal value.
+    # S1.u[8] -- value is a positive normal value.
+    # S1.u[9] -- value is positive infinity.
+    def v_cmp_class_f16(self, reg_d, arg_0, arg_1=None):
+        if arg_1 is None:
+            arg_1 = arg_0
+            arg_0 = reg_d
+            reg_d = None
+        arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_f16)
+        arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_u32)
+        d_value = 0
+        if np.isnan(arg_0_value):
+            if arg_1_value & 0x2:
+                d_value = 1
+        elif np.isinf(arg_0_value):
+            if arg_1_value & 0x200:
+                d_value = 1
+        elif arg_0_value == 0:
+            if arg_1_value & 0x40:
+                d_value = 1
+        elif arg_0_value == -0:
+            if arg_1_value & 0x20:
+                d_value = 1
+        elif arg_0_value < 0:
+            if arg_1_value & 0x10:
+                d_value = 1
+        else:
+            if arg_1_value & 0x8:
+                d_value = 1
+        # Set vcc
+        self.registers.vcc = d_value
+        if reg_d is not None:
+            self.registers.set_vgpr_u32(reg_d, d_value)
 
     # Return 1 iff A equal to B.
     # Write only EXEC. SDST must be set to EXEC_LO. Signal 'invalid' on sNAN's, and also on qNAN's if clamp is set.

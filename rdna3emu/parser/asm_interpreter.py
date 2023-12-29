@@ -371,6 +371,7 @@ def extract_text_section(test_file_path):
 
 def run():
     print_passing_dumps = False
+    any_failed = False
     test_file_names = [
         "add_tensors.txt",
         "exp_tensors.txt",
@@ -399,6 +400,9 @@ def run():
             print("!!! Failed interpret asm !!!")
             print(e)
             asm_interpreter.print_last_instruction()
+            any_failed = True
+    if not any_failed:
+        print("!!! All tests passed !!!")
 
 
 if __name__ == "__main__":
