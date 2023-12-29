@@ -8,6 +8,15 @@ class ScalarOps:
         self.registers = registers
         self.memory = memory
 
+    def try_get_literal(self, arg, get_reg_func):
+        # Argument could be a register or a literal
+        if isinstance(arg, int) or isinstance(arg, float):
+            # Literal
+            return arg
+        else:
+            # Register, let the caller handle the type
+            return get_reg_func(arg)
+
     # PRG_CTRL instructions
     def s_code_end(self):
         pass  # raise Exception("OP... not implemented")
@@ -498,23 +507,23 @@ class ScalarOps:
         reg_d_value = (reg_s1_value << 16) | (reg_s0_value >> 16)
         self.registers.set_sgpr_u32(reg_d, reg_d_value)
 
-    def s_move_b32(self, reg_d, reg_s0):
-        reg_s0_val = self.registers.sgpr_u32(reg_s0)
-        self.registers.set_sgpr_u32(reg_d, reg_s0_val)
+    def s_mov_b32(self, reg_d, arg_0):
+        arg_0_val = self.try_get_literal(arg_0, self.registers.sgpr_u32)
+        self.registers.set_sgpr_u32(reg_d, arg_0_val)
 
-    # Move scalar input into a scalar register. (64-bit)
-    def s_move_b64(self, reg_d, reg_s0):
+    # mov scalar input into a scalar register. (64-bit)
+    def s_mov_b64(self, reg_d, reg_s0):
         reg_s0_val = self.registers.sgpr_u64(reg_s0)
         self.registers.set_sgpr_u64(reg_d, reg_s0_val)
 
-    # Move scalar input into a scalar register iff SCC is nonzero.
-    def c_move_b32(self, reg_d, reg_s0):
+    # mov scalar input into a scalar register iff SCC is nonzero.
+    def c_mov_b32(self, reg_d, reg_s0):
         if self.registers._status.scc() == 1:
-            self.s_move_b32(reg_d, reg_s0)
+            self.s_mov_b32(reg_d, reg_s0)
 
-    def c_move_b64(self, reg_d, reg_s0):
+    def c_mov_b64(self, reg_d, reg_s0):
         if self.registers._status.scc() == 1:
-            self.s_move_b64(reg_d, reg_s0)
+            self.s_mov_b64(reg_d, reg_s0)
 
     # Reverse the order of bits in a scalar input and store the result into a scalar register.
     def s_brev_b32(self, reg_d, reg_s0):
@@ -892,7 +901,7 @@ class ScalarOps:
         value = self.registers.sgpr_u32(addr % len(self.registers._sgpr))
         self.registers.set_sgpr_u32(reg_d, value)
 
-    def s_movereld_b32(self, reg_d, reg_s0):
+    def s_movreld_b32(self, reg_d, reg_s0):
         addr = self.registers.sgpr_u32(reg_s0)
         addr += self.registers.m0 & 0xFFFFFFFF
         value = self.registers.sgpr_u32(addr % len(self.registers._sgpr))
@@ -904,7 +913,7 @@ class ScalarOps:
         value = self.registers.sgpr_u64(addr % len(self.registers._sgpr))
         self.registers.set_sgpr_u64(reg_d, value)
 
-    def s_moverelsd_2_b32(self, reg_d, reg_s0):
+    def s_movrelsd_2_b32(self, reg_d, reg_s0):
         addr = self.registers.sgpr_u32(reg_s0)
         addr += self.registers.m0 & 0xFFFFFFFF
         value1 = self.registers.sgpr_u32(addr % len(self.registers._sgpr))

@@ -82,10 +82,10 @@ class InstructionSet:
                 "S_PACK_HL_B32_B16": self.scalar_ops.s_pack_hl_b32_b16,  # 53
             },
             "SOP1": {
-                "S_MOV_B32": self.scalar_ops.s_move_b32,
-                "S_MOV_B64": self.scalar_ops.s_move_b64,
-                "C_MOV_B32": self.scalar_ops.c_move_b32,
-                "C_MOV_B64": self.scalar_ops.c_move_b64,
+                "S_MOV_B32": self.scalar_ops.s_mov_b32,
+                "S_MOV_B64": self.scalar_ops.s_mov_b64,
+                "C_MOV_B32": self.scalar_ops.c_mov_b32,
+                "C_MOV_B64": self.scalar_ops.c_mov_b64,
                 "S_BREV_B32": self.scalar_ops.s_brev_b32,
                 "S_BREV_B64": self.scalar_ops.s_brev_b64,
                 "S_CTZ_I32_B32": self.scalar_ops.s_ctz_i32_b32,
@@ -136,9 +136,9 @@ class InstructionSet:
                 "S_AND_NOT1_WREXEC_B32": self.scalar_ops.s_and_not1_wrexec_b32,
                 "S_AND_NOT1_WREXEC_B64": self.scalar_ops.s_and_not1_wrexec_b64,
                 "S_MOVRELS_B32": self.scalar_ops.s_movrels_b32,
-                "S_MOVRELD_B32": self.scalar_ops.s_movereld_b32,
+                "S_MOVRELD_B32": self.scalar_ops.s_movreld_b32,
                 "S_MOVRELD_B64": self.scalar_ops.s_movreld_b64,
-                "S_MOVRELSD_2_B32": self.scalar_ops.s_moverelsd_2_b32,
+                "S_MOVRELSD_2_B32": self.scalar_ops.s_movrelsd_2_b32,
                 "S_GETPC_B64": self.scalar_ops.s_getpc_b64,
                 "S_SETPC_B64": self.scalar_ops.s_setpc_b64,
                 "S_SWAPPC_B64": self.scalar_ops.s_swappc_b64,
@@ -327,12 +327,14 @@ class InstructionSet:
                 "V_SUB_CO_U32": self.vector_ops.v_sub_co_u32,  # 769
             },
             "VOPC": {
+                "V_CMP_LT_U32": self.vector_ops.v_cmp_lt_u32,  # 73
                 "V_CMP_EQ_U32": self.vector_ops.v_cmp_eq_u32,  # 74
                 "V_CMP_NE_U32": self.vector_ops.v_cmp_ne_u32,  # 75
                 "V_CMP_LT_U64": self.vector_ops.v_cmp_lt_u64,  # 89
                 "V_CMP_EQ_U64": self.vector_ops.v_cmp_eq_u64,  # 90
                 "V_CMP_GT_U64": self.vector_ops.v_cmp_gt_u64,  # 92
                 "V_CMP_NE_U64": self.vector_ops.v_cmp_ne_u64,  # 93
+                "V_CMPX_NGT_F32": self.vector_ops.v_cmpx_ngt_f32,  # 96
                 "V_CMPX_EQ_U32": self.vector_ops.v_cmpx_eq_u32,  # 202
                 "V_CMPX_GT_U32": self.vector_ops.v_cmpx_gt_u32,  # 204
                 "V_CMPX_NE_U32": self.vector_ops.v_cmpx_ne_u32,  # 205

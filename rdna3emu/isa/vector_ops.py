@@ -20,11 +20,11 @@ class VectorOps:
 
     # VOP2 instructions
     # Copy data from one of two inputs based on the vector condition code and store the result into a vector register.
-    def v_cndmask_b32(self, reg_d, reg_v0, reg_v1):
-        reg_v0_value = self.registers.sgpr_u32(reg_v0)
-        reg_v1_value = self.registers.sgpr_u32(reg_v1)
+    def v_cndmask_b32(self, reg_d, arg_0, arg_1):
+        arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_u32)
+        arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_u32)
         reg_vcc_value = self.registers.vcc
-        reg_d_value = reg_v0_value if reg_vcc_value == 1 else reg_v1_value
+        reg_d_value = arg_0_value if reg_vcc_value == 1 else arg_1_value
         self.registers.set_sgpr_u32(reg_d, reg_d_value)
 
     # Dot product of packed FP16 values, accumulate with destination.
@@ -194,10 +194,10 @@ class VectorOps:
         self.registers.set_vgpr_i32(reg_d, reg_d_value)
 
     # Calculate bitwise AND on two vector inputs and store the result into a vector register.
-    def v_and_b32(self, reg_d, reg_v0, reg_v1):
-        reg_v0_value = self.registers.vgpr_u32(reg_v0)
-        reg_v1_value = self.registers.vgpr_u32(reg_v1)
-        reg_d_value = reg_v0_value & reg_v1_value
+    def v_and_b32(self, reg_d, arg_0, arg_1):
+        arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_u32)
+        arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_u32)
+        reg_d_value = arg_0_value & arg_1_value
         self.registers.set_vgpr_u32(reg_d, reg_d_value)
 
     # Calculate bitwise OR on two vector inputs and store the result into a vector register.
@@ -246,10 +246,10 @@ class VectorOps:
         self.v_sub_co_ci_u32(reg_d, reg_v1, reg_v0)
 
     # Add two unsigned inputs and store the result into a vector register. No carry-in or carry-out support.
-    def v_add_nc_u32(self, reg_d, reg_v0, reg_v1):
-        reg_v0_value = self.registers.vgpr_u32(reg_v0)
-        reg_v1_value = self.registers.vgpr_u32(reg_v1)
-        reg_d_value = reg_v0_value + reg_v1_value
+    def v_add_nc_u32(self, reg_d, arg_0, arg_1):
+        arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_u32)
+        arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_u32)
+        reg_d_value = arg_0_value + arg_1_value
         self.registers.set_vgpr_u32(reg_d, reg_d_value)
 
     # Subtract the second unsigned input from the first input and store the result into a vector register. No carry-in or carry-out support.
@@ -272,19 +272,17 @@ class VectorOps:
         self.registers.set_vgpr_f32(reg_d, reg_d_value)
 
     # Multiply a single-precision float with a literal constant and add a second single-precision float using fused multiply-add.
-    def v_fmamk_f32(self, reg_d, reg_v0, reg_v1):
+    def v_fmamk_f32(self, reg_d, reg_v0, reg_v1, simm32):
         reg_v0_value = self.registers.vgpr_f32(reg_v0)
         reg_v1_value = self.registers.vgpr_f32(reg_v1)
-        reg_simm32_value = self.registers.vgpr_f32(self.reg_simm)
-        reg_d_value = reg_v1_value + (reg_v0_value * reg_simm32_value)
+        reg_d_value = reg_v1_value + (reg_v0_value * simm32)
         self.registers.set_vgpr_f32(reg_d, reg_d_value)
 
     # Multiply two single-precision floats and add a literal constant using fused multiply-add.
-    def v_fmaak_f32(self, reg_d, reg_v0, reg_v1):
+    def v_fmaak_f32(self, reg_d, reg_v0, reg_v1, simm32):
         reg_v0_value = self.registers.vgpr_f32(reg_v0)
         reg_v1_value = self.registers.vgpr_f32(reg_v1)
-        reg_simm32_value = self.registers.vgpr_f32(self.reg_simm)
-        reg_d_value = reg_simm32_value + (reg_v0_value * reg_v1_value)
+        reg_d_value = simm32 + (reg_v0_value * reg_v1_value)
         self.registers.set_vgpr_f32(reg_d, reg_d_value)
 
     # Convert two single-precision float inputs into a packed FP16 result with round toward zero semantics (ignore the current rounding mode), and store the result into a vector register.
@@ -341,20 +339,18 @@ class VectorOps:
         self.registers.set_vgpr_f16(reg_d, reg_d_value)
 
     # Multiply a FP16 value with a literal constant and add a second FP16 value using fused multiply-add.
-    def v_fmamk_f16(self, reg_d, reg_v0, reg_v1):
+    def v_fmamk_f16(self, reg_d, reg_v0, reg_v1, simm32):
         reg_v0_value = utils.fp16_to_fp32(self.registers.vgpr_f32(reg_v0))
         reg_v1_value = utils.fp16_to_fp32(self.registers.vgpr_f32(reg_v1))
-        reg_simm32_value = utils.fp16_to_fp32(self.registers.vgpr_f32(self.reg_simm))
-        reg_d_value = reg_v1_value + (reg_v0_value * reg_simm32_value)
+        reg_d_value = reg_v1_value + (reg_v0_value * simm32)
         reg_d_value = utils.fp32_to_fp16(reg_d_value)
         self.registers.set_vgpr_f16(reg_d, reg_d_value)
 
     # Multiply two FP16 values and add a literal constant using fused multiply-add.
-    def v_fmaak_f16(self, reg_d, reg_v0, reg_v1):
+    def v_fmaak_f16(self, reg_d, reg_v0, reg_v1, simm32):
         reg_v0_value = utils.fp16_to_fp32(self.registers.vgpr_f32(reg_v0))
         reg_v1_value = utils.fp16_to_fp32(self.registers.vgpr_f32(reg_v1))
-        reg_simm32_value = utils.fp16_to_fp32(self.registers.vgpr_f32(self.reg_simm))
-        reg_d_value = reg_simm32_value + (reg_v0_value * reg_v1_value)
+        reg_d_value = simm32 + (reg_v0_value * reg_v1_value)
         reg_d_value = utils.fp32_to_fp16(reg_d_value)
         self.registers.set_vgpr_f16(reg_d, reg_d_value)
 
@@ -414,9 +410,10 @@ class VectorOps:
     def v_nop(self):
         pass  # raise Exception("OP... not implemented")
 
-    # Move data from a vector input into a vector register.
-    def v_mov_b32(self):
-        pass  # raise Exception("OP... not implemented")
+    # mov data from a vector input into a vector register.
+    def v_mov_b32(self, reg_d, reg_v0):
+        reg_v0_value = self.registers.vgpr_u32(reg_v0)
+        self.registers.set_vgpr_u32(reg_d, reg_v0_value)
 
     # Read the scalar value in the lowest active lane of the input vector register and store it into a scalar register.
     def v_readfirstlane_b32(self, reg_d, reg_v0):
@@ -554,7 +551,7 @@ class VectorOps:
     def v_pipeflush(self):
         pass  # raise Exception("OP... not implemented")
 
-    # Move data to a VGPR.
+    # mov data to a VGPR.
     def v_mov_b16(self):
         pass  # raise Exception("OP... not implemented")
 
@@ -825,9 +822,13 @@ class VectorOps:
     def v_lshl_add_u32(self):
         pass  # raise Exception("OP... not implemented")
 
-    #
-    def v_and_or_b32(self):
-        pass  # raise Exception("OP... not implemented")
+    # Calculate bitwise AND on the first two vector inputs, then compute the bitwise OR of the intermediate result and the third vector input, then store the result into a vector register.
+    # ISA does not imply this format of the arguments, but it is the only one used.
+    def v_and_or_b32(self, reg_d, reg_v0, reg_s0, arg_0):
+        reg_v0_value = self.registers.vgpr_u32(reg_v0)
+        reg_s0_value = self.registers.sgpr_u32(reg_s0)
+        reg_d_value = (reg_v0_value & reg_s0_value) | arg_0
+        self.registers.set_vgpr_u32(reg_d, reg_d_value)
 
     #
     def v_or3_b32(self):
@@ -870,6 +871,13 @@ class VectorOps:
     def v_sub_co_u32(self):
         pass  # raise Exception("OP... not implemented")
 
+    # Return 1 iff A less than B.
+    def v_cmp_lt_u32(self, arg_0, arg_1):
+        arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_u32)
+        arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_u32)
+
+        self.registers.set_exec(0, arg_0_value < arg_1_value)
+
     # VOPC instructions
     #
     def v_cmp_eq_u32(self):
@@ -894,6 +902,13 @@ class VectorOps:
     #
     def v_cmp_ne_u64(self):
         pass  # raise Exception("OP... not implemented")
+
+    # Return 1 iff A not greater than B.
+    def v_cmpx_ngt_f32(self, arg_0, arg_1):
+        arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_f32)
+        arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_f32)
+
+        self.registers.set_exec(0, arg_0_value <= arg_1_value)
 
     # Return 1 iff A equal to B.
     # Write only EXEC. SDST must be set to EXEC_LO. Signal 'invalid' on sNAN's, and also on qNAN's if clamp is set.
@@ -936,7 +951,7 @@ class VectorOps:
         reg_d_value = arg_0_value * arg_1_value
         self.registers.set_vgpr_f32(reg_d, reg_d_value)
 
-    # Move data from a vector input into a vector register.
+    # mov data from a vector input into a vector register.
     def v_dual_mov_b32(self, reg_d, reg_v0):
         reg_v0_value = self.registers.vgpr_u32(reg_v0)
         self.registers.set_vgpr_u32(reg_d, reg_v0_value)
