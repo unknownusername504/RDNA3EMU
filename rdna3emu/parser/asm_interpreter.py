@@ -384,11 +384,11 @@ def run():
         try:
             asm_interpreter.interpret_asm()
             print("!!! Passed interpret asm !!!")
+            asm_interpreter.isa.dump_registers()
+            asm_interpreter.isa.dump_memory()
         except Exception as e:
             print("!!! Failed interpret asm !!!")
             print(e)
-        # asm_interpreter.isa.dump_registers()
-        # asm_interpreter.isa.dump_memory()
 
 
 if __name__ == "__main__":
