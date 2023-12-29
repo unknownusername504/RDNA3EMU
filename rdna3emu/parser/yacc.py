@@ -23,7 +23,7 @@ def p_statement(p):
     if len(p) == 2 or len(p) == 3:
       p[0] = [p[1], p[2]] if len(p) == 3 else p[1]
     else:
-      p[0] = (p[1], p[2], p[4], p[5])
+      p[0] = [p[1], p[2], p[4], p[5]]
 
 def p_operands(p):
     '''operands : operand

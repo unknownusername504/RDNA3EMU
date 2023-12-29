@@ -55,11 +55,13 @@ class Instruction:
       instruction_func = instr
       if instr.startswith("S_"):
           # Scalar instruction, call the right function
-          instruction_func = isa.find_instruction_func(instr.upper(), "SCALAR")
-      elif instr.startswith("v_"):
-          instruction_func = isa.find_instruction_func(instr.upper(), "VECTOR")
-      elif instr.startswith("global_"):
-          instruction_func = isa.find_instruction_func(instr.upper(), "MEMORY")
+          instruction_func = isa.find_instruction_func(instr, "SCALAR")
+      elif instr.startswith("V_"):
+          instruction_func = isa.find_instruction_func(instr, "VECTOR")
+      elif instr.startswith("GLOBAL_") or instr.startswith("DS_"):
+          instruction_func = isa.find_instruction_func(instr, "MEMORY")
+      else:
+         print(f"Unbound function: {instr}")
       self.fx = instruction_func
   def __repr__(self):
     return f'Instruction[name={self.name} fx={self.fx}]'
