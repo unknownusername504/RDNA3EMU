@@ -1,6 +1,6 @@
 import numpy as np
 
-from rdna3emu.isa.registers import Registers as Re
+from .registers import Registers as Re
 
 
 class Memory:
@@ -258,6 +258,12 @@ class Memory:
         address = reg_v0_value + reg_s0_value + reg_s1_value + offset
 
         self.set_global_memory(address, 4, reg_d_value)
+
+    # global_store_b64 v[0:1], v[2:3], off
+    # Call the 32-bit store twice
+    def global_store_b64(self, reg_d1, reg_d0, reg_v0, reg_v1, reg_s0, offset=0):
+        self.global_store_b32(reg_d0, reg_v0, reg_s0, offset)
+        self.global_store_b32(reg_d1, reg_v1, reg_s0, offset + 4)
 
     # Store 32-bit data from a vector register into a given memory location.
     def ds_load_b32(self, reg_d, reg_s0, offset=0):

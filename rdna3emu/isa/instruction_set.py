@@ -1,15 +1,8 @@
-# This file defines the instruction set for RNDA3.
-import sys
-
-# Add rdna3emu to path
-# Set PYTHONPATH="." python3 file
-sys.path.append("../rdna3emu/")
-
-from rdna3emu.isa.scalar_ops import ScalarOps
-from rdna3emu.isa.vector_ops import VectorOps
-from rdna3emu.isa.registers import Registers
-from rdna3emu.isa.memory import Memory
-from rdna3emu.isa.utils import populate_instruction_usage
+from .scalar_ops import ScalarOps
+from .vector_ops import VectorOps
+from .registers import Registers
+from .memory import Memory
+from .utils import populate_instruction_usage
 
 
 class InstructionSet:
@@ -389,6 +382,7 @@ class InstructionSet:
                 "GLOBAL_STORE_U16": self.memory.global_store_u16,
                 "GLOBAL_STORE_I16": self.memory.global_store_i16,
                 "GLOBAL_STORE_B32": self.memory.global_store_b32,
+                "GLOBAL_STORE_B64": self.memory.global_store_b64,
             },
             "SCRATCH": {},
             "LDS": {

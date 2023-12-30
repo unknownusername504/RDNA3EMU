@@ -1,5 +1,5 @@
-from rdna3emu.parser.parser import parse
-from rdna3emu.interpreter import build_executable, run
+from .parser import parse
+from .interpreter import build_executable, run
 import argparse
 from pathlib import Path
 import pprint

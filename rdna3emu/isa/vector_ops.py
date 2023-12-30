@@ -1,7 +1,7 @@
 import math
-import rdna3emu.isa.utils as utils
-from rdna3emu.isa.registers import Registers as Re
-from rdna3emu.isa.memory import Memory as Me
+from .utils import *
+from .registers import Registers as Re
+from .memory import Memory as Me
 import numpy as np
 
 

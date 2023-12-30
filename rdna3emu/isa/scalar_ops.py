@@ -1,6 +1,6 @@
-import rdna3emu.isa.utils as utils
-from rdna3emu.isa.registers import Registers as Re
-from rdna3emu.isa.memory import Memory as Me
+from .utils import *
+from .registers import Registers as Re
+from .memory import Memory as Me
 
 
 class ScalarOps:
@@ -101,15 +101,15 @@ class ScalarOps:
 
     # Given a shift count in the second scalar input, calculate the logical shift left of the first scalar input, store the result into a scalar register and set SCC iff the result is nonzero.
     def s_lshl_b64(self, reg_d_hi, reg_d_lo, reg_s_hi, reg_s_lo, imm):
-        reg_s_lobits = format(self.registers.sgpr_u32(reg_s_lo), '032b')
-        reg_s_hibits = format(self.registers.sgpr_u32(reg_s_hi), '032b')
+        reg_s_lobits = format(self.registers.sgpr_u32(reg_s_lo), "032b")
+        reg_s_hibits = format(self.registers.sgpr_u32(reg_s_hi), "032b")
         reg_s_val = int(reg_s_hibits + reg_s_lobits, 2)
         reg_d_value = reg_s_val << imm
         reg_scc_value = 1 if (reg_d_value != 0) else 0
         self.registers._status.set_scc(reg_scc_value)
-        val_bits = format(reg_d_value, '064b')
-        val_lobits = int(val_bits[0:32],2)
-        val_hibits = int(val_bits[32:64],2)
+        val_bits = format(reg_d_value, "064b")
+        val_lobits = int(val_bits[0:32], 2)
+        val_hibits = int(val_bits[32:64], 2)
         self.registers.set_sgpr_u32(reg_d_lo, val_lobits)
         self.registers.set_sgpr_u32(reg_d_hi, val_hibits)
 
@@ -513,9 +513,9 @@ class ScalarOps:
         self.registers.set_sgpr_u32(reg_d, reg_d_value)
 
     def s_mov_b32(self, reg_d, arg_0):
-       # TODO: DEAL WITH ARG WHEN EXEC_LO, EXEC_HI, VCC etc.
-       arg_0_val = self.try_get_literal(arg_0, self.registers.sgpr_u32)
-       self.registers.set_sgpr_u32(reg_d, arg_0_val)
+        # TODO: DEAL WITH ARG WHEN EXEC_LO, EXEC_HI, VCC etc.
+        arg_0_val = self.try_get_literal(arg_0, self.registers.sgpr_u32)
+        self.registers.set_sgpr_u32(reg_d, arg_0_val)
 
     # mov scalar input into a scalar register. (64-bit)
     def s_mov_b64(self, reg_d, reg_s0):
@@ -1020,6 +1020,7 @@ class ScalarOps:
     The clause breaks after every N instructions, N = simm[11:8] (0 - 15; 0 = no breaks)
     We will just pass # raise Exception("OP... not implemented") the max code block to this function and let it handle the rest.
     """
+
     def s_clause(self, simm16, clause_code_block):
         clause_length = (simm16 & 0x3F) + 1
         # Check between 1 and 62
@@ -1078,21 +1079,21 @@ class ScalarOps:
         reg_d_value = self.memory.get_memory(reg_s0_value + imm, 4)
         self.registers.set_sgpr_u32(reg_d, reg_d_value)
 
-    # TODO: Imm can be a scalar (ignore 2 LSBs in that case) 
+    # TODO: Imm can be a scalar (ignore 2 LSBs in that case)
     def s_load_b64(self, reg_d_upper, reg_d_lower, reg_s_upper, reg_s_lower, imm=None):
-      reg_s_lobits = format(self.registers.sgpr_u32(reg_s_lower), '032b')
-      reg_s_hibits = format(self.registers.sgpr_u32(reg_s_upper), '032b')
-      base_addr = reg_s_hibits + reg_s_lobits
-      addr = int(base_addr, 2)
-      if imm:
-        addr += imm 
-      val = self.memory.get_memory(addr, 8) 
-      print(f'addr={addr} val@addr={val}')
-      val_bits = format(val, '064b')
-      val_lobits = int(val_bits[0:32],2)
-      val_hibits = int(val_bits[32:64],2)
-      self.registers.set_sgpr_u32(reg_d_lower, val_lobits)
-      self.registers.set_sgpr_u32(reg_d_upper, val_hibits)
+        reg_s_lobits = format(self.registers.sgpr_u32(reg_s_lower), "032b")
+        reg_s_hibits = format(self.registers.sgpr_u32(reg_s_upper), "032b")
+        base_addr = reg_s_hibits + reg_s_lobits
+        addr = int(base_addr, 2)
+        if imm:
+            addr += imm
+        val = self.memory.get_memory(addr, 8)
+        print(f"addr={addr} val@addr={val}")
+        val_bits = format(val, "064b")
+        val_lobits = int(val_bits[0:32], 2)
+        val_hibits = int(val_bits[32:64], 2)
+        self.registers.set_sgpr_u32(reg_d_lower, val_lobits)
+        self.registers.set_sgpr_u32(reg_d_upper, val_hibits)
 
     def s_load_b64_imm(self, reg_d, reg_s0, imm):
         reg_s0_value = self.registers.sgpr_u64(reg_s0)
@@ -1106,24 +1107,33 @@ class ScalarOps:
     #     reg_d_value = self.memory.get_memory(reg_s0_value + reg_s1_value, 16)
     #     self.registers.set_sgpr_u128(reg_d, reg_d_value)
 
-    def s_load_b128(self, reg_d2_upper, reg_d2_lower, reg_d1_upper, reg_d1_lower, reg_s_upper, reg_s_lower, imm=None):
-      reg_s_lobits = format(self.registers.sgpr_u32(reg_s_lower), '032b')
-      reg_s_hibits = format(self.registers.sgpr_u32(reg_s_upper), '032b')
-      base_addr = reg_s_hibits + reg_s_lobits
-      addr = int(base_addr, 2)
-      if imm:
-        addr += imm 
-      val = self.memory.get_memory(addr, 16) 
-      print(f'addr={addr} val@addr={val}')
-      val_bits = format(val, '0128b')
-      val_1lobits = int(val_bits[0:32],2)
-      val_1hibits = int(val_bits[32:64],2)
-      val_2lobits = int(val_bits[64:96],2)
-      val_2hibits = int(val_bits[96:128],2)
-      self.registers.set_sgpr_u32(reg_d1_lower, val_1lobits)
-      self.registers.set_sgpr_u32(reg_d1_upper, val_1hibits)
-      self.registers.set_sgpr_u32(reg_d2_lower, val_2lobits)
-      self.registers.set_sgpr_u32(reg_d2_upper, val_2hibits)
+    def s_load_b128(
+        self,
+        reg_d2_upper,
+        reg_d2_lower,
+        reg_d1_upper,
+        reg_d1_lower,
+        reg_s_upper,
+        reg_s_lower,
+        imm=None,
+    ):
+        reg_s_lobits = format(self.registers.sgpr_u32(reg_s_lower), "032b")
+        reg_s_hibits = format(self.registers.sgpr_u32(reg_s_upper), "032b")
+        base_addr = reg_s_hibits + reg_s_lobits
+        addr = int(base_addr, 2)
+        if imm:
+            addr += imm
+        val = self.memory.get_memory(addr, 16)
+        print(f"addr={addr} val@addr={val}")
+        val_bits = format(val, "0128b")
+        val_1lobits = int(val_bits[0:32], 2)
+        val_1hibits = int(val_bits[32:64], 2)
+        val_2lobits = int(val_bits[64:96], 2)
+        val_2hibits = int(val_bits[96:128], 2)
+        self.registers.set_sgpr_u32(reg_d1_lower, val_1lobits)
+        self.registers.set_sgpr_u32(reg_d1_upper, val_1hibits)
+        self.registers.set_sgpr_u32(reg_d2_lower, val_2lobits)
+        self.registers.set_sgpr_u32(reg_d2_upper, val_2hibits)
 
     def s_load_b128_imm(self, reg_d, reg_s0, imm):
         reg_s0_value = self.registers.sgpr_u64(reg_s0)

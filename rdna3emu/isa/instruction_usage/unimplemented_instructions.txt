@@ -1,4 +1,1 @@
-File: C:\Users\bunni\OneDrive\Desktop\RDNA3EMU\Data\tinyconvdump.txt
-DS_LOAD_B128
-DS_STORE_B32
-GLOBAL_LOAD_B128
+File: C:\Users\bunni\OneDrive\Desktop\RDNA3EMU\rdna3emu\..\Data\zero_tensors.txt
