@@ -8,7 +8,6 @@ reserved = {
     ".data": "DATA",
     ".bss": "BSS",
     "SHN_AMDGPU_LDS": "LDS_GLOBAL",
-
 }
 # List of token names
 tokens = (
@@ -41,8 +40,10 @@ tokens = (
     "OR",
     "HASH",
     "REF",
-    "EXEC_LO", "EXEC_HI",
-    "VCC_LO", "VCC_HI"
+    "EXEC_LO",
+    "EXEC_HI",
+    "VCC_LO",
+    "VCC_HI",
 ) + tuple(reserved.values())
 
 # Regular expression rules for simple tokens
@@ -55,14 +56,13 @@ t_AT = r"@"
 t_OR = r"\|"
 t_HASH = r"\#"
 
-'''
+"""
     "vcc_lo": "VCC_LO" ,
     "vcc_hi": "VCC_HI", 
     "exec_lo": "EXEC_LO",
     "exec_hi": "EXEC_HI", 
     "m0": "M0",
-'''
-
+"""
 
 
 def t_HEX(t):
@@ -82,35 +82,42 @@ def t_BINARY(t):
     t.value = ir.Operand(type="Binary", value=int(t.value, base=2))
     return t
 
+
 def t_FLOATING(t):
     r"[-]?[0-9]*[.][0-9]+([eE][+-]?[0-9]*)? | [-]0x[0-9a-fA-F]*(.[0-9a-fA-F]+)?[pP][+-]?[0-9a-fA-F]+"
     t.value = ir.Operand(type="Float", value=float(t.value))
     return t
+
 
 def t_DECIMAL(t):
     r"[-]?[1-9][0-9]*|0"
     t.value = ir.Operand(type="Decimal", value=int(t.value))
     return t
 
+
 def t_EXEC_LO(t):
-  r"exec_lo"
-  t.value = ir.Operand(type="EXEC_LO", value=t.value)
-  return t
+    r"exec_lo"
+    t.value = ir.Operand(type="EXEC_LO", value=t.value)
+    return t
+
 
 def t_EXEC_HI(t):
-  r"exec_hi"
-  t.value = ir.Operand(type="EXEC_HI", value=t.value)
-  return t
+    r"exec_hi"
+    t.value = ir.Operand(type="EXEC_HI", value=t.value)
+    return t
+
 
 def t_VCC_LO(t):
-  r"vcc_lo"
-  t.value = ir.Operand(type="VCC_LO", value=t.value)
-  return t
+    r"vcc_lo"
+    t.value = ir.Operand(type="VCC_LO", value=t.value)
+    return t
+
 
 def t_VCC_HI(t):
-  r"vccc_hi"
-  t.value = ir.Operand(type="VCC_HI", value=t.value)
-  return t
+    r"vccc_hi"
+    t.value = ir.Operand(type="VCC_HI", value=t.value)
+    return t
+
 
 def t_REF(t):
     r"<[a-zA-Z_.][a-zA-Z0-9_$.@]*>"
