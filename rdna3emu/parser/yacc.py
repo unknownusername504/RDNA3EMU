@@ -32,7 +32,6 @@ def p_statement(p):
 def p_operands(p):
     """operands : operand
     | operands COMMA operand
-    | operands OR operand
     | operands operand"""
     if len(p) == 2:
         p[0] = [p[1]]
@@ -45,6 +44,7 @@ def p_operands(p):
 def p_operand(p):
     """operand : SGPR
     | VGPR
+    | OR VGPR OR
     | FLOATING
     | DECIMAL
     | SYMBOL
@@ -55,9 +55,17 @@ def p_operand(p):
     | VCC_LO
     | VCC_HI
     | OCTAL
+    | MINUS operand
     | func
+    | OR func 
     | modifier"""
-    p[0] = p[1]
+    if len(p) == 4: 
+      p[0] = p[2]
+
+    elif len(p) == 3:
+      p[0] = p[2]
+    else:
+      p[0] = p[1]
 
 
 def p_modifier(p):
