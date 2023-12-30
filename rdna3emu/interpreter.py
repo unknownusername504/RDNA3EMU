@@ -66,6 +66,10 @@ def extract_exec(instr, operands):
 def run(executable, print_instr=True, dump=True):
     for instr in executable:
         try:
+            # s_endpgm and s_code_end are the only instructions that don't take any arguments and are not arrays but are callable methods
+            # Check that instr is a method and not a tuple
+            if callable(instr):
+                instr = (instr, [])
             instr[0](*instr[1])
             if print_instr:
                 print(instr[0], instr[1])
