@@ -33,6 +33,9 @@ if "%~1"=="reinstall" (
     )
 )
 
+REM Add the pythonpath
+set PYTHONPATH=%PYTHONPATH%;%CD%\rdna3emu
+
 REM Run all the tests
 python -m unittest rdna3emu\test_all.py
 

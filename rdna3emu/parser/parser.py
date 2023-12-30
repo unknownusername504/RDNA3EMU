@@ -1,5 +1,5 @@
-from .yacc import parser
-from .lex import lexer
+from rdna3emu.parser.yacc import parser
+from rdna3emu.parser.lex import lexer
 
 
 def parse(data, debug=False):

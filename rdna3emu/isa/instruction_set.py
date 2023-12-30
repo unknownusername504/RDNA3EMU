@@ -1,8 +1,8 @@
-from .scalar_ops import ScalarOps
-from .vector_ops import VectorOps
-from .registers import Registers
-from .memory import Memory
-from .utils import populate_instruction_usage
+from rdna3emu.isa.scalar_ops import ScalarOps
+from rdna3emu.isa.vector_ops import VectorOps
+from rdna3emu.isa.registers import Registers
+from rdna3emu.isa.memory import Memory
+from rdna3emu.isa.utils import populate_instruction_usage
 
 
 class InstructionSet:

@@ -1,4 +1,4 @@
-from .parser.ir import Instruction, isa
+from rdna3emu.parser.ir import Instruction, isa
 
 
 def build_executable(stmts):

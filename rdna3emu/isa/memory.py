@@ -1,6 +1,6 @@
 import numpy as np
 
-from .registers import Registers as Re
+from rdna3emu.isa.registers import Registers as Re
 
 
 class Memory:
@@ -244,6 +244,7 @@ class Memory:
         self.set_global_memory(address, 2, reg_d_value)
 
     # Store 32-bit data from a vector register into a given memory location.
+    # global_store_b32 v1, v0, s[0:1]
     def global_store_b32(self, reg_d, reg_v0, reg_s0, reg_s1, offset=0):
         # Force the offset to be an integer for now since that is not handled in the parser correctly
         if not isinstance(offset, int):
@@ -260,10 +261,20 @@ class Memory:
         self.set_global_memory(address, 4, reg_d_value)
 
     # global_store_b64 v[0:1], v[2:3], off
-    # Call the 32-bit store twice
-    def global_store_b64(self, reg_d1, reg_d0, reg_v0, reg_v1, reg_s0, offset=0):
-        self.global_store_b32(reg_d0, reg_v0, reg_s0, offset)
-        self.global_store_b32(reg_d1, reg_v1, reg_s0, offset + 4)
+    def global_store_b64(self, reg_d1, reg_d0, reg_v0, reg_v1, offset=0):
+        if not isinstance(offset, int):
+            offset = int(offset)
+            # Print a warning
+            print("Warning: Offset is not an integer")
+        reg_d0_value = self.registers.vgpr_u32(reg_d0)
+        reg_d1_value = self.registers.vgpr_u32(reg_d1)
+        reg_v0_value = self.registers.vgpr_u32(reg_v0)
+        reg_v1_value = self.registers.vgpr_u32(reg_v1)
+
+        address = reg_v0_value + reg_v1_value + offset
+
+        self.set_global_memory(address, 4, reg_d0_value)
+        self.set_global_memory(address + 4, 4, reg_d1_value)
 
     # Store 32-bit data from a vector register into a given memory location.
     def ds_load_b32(self, reg_d, reg_s0, offset=0):

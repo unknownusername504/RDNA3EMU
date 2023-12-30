@@ -1,9 +1,9 @@
 import os
 
 import ply.lex as lex
-from ..isa.instruction_set import InstructionSet
+from rdna3emu.isa.instruction_set import InstructionSet
 
-from .legacy_lex import Lexer
+from rdna3emu.parser.legacy_lex import Lexer
 
 # Declare type for register ids that is an int but won't be confused with other ints when using isinstance
 RegisterId = int

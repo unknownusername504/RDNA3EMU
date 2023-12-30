@@ -1,8 +1,6 @@
 import unittest
-import io
-import contextlib
 
-from .isa.instruction_set import InstructionSet
+from rdna3emu.isa.instruction_set import InstructionSet
 
 
 class TestSequences(unittest.TestCase):
@@ -12,7 +10,7 @@ class TestSequences(unittest.TestCase):
 def make_test_func(test_file_name, isa):
     def test_func(self):
         import os
-        from .isa.utils import find_unimplemented_instructions
+        from rdna3emu.isa.utils import find_unimplemented_instructions
 
         # Print that we are running this test
         print()
@@ -48,9 +46,6 @@ def make_test_func(test_file_name, isa):
             self.fail(
                 f"There are unimplemented instructions in {test_file_name}:\n{unimplemented_instructions}"
             )
-
-        # Print that this test passed
-        print("P")
 
     # Set the name of the test
     test_func.__name__ = "test_" + test_file_name
