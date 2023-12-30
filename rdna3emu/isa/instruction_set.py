@@ -324,6 +324,7 @@ class InstructionSet:
                 "V_WRITELANE_B32": self.vector_ops.v_writelane_b32,  # 865
             },
             "VOP3P": {
+                "V_FMA_MIX_F32": self.vector_ops.v_fma_mix_f32,  # 32
                 "V_FMA_MIXLO_F16": self.vector_ops.v_fma_mixlo_f16,  # 33
             },
             "VOP3SD": {

@@ -1,5 +1,5 @@
 import math
-from rdna3emu.isa.utils import *
+import rdna3emu.isa.utils as utils
 from rdna3emu.isa.registers import Registers as Re
 from rdna3emu.isa.memory import Memory as Me
 import numpy as np
@@ -1126,6 +1126,33 @@ class VectorOps:
     def v_writelane_b32(self):
         pass  # raise Exception("OP... not implemented")
 
+    # Fused-multiply-add of single-precision values with MIX encoding.
+    # Size and location of S0, S1 and S2 controlled by OPSEL: 0=src[31:0], 1=src[31:0], 2=src[15:0], 3=src[31:16]. Also,
+    # for FMA_MIX, the NEG_HI field acts instead as an absolute-value modifier.
+    def v_fma_mix_f32(self, reg_d, arg_0, arg_1, arg_2, opsel=0):
+        inputs = [arg_0, arg_1, arg_2]
+        opsel_lo = opsel & 0x1
+        opsel_hi = (opsel >> 1) & 0x1
+        for i in range(3):
+            # Unpack the literal or register.
+            imm_value_lo, imm_value_hi = self.unpack_f32(inputs[i])
+            if not opsel_hi:
+                inputs[i] = imm_value_hi
+            elif opsel_lo:
+                inputs[i] = imm_value_lo
+            else:
+                inputs[i] = self.pack_f32(imm_value_lo, imm_value_hi)
+
+        # Unpack the destination register.
+        reg_d_value_lo, reg_d_value_hi = self.unpack_f32(reg_d)
+
+        # Perform the fused multiply add.
+        reg_d_value_lo = inputs[0] * inputs[1] + inputs[2]
+        reg_d_value_hi = reg_d_value_hi
+
+        reg_d_value = self.pack_f32(reg_d_value_lo, reg_d_value_hi)
+        self.registers.set_vgpr_f32(reg_d, reg_d_value)
+
     # VOP3P instructions
     # Fused-multiply-add of FP16 values with MIX encoding, result stored in low 16 bits of destination.
     # Size and location of S0, S1 and S2 controlled by OPSEL: 0=src[31:0], 1=src[31:0], 2=src[15:0], 3=src[31:16]. Also,
@@ -1164,6 +1191,8 @@ class VectorOps:
         reg_d_value_hi = reg_d_value_hi
 
         reg_d_value = self.pack_f32(reg_d_value_lo, reg_d_value_hi)
+        # Convert to half precision.
+        reg_d_value = utils.fp32_to_fp16(reg_d_value)
         self.registers.set_vgpr_f32(reg_d, reg_d_value)
 
     # VOP3SD instructions

@@ -1,4 +1,4 @@
-from rdna3emu.isa.utils import *
+import rdna3emu.isa.utils as utils
 from rdna3emu.isa.registers import Registers as Re
 from rdna3emu.isa.memory import Memory as Me
 
