@@ -64,8 +64,17 @@ def extract_exec(instr, operands):
 
 
 def run(executable, print_instr=True, dump=True):
+    emulated_result = None
     for instr in executable:
         try:
+            # s_endpgm and s_code_end are the only instructions that don't take any arguments and are not arrays but are callable methods
+            # Check that instr is a method and not a tuple
+            if callable(instr):
+                instr = (instr, [])
+            # v_cndmask_b32 isn't parsing the last argument correctly which is vcc_lo so we need to add it manually
+            if instr[0] == isa.vector_ops.v_cndmask_b32:
+                if len(instr[1]) == 3:
+                    instr[1].append("vcc_lo")
             instr[0](*instr[1])
             if print_instr:
                 print(instr[0], instr[1])
@@ -76,3 +85,4 @@ def run(executable, print_instr=True, dump=True):
             # Re-raise the exception with the instruction appended
             e.args = e.args + (instr,)
             raise e
+    return emulated_result
