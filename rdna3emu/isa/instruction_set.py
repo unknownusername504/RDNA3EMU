@@ -1,3 +1,4 @@
+import numpy as np
 from rdna3emu.isa.scalar_ops import ScalarOps
 from rdna3emu.isa.vector_ops import VectorOps
 from rdna3emu.isa.registers import Registers
@@ -409,6 +410,10 @@ class InstructionSet:
 
     def dump_memory(self, non_zero=False):
         self.memory.dump_memory(non_zero)
+
+    def get_results(self):
+        # TODO: Actually parse the registers and memory to get the results, for now return an empty numpy array
+        return np.array([])
 
     def reset(self):
         del self.registers
