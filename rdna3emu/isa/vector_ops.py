@@ -233,13 +233,26 @@ class VectorOps:
         self.registers.set_vgpr_u32(reg_d, reg_d_value)
 
     # Add two unsigned inputs and a bit from a carry-in mask, store the result into a vector register and store the carry-out mask into a scalar register.
-    def v_add_co_ci_u32(self, reg_d, reg_v0, reg_v1):
-        reg_v0_value = self.registers.vgpr_u32(reg_v0)
-        reg_v1_value = self.registers.vgpr_u32(reg_v1)
-        reg_vcc_value = self.registers.vcc
-        reg_d_value = reg_v0_value + reg_v1_value + reg_vcc_value
-        reg_vcc_value = 1 if reg_d_value > 0xFFFFFFFF else 0
-        self.registers.vcc = reg_vcc_value
+    # v_add_co_ci_u32_e32 v1, vcc_lo, s5, v1, vcc_lo
+    # In VOP3 the VCC destination may be an arbitrary SGPR-pair, and the VCC source comes from the SGPR-pair at S2.u.
+    def v_add_co_ci_u32(self, reg_d, arg_0, arg_1, arg_2, arg_3):
+        arg_1_value = self.try_get_literal(arg_1, self.registers.sgpr_u32)
+        arg_2_value = self.try_get_literal(arg_2, self.registers.vgpr_u32)
+        if isinstance(arg_3, str):
+            arg_3_value = self.registers.vcc & 1
+        else:
+            arg_3_value = self.registers.sgpr_u32(arg_3) & 1
+
+        reg_d_value = arg_1_value + arg_2_value + arg_3_value
+
+        arg_0_value = reg_d_value > 0xFFFFFFFF
+
+        if isinstance(arg_0, str):
+            self.registers.vcc = arg_0_value
+        else:
+            self.registers.set_sgpr_u32(arg_0, arg_0_value)
+
+        reg_d_value = reg_d_value & 0xFFFFFFFF
         self.registers.set_vgpr_u32(reg_d, reg_d_value)
 
     # Subtract the second unsigned input from the first input, subtract a bit from the carry-in mask, store the result into a vector register and store the carry-out mask to a scalar register
@@ -1148,9 +1161,22 @@ class VectorOps:
         reg_d_value = arg_1_value << arg_0_value
         self.registers.set_vgpr_u16(reg_d, reg_d_value)
 
-    #
-    def v_lshlrev_b64(self):
-        pass  # raise Exception("OP... not implemented")
+    # Given a shift count in the first vector input, calculate the logical shift left of the second vector input and store the result into a vector register.
+    # D0.u64 = (S1.u64 << S0[5 : 0].u)
+    # v_lshlrev_b64 v[0:1], 1, v[9:10]
+    def v_lshlrev_b64(self, reg_d0, reg_d1, arg_0, arg_1, arg_2):
+        arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_u32) & 0x3F
+        arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_u32)
+        arg_2_value = self.try_get_literal(arg_2, self.registers.vgpr_u32)
+
+        # Combine the two 32-bit values into a single 64-bit value.
+        input_value = int(arg_1_value) | (int(arg_2_value) << 32)
+        reg_d_value = input_value << arg_0_value
+        reg_d0_value = np.uint32(reg_d_value & 0xFFFFFFFF)
+        reg_d1_value = np.uint32(reg_d_value >> 32) & 0xFFFFFFFF
+
+        self.registers.set_vgpr_u32(reg_d0, reg_d0_value)
+        self.registers.set_vgpr_u32(reg_d1, reg_d1_value)
 
     #
     def v_writelane_b32(self):
