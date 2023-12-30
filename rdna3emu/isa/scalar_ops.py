@@ -100,13 +100,18 @@ class ScalarOps:
         self.registers.set_sgpr_u32(reg_d, reg_d_value)
 
     # Given a shift count in the second scalar input, calculate the logical shift left of the first scalar input, store the result into a scalar register and set SCC iff the result is nonzero.
-    def s_lshl_b64(self, reg_d, reg_s0, reg_s1):
-        reg_s0_value = self.registers.sgpr_u64(reg_s0)
-        reg_s1_value = self.registers.sgpr_u64(reg_s1)
-        reg_d_value = reg_s0_value << reg_s1_value
+    def s_lshl_b64(self, reg_d_hi, reg_d_lo, reg_s_hi, reg_s_lo, imm):
+        reg_s_lobits = format(self.registers.sgpr_u32(reg_s_lo), '032b')
+        reg_s_hibits = format(self.registers.sgpr_u32(reg_s_hi), '032b')
+        reg_s_val = int(reg_s_hibits + reg_s_lobits, 2)
+        reg_d_value = reg_s_val << imm
         reg_scc_value = 1 if (reg_d_value != 0) else 0
         self.registers._status.set_scc(reg_scc_value)
-        self.registers.set_sgpr_u64(reg_d, reg_d_value)
+        val_bits = format(reg_d_value, '064b')
+        val_lobits = int(val_bits[0:32],2)
+        val_hibits = int(val_bits[32:64],2)
+        self.registers.set_sgpr_u32(reg_d_lo, val_lobits)
+        self.registers.set_sgpr_u32(reg_d_hi, val_hibits)
 
     # Given a shift count in the second scalar input, calculate the logical shift right of the first scalar input, store the result into a scalar register and set SCC iff the result is nonzero.
     def s_lshr_b32(self, reg_d, reg_s0, reg_s1):
@@ -508,8 +513,9 @@ class ScalarOps:
         self.registers.set_sgpr_u32(reg_d, reg_d_value)
 
     def s_mov_b32(self, reg_d, arg_0):
-        arg_0_val = self.try_get_literal(arg_0, self.registers.sgpr_u32)
-        self.registers.set_sgpr_u32(reg_d, arg_0_val)
+       # TODO: DEAL WITH ARG WHEN EXEC_LO, EXEC_HI, VCC etc.
+       arg_0_val = self.try_get_literal(arg_0, self.registers.sgpr_u32)
+       self.registers.set_sgpr_u32(reg_d, arg_0_val)
 
     # mov scalar input into a scalar register. (64-bit)
     def s_mov_b64(self, reg_d, reg_s0):
@@ -1093,12 +1099,12 @@ class ScalarOps:
         reg_d_value = self.memory.get_memory(reg_s0_value + imm, 8)
         self.registers.set_sgpr_u64(reg_d, reg_d_value)
 
-    # Load a 128-bit value from memory into a scalar register.
-    def s_load_b128(self, reg_d, reg_s0, reg_s1):
-        reg_s0_value = self.registers.sgpr_u64(reg_s0)
-        reg_s1_value = self.registers.sgpr_u64(reg_s1)
-        reg_d_value = self.memory.get_memory(reg_s0_value + reg_s1_value, 16)
-        self.registers.set_sgpr_u128(reg_d, reg_d_value)
+    # # Load a 128-bit value from memory into a scalar register.
+    # def s_load_b128(self, reg_d, reg_s0, reg_s1):
+    #     reg_s0_value = self.registers.sgpr_u64(reg_s0)
+    #     reg_s1_value = self.registers.sgpr_u64(reg_s1)
+    #     reg_d_value = self.memory.get_memory(reg_s0_value + reg_s1_value, 16)
+    #     self.registers.set_sgpr_u128(reg_d, reg_d_value)
 
     def s_load_b128(self, reg_d2_upper, reg_d2_lower, reg_d1_upper, reg_d1_lower, reg_s_upper, reg_s_lower, imm=None):
       reg_s_lobits = format(self.registers.sgpr_u32(reg_s_lower), '032b')

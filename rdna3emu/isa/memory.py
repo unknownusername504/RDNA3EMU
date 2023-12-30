@@ -187,6 +187,24 @@ class Memory:
         reg_d_value = self.get_global_memory(address, 4)
         self.registers.set_vgpr_u32(reg_d, reg_d_value)
 
+    # Global: use the SGPR to provide a base address and the VGPR provides a 32-bit byte offset. 
+    def global_load_b128(self, reg_d3, reg_d2, reg_d1, reg_d0, regv_offset, reg_s_hi, reg_s_lo, offset=0):
+      reg_s_lobits = format(self.registers.sgpr_u32(reg_s_lo), '032b')
+      reg_s_hibits = format(self.registers.sgpr_u32(reg_s_hi), '032b')
+      voffset = self.registers.vgpr_u32(regv_offset)
+      addr = int(reg_s_hibits + reg_s_lobits, 2) + voffset + offset
+      val = self.get_global_memory(addr, 16)
+      val_bits = format(val, '0128b')
+      val_1lobits = int(val_bits[0:32],2)
+      val_1hibits = int(val_bits[32:64],2)
+      val_2lobits = int(val_bits[64:96],2)
+      val_2hibits = int(val_bits[96:128],2)
+      self.registers.set_vgpr_u32(reg_d0, val_1lobits)
+      self.registers.set_vgpr_u32(reg_d1, val_1hibits)
+      self.registers.set_vgpr_u32(reg_d2, val_2lobits)
+      self.registers.set_vgpr_u32(reg_d3, val_2hibits)
+    
+
     # Untyped buffer store byte.
     def global_store_u8(self, reg_d, reg_v0, reg_s0, reg_s1, offset=0):
         reg_d_value = self.registers.vgpr_u8(reg_d)

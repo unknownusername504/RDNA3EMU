@@ -383,6 +383,7 @@ class InstructionSet:
                 "GLOBAL_LOAD_U16": self.memory.global_load_u16,
                 "GLOBAL_LOAD_I16": self.memory.global_load_i16,
                 "GLOBAL_LOAD_B32": self.memory.global_load_b32,
+                "GLOBAL_LOAD_B128": self.memory.global_load_b128,
                 "GLOBAL_STORE_U8": self.memory.global_store_u8,
                 "GLOBAL_STORE_I8": self.memory.global_store_i8,
                 "GLOBAL_STORE_U16": self.memory.global_store_u16,

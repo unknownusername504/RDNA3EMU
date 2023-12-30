@@ -46,6 +46,10 @@ def p_operand(p):
                | SYMBOL
                | BINARY
                | HEX
+               | EXEC_LO
+               | EXEC_HI
+               | VCC_LO
+               | VCC_HI
                | OCTAL
                | func
                | modifier'''
