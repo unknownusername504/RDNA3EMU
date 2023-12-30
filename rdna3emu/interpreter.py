@@ -73,6 +73,6 @@ def run(executable, print_instr=True, dump=True):
                 isa.dump_memory()
                 isa.dump_registers()
         except Exception as e:
-            print(instr)
-            # Re-raise the exception
+            # Re-raise the exception with the instruction appended
+            e.args = e.args + (instr,)
             raise e
