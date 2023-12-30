@@ -1,3 +1,4 @@
+import inspect
 import math
 import rdna3emu.isa.utils as utils
 from rdna3emu.isa.registers import Registers as Re
@@ -22,15 +23,15 @@ class VectorOps:
     # VOP2 instructions
     # Copy data from one of two inputs based on the vector condition code and store the result into a vector register.
     # In VOP3 the VCC source may be a scalar GPR specified in S2.
-    def v_cndmask_b32(self, reg_d, arg_0, arg_1, arg_vcc=None):
+    def v_cndmask_b32(self, reg_d, arg_0, arg_1, arg_2):
         arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_u32)
         arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_u32)
-        if arg_vcc is None:
-            reg_vcc_value = self.registers.vcc
+        if isinstance(arg_2, str):
+            arg_2_value = self.registers.vcc
         else:
-            reg_vcc_value = self.try_get_literal(arg_vcc, self.registers.sgpr_u32)
-        reg_d_value = arg_0_value if reg_vcc_value == 1 else arg_1_value
-        self.registers.set_sgpr_u32(reg_d, reg_d_value)
+            arg_2_value = self.registers.sgpr_u32(arg_2)
+        reg_d_value = arg_0_value if arg_2_value else arg_1_value
+        self.registers.set_vgpr_u32(reg_d, reg_d_value)
 
     # Dot product of packed FP16 values, accumulate with destination.
     def v_dot2acc_f32_f16(self, reg_d, reg_v0, reg_v1):
@@ -883,36 +884,65 @@ class VectorOps:
     # S1.u[7] -- value is a positive denormal value.
     # S1.u[8] -- value is a positive normal value.
     # S1.u[9] -- value is positive infinity.
-    def v_cmp_class_f32(self, reg_d, arg_0, arg_1=None):
-        if arg_1 is None:
-            arg_1 = arg_0
-            arg_0 = reg_d
-            reg_d = None
-        arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_f32)
-        arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_u32)
-        d_value = 0
-        if np.isnan(arg_0_value):
-            if arg_1_value & 0x2:
-                d_value = 1
-        elif np.isinf(arg_0_value):
-            if arg_1_value & 0x200:
-                d_value = 1
-        elif arg_0_value == 0:
-            if arg_1_value & 0x40:
-                d_value = 1
-        elif arg_0_value == -0:
-            if arg_1_value & 0x20:
-                d_value = 1
-        elif arg_0_value < 0:
-            if arg_1_value & 0x10:
-                d_value = 1
+    def v_cmp_class_f32(self, arg_0, arg_1, arg_2):
+        arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_f32)
+        arg_2_value = self.try_get_literal(arg_2, self.registers.vgpr_u32)
+        result = 0
+
+        nan = 0xFFC00000
+        quite_nan = 0x7FC00000
+        neg_inf = 0xFF800000
+        pos_inf = 0x7F800000
+        neg_zero = 0x80000000
+        pos_zero = 0x00000000
+
+        if arg_2_value & (0x1 << 0):
+            # Signaling NAN
+            result = arg_1_value == nan
+        elif arg_2_value & (0x1 << 1):
+            # Quiet NAN
+            result = arg_1_value == quite_nan
+        elif arg_2_value & (0x1 << 2):
+            # Negative infinity
+            result = arg_1_value == neg_inf
+        elif arg_2_value & (0x1 << 3):
+            # Negative normal value
+            result = arg_1_value | 0x80000000
+        elif arg_2_value & (0x1 << 4):
+            # Negative denormal value
+            result = arg_1_value | 0x80000000
+        elif arg_2_value & (0x1 << 5):
+            # Negative zero
+            result = arg_1_value == neg_zero
+        elif arg_2_value & (0x1 << 6):
+            # Positive zero
+            result = arg_1_value == pos_zero
+        elif arg_2_value & (0x1 << 7):
+            # Positive denormal value
+            result = arg_1_value & 0x7FFFFFFF
+        elif arg_2_value & (0x1 << 8):
+            # Positive normal value
+            result = arg_1_value & 0x7FFFFFFF
+        elif arg_2_value & (0x1 << 9):
+            # Positive infinity
+            result = arg_1_value == pos_inf
+
+        # Set vcc/dst
+        if not isinstance(arg_0, str):
+            self.registers.set_sgpr_u32(arg_0, result)
         else:
-            if arg_1_value & 0x8:
-                d_value = 1
-        # Set vcc
-        self.registers.vcc = d_value
-        if reg_d is not None:
-            self.registers.set_vgpr_u32(reg_d, d_value)
+            if arg_0 == "vcc_lo":
+                result = (result & 0xFFFF) | (self.registers.vcc & 0xFFFF0000)
+            elif arg_0 == "vcc_hi":
+                result = (result << 16) | (self.registers.vcc & 0xFFFF)
+            else:
+                raise Exception(
+                    "Invalid argument to {}".format(
+                        inspect.currentframe().f_code.co_name
+                    )
+                )
+
+            self.registers.vcc = result
 
     # Bitfield extract. Extract unsigned bitfield from first operand using field offset in second operand and field size in third operand.
     # D0.u = ((S0.u >> S1.u[4 : 0].u) & 32'U((1 << S2.u[4 : 0].u) - 1))
@@ -1203,105 +1233,142 @@ class VectorOps:
     # Add two unsigned inputs, store the result into a vector register and store the carry-out mask into a scalar register.
     # Example: v_add_co_u32 v0, vcc_lo, s4, v0
     # In the example vcc_lo will fail to parse and is interpreted as only storing the carry-out mask into vcc.
-    def v_add_co_u32(self, reg_d, arg_0, arg_1, arg_2=None):
-        if arg_2 is None:
-            arg_2 = arg_1
-            arg_1 = arg_0
-            arg_0 = None
+    def v_add_co_u32(self, reg_d, arg_0, arg_1, arg_2):
         arg_1_value = self.try_get_literal(arg_1, self.registers.sgpr_u32)
         arg_2_value = self.try_get_literal(arg_2, self.registers.vgpr_u32)
-        d_value = arg_1_value + arg_2_value
-        self.registers.vcc = d_value > 0xFFFFFFFF
-        if arg_0 is not None:
-            self.registers.set_vgpr_u32(arg_0, d_value)
-        self.registers.set_vgpr_u32(reg_d, d_value)
+
+        reg_d_value = arg_1_value + arg_2_value
+        carry_out = 1 if reg_d_value > 0xFFFFFFFF else 0
+        self.registers.set_vgpr_u32(reg_d, reg_d_value)
+
+        # Set vcc
+        if isinstance(arg_0, str):
+            if arg_0 == "vcc_lo":
+                self.registers.vcc = (self.registers.vcc & 0xFFFF0000) | carry_out
+            elif arg_0 == "vcc_hi":
+                self.registers.vcc = (self.registers.vcc & 0xFFFF) | (carry_out << 16)
+            else:
+                raise Exception(
+                    "Invalid argument to {}".format(
+                        inspect.currentframe().f_code.co_name
+                    )
+                )
+        else:
+            self.registers.set_sgpr_u32(arg_0, carry_out)
 
     #
     def v_sub_co_u32(self):
         pass  # raise Exception("OP... not implemented")
 
     # Return 1 iff A less than B.
-    def v_cmp_lt_f32(self, arg_0, arg_1, arg_2=None):
-        # If there are three arguments, the result is supposed to be written to the first argument.
-        if arg_2 is not None:
-            reg_d = arg_0
-            arg_0_value = self.try_get_literal(arg_1, self.registers.vgpr_f32)
-            arg_1_value = self.try_get_literal(arg_2, self.registers.vgpr_f32)
-        else:
-            # If there are two arguments, the result is supposed to be written to EXEC.
-            arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_f32)
-            arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_f32)
+    def v_cmp_lt_f32(self, arg_0, arg_1, arg_2):
+        # The first argument is the destination register.
+        # But this may parse as a string of "vcc" if the destination register is omitted.
+        arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_f32)
+        arg_2_value = self.try_get_literal(arg_2, self.registers.vgpr_f32)
 
-        self.registers.exec = arg_0_value < arg_1_value
-        if arg_2 is not None:
-            self.registers.set_vgpr_u32(reg_d, arg_0_value < arg_1_value)
+        result = arg_1_value < arg_2_value
+
+        if not isinstance(arg_0, str):
+            self.registers.set_sgpr_u32(arg_0, result)
+        else:
+            if arg_0 == "vcc_lo":
+                result = (result & 0xFFFF) | (self.registers.vcc & 0xFFFF0000)
+            elif arg_0 == "vcc_hi":
+                result = (result << 16) | (self.registers.vcc & 0xFFFF)
+            else:
+                raise Exception(
+                    "Invalid argument to {}".format(
+                        inspect.currentframe().f_code.co_name
+                    )
+                )
+
+            self.registers.vcc = result
 
     # Return 1 iff A greater than B.
     # D0 = VCC in VOPC encoding.
-    def v_cmp_gt_f32(self, arg_0, arg_1, arg_2=None):
-        # If there are three arguments, the result is supposed to be written to the first argument.
-        if arg_2 is not None:
-            reg_d = arg_0
-            arg_0_value = self.try_get_literal(arg_1, self.registers.vgpr_f32)
-            arg_1_value = self.try_get_literal(arg_2, self.registers.vgpr_f32)
-        else:
-            # If there are two arguments, the result is supposed to be written to EXEC.
-            arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_f32)
-            arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_f32)
+    def v_cmp_gt_f32(self, arg_0, arg_1, arg_2):
+        # The first argument is the destination register.
+        # But this may parse as a string of "vcc" if the destination register is omitted.
+        arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_f32)
+        arg_2_value = self.try_get_literal(arg_2, self.registers.vgpr_f32)
 
-        self.registers.exec = arg_0_value > arg_1_value
-        if arg_2 is not None:
-            self.registers.set_vgpr_u32(reg_d, arg_0_value > arg_1_value)
+        result = arg_1_value > arg_2_value
+
+        if isinstance(arg_0, str):
+            if arg_0 == "vcc_lo":
+                result = (result & 0xFFFF) | (self.registers.vcc & 0xFFFF0000)
+            elif arg_0 == "vcc_hi":
+                result = (result << 16) | (self.registers.vcc & 0xFFFF)
+            else:
+                raise Exception(
+                    "Invalid argument to {}".format(
+                        inspect.currentframe().f_code.co_name
+                    )
+                )
+
+            self.registers.vcc = result
+        else:
+            self.registers.set_sgpr_u32(arg_0, result)
 
     # Return 1 iff A greater than or equal to B.
-    def v_cmp_ge_f32(self, arg_0, arg_1, arg_2=None):
-        # If there are three arguments, the result is supposed to be written to the first argument.
-        if arg_2 is not None:
-            reg_d = arg_0
-            arg_0_value = self.try_get_literal(arg_1, self.registers.vgpr_f32)
-            arg_1_value = self.try_get_literal(arg_2, self.registers.vgpr_f32)
-        else:
-            # If there are two arguments, the result is supposed to be written to EXEC.
-            arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_f32)
-            arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_f32)
+    def v_cmp_ge_f32(self, arg_0, arg_1, arg_2):
+        # The first argument is the destination register.
+        # But this may parse as a string of "vcc" if the destination register is omitted.
+        arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_f32)
+        arg_2_value = self.try_get_literal(arg_2, self.registers.vgpr_f32)
 
-        self.registers.exec = arg_0_value >= arg_1_value
-        if arg_2 is not None:
-            self.registers.set_vgpr_u32(reg_d, arg_0_value >= arg_1_value)
+        result = arg_1_value >= arg_2_value
+
+        if not isinstance(arg_0, str):
+            self.registers.set_sgpr_u32(arg_0, result)
+        else:
+            if "_lo" in arg_0:
+                result = (result & 0xFFFF) | (self.registers.vcc & 0xFFFF0000)
+            elif "_hi" in arg_0:
+                result = (result << 16) | (self.registers.vcc & 0xFFFF)
+
+            self.registers.vcc = result
 
     # Return 1 iff A less than B.
-    def v_cmp_lt_u32(self, arg_0, arg_1, arg_2=None):
-        # If there are three arguments, the result is supposed to be written to the first argument.
-        if arg_2 is not None:
-            reg_d = arg_0
-            arg_0_value = self.try_get_literal(arg_1, self.registers.vgpr_u32)
-            arg_1_value = self.try_get_literal(arg_2, self.registers.vgpr_u32)
-        else:
-            # If there are two arguments, the result is supposed to be written to EXEC.
-            arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_u32)
-            arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_u32)
+    def v_cmp_lt_u32(self, arg_0, arg_1, arg_2):
+        # The first argument is the destination register.
+        # But this may parse as a string of "vcc" if the destination register is omitted.
+        arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_u32)
+        arg_2_value = self.try_get_literal(arg_2, self.registers.vgpr_u32)
 
-        self.registers.exec = arg_0_value < arg_1_value
-        if arg_2 is not None:
-            self.registers.set_vgpr_u32(reg_d, arg_0_value < arg_1_value)
+        result = arg_1_value < arg_2_value
+
+        if not isinstance(arg_0, str):
+            self.registers.set_sgpr_u32(arg_0, result)
+        else:
+            if "_lo" in arg_0:
+                result = (result & 0xFFFF) | (self.registers.vcc & 0xFFFF0000)
+            elif "_hi" in arg_0:
+                result = (result << 16) | (self.registers.vcc & 0xFFFF)
+
+            self.registers.vcc = result
 
     # VOPC instructions
     # Return 1 iff A equal to B.
     # D0 = VCC in VOPC encoding.
-    def v_cmp_eq_u32(self, arg_0, arg_1, arg_2=None):
-        # If there are three arguments, the result is supposed to be written to the first argument.
-        if arg_2 is not None:
-            reg_d = arg_0
-            arg_0_value = self.try_get_literal(arg_1, self.registers.vgpr_u32)
-            arg_1_value = self.try_get_literal(arg_2, self.registers.vgpr_u32)
-        else:
-            # If there are two arguments, the result is supposed to be written to EXEC.
-            arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_u32)
-            arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_u32)
+    def v_cmp_eq_u32(self, arg_0, arg_1, arg_2):
+        # The first argument is the destination register.
+        # But this may parse as a string of "vcc" if the destination register is omitted.
+        arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_u32)
+        arg_2_value = self.try_get_literal(arg_2, self.registers.vgpr_u32)
 
-        self.registers.exec = arg_0_value == arg_1_value
-        if arg_2 is not None:
-            self.registers.set_vgpr_u32(reg_d, arg_0_value == arg_1_value)
+        result = arg_1_value == arg_2_value
+
+        if not isinstance(arg_0, str):
+            self.registers.set_sgpr_u32(arg_0, result)
+        else:
+            if "_lo" in arg_0:
+                result = (result & 0xFFFF) | (self.registers.vcc & 0xFFFF0000)
+            elif "_hi" in arg_0:
+                result = (result << 16) | (self.registers.vcc & 0xFFFF)
+
+            self.registers.vcc = result
 
     #
     def v_cmp_ne_u32(self):
@@ -1343,36 +1410,65 @@ class VectorOps:
     # S1.u[7] -- value is a positive denormal value.
     # S1.u[8] -- value is a positive normal value.
     # S1.u[9] -- value is positive infinity.
-    def v_cmp_class_f16(self, reg_d, arg_0, arg_1=None):
-        if arg_1 is None:
-            arg_1 = arg_0
-            arg_0 = reg_d
-            reg_d = None
-        arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_f16)
-        arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_u32)
-        d_value = 0
-        if np.isnan(arg_0_value):
-            if arg_1_value & 0x2:
-                d_value = 1
-        elif np.isinf(arg_0_value):
-            if arg_1_value & 0x200:
-                d_value = 1
-        elif arg_0_value == 0:
-            if arg_1_value & 0x40:
-                d_value = 1
-        elif arg_0_value == -0:
-            if arg_1_value & 0x20:
-                d_value = 1
-        elif arg_0_value < 0:
-            if arg_1_value & 0x10:
-                d_value = 1
+    def v_cmp_class_f16(self, arg_0, arg_1, arg_2):
+        arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_f16)
+        arg_2_value = self.try_get_literal(arg_2, self.registers.vgpr_u32)
+        result = 0
+
+        nan = 0xFE00
+        quite_nan = 0x7E00
+        neg_inf = 0xFC00
+        pos_inf = 0x7C00
+        neg_zero = 0x8000
+        pos_zero = 0x0000
+
+        if arg_2_value & (0x1 << 0):
+            # Signaling NAN
+            result = arg_1_value == nan
+        elif arg_2_value & (0x1 << 1):
+            # Quiet NAN
+            result = arg_1_value == quite_nan
+        elif arg_2_value & (0x1 << 2):
+            # Negative infinity
+            result = arg_1_value == neg_inf
+        elif arg_2_value & (0x1 << 3):
+            # Negative normal value
+            result = arg_1_value | 0x8000
+        elif arg_2_value & (0x1 << 4):
+            # Negative denormal value
+            result = arg_1_value | 0x8000
+        elif arg_2_value & (0x1 << 5):
+            # Negative zero
+            result = arg_1_value == neg_zero
+        elif arg_2_value & (0x1 << 6):
+            # Positive zero
+            result = arg_1_value == pos_zero
+        elif arg_2_value & (0x1 << 7):
+            # Positive denormal value
+            result = arg_1_value & 0x7FFF
+        elif arg_2_value & (0x1 << 8):
+            # Positive normal value
+            result = arg_1_value & 0x7FFF
+        elif arg_2_value & (0x1 << 9):
+            # Positive infinity
+            result = arg_1_value == pos_inf
+
+        # Set vcc/dst
+        if not isinstance(arg_0, str):
+            self.registers.set_sgpr_u32(arg_0, result)
         else:
-            if arg_1_value & 0x8:
-                d_value = 1
-        # Set vcc
-        self.registers.vcc = d_value
-        if reg_d is not None:
-            self.registers.set_vgpr_u32(reg_d, d_value)
+            if arg_0 == "vcc_lo":
+                result = (result & 0xFFFF) | (self.registers.vcc & 0xFFFF0000)
+            elif arg_0 == "vcc_hi":
+                result = (result << 16) | (self.registers.vcc & 0xFFFF)
+            else:
+                raise Exception(
+                    "Invalid argument to {}".format(
+                        inspect.currentframe().f_code.co_name
+                    )
+                )
+
+            self.registers.vcc = result
 
     # Return 1 iff A equal to B.
     # Write only EXEC. SDST must be set to EXEC_LO. Signal 'invalid' on sNAN's, and also on qNAN's if clamp is set.
