@@ -63,9 +63,16 @@ def extract_exec(instr, operands):
     return (instr.fx, args)
 
 
-def run(executable):
+def run(executable, print_instr=True, dump=True):
     for instr in executable:
-        print(instr[0], instr[1])
-        instr[0](*instr[1])
-        isa.dump_memory()
-        isa.dump_registers()
+        try:
+            instr[0](*instr[1])
+            if print_instr:
+                print(instr[0], instr[1])
+            if dump:
+                isa.dump_memory()
+                isa.dump_registers()
+        except Exception as e:
+            print(instr)
+            # Re-raise the exception
+            raise e
