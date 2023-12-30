@@ -290,6 +290,26 @@ class Memory:
 
         reg_s0_value = self.get_local_memory(address, 4)
         self.registers.set_vgpr_u32(reg_s0, reg_s0_value)
+    
+    def ds_load_b128( self, reg_d3, reg_d2, reg_d1, reg_d0, reg_s0, offset=0):
+        if not isinstance(offset, int):
+            offset = int(offset)
+            # Print a warning
+            print("Warning: Offset is not an integer")
+        reg_s_value = self.registers.vgpr_u32(reg_s0)
+        addr = reg_s_value + offset
+
+        val = self.get_local_memory(addr, 16)
+        val_bits = format(val, "0128b")
+        val_1lobits = int(val_bits[0:32], 2)
+        val_1hibits = int(val_bits[32:64], 2)
+        val_2lobits = int(val_bits[64:96], 2)
+        val_2hibits = int(val_bits[96:128], 2)
+        self.registers.set_sgpr_u32(reg_d0, val_1lobits)
+        self.registers.set_sgpr_u32(reg_d1, val_1hibits)
+        self.registers.set_sgpr_u32(reg_d2, val_2lobits)
+        self.registers.set_sgpr_u32(reg_d3, val_2hibits) 
+      
 
     # this instruction takes a 32-bit value from the register reg_s0 and stores it in the local data share at the address specified by the value in the register reg_d.
     def ds_store_b32(self, reg_d, reg_s0, offset=0):
