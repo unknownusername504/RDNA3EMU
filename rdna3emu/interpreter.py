@@ -70,6 +70,10 @@ def run(executable, print_instr=True, dump=True):
             # Check that instr is a method and not a tuple
             if callable(instr):
                 instr = (instr, [])
+            # v_cndmask_b32 isn't parsing the last argument correctly which is vcc_lo so we need to add it manually
+            if instr[0] == isa.vector_ops.v_cndmask_b32:
+                if len(instr[1]) == 3:
+                    instr[1].append("vcc_lo")
             instr[0](*instr[1])
             if print_instr:
                 print(instr[0], instr[1])
