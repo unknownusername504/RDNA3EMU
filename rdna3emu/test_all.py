@@ -1,10 +1,16 @@
 import unittest
 
+import numpy as np
+
 from rdna3emu.isa.instruction_set import InstructionSet
 
 
 class TestSequences(unittest.TestCase):
     pass
+
+
+def get_expected_result(result_file_path):
+    return np.load(result_file_path)
 
 
 def make_test_func(test_file_name, isa):
@@ -69,9 +75,35 @@ def make_test_func(test_file_name, isa):
                         data = f.read()
 
                     instructions = parse(data)
-                    run(build_executable(instructions), False, False)
+                    emulated_result = run(build_executable(instructions), False, False)
         except Exception as _:
             self.fail(f"Failed to run {test_file_name} through interpreter.\n")
+
+        # Return if emulated_result is None
+        if emulated_result is None:
+            return
+
+        result_file_path = test_file_path.replace(".txt", "_result.npy")
+        # Assert that the file exists
+        try:
+            assert os.path.exists(result_file_path)
+        except AssertionError:
+            self.fail(f"The file {result_file_path} does not exist.")
+
+        expected_result = get_expected_result(result_file_path)
+
+        # Compare the results
+        try:
+            # Result will be a numpy array
+            np.testing.assert_allclose(
+                emulated_result, expected_result, atol=1e-6, rtol=1e-6
+            )
+        except AssertionError:
+            self.fail(
+                f"Emulated result does not match expected result for {test_file_name}.\n"
+                f"Emulated result: {emulated_result}\n"
+                f"Expected result: {expected_result}\n"
+            )
 
     # Set the name of the test
     test_func.__name__ = "test_" + test_file_name

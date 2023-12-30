@@ -64,6 +64,7 @@ def extract_exec(instr, operands):
 
 
 def run(executable, print_instr=True, dump=True):
+    emulated_result = None
     for instr in executable:
         try:
             # s_endpgm and s_code_end are the only instructions that don't take any arguments and are not arrays but are callable methods
@@ -84,3 +85,4 @@ def run(executable, print_instr=True, dump=True):
             # Re-raise the exception with the instruction appended
             e.args = e.args + (instr,)
             raise e
+    return emulated_result
