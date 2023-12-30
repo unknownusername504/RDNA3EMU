@@ -24,8 +24,9 @@ class Memory:
         # fprint = lambda x: print(x, file=open("memory.txt", "a"))
         print("==== Memory: ====")
         # Sort the accesses by address
-        self.accesses = sorted(self.accesses)
-        for access in self.accesses:
+        # Use local because it changes self.accesses to a list
+        accesses = sorted(self.accesses)
+        for access in accesses:
             # Read the current value given the address and size
             value = self.get_memory(access, 4)
             if non_zero and value == 0:
@@ -301,5 +302,6 @@ class Memory:
         reg_s0_value = self.registers.vgpr_u32(reg_s0)
 
         address = reg_d_value + offset
+        print(address)
 
         self.set_local_memory(address, 4, reg_s0_value)
