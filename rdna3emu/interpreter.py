@@ -85,4 +85,5 @@ def run(executable, print_instr=True, dump=True):
             # Re-raise the exception with the instruction appended
             e.args = e.args + (instr,)
             raise e
+    emulated_result = isa.get_results()
     return emulated_result
