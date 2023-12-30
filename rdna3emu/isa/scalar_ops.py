@@ -9,10 +9,17 @@ class ScalarOps:
         self.memory = memory
 
     def try_get_literal(self, arg, get_reg_func):
+        print(arg)
         # Argument could be a register or a literal
         if isinstance(arg, int) or isinstance(arg, float):
             # Literal
             return arg
+        elif isinstance(arg, str):
+            # Maybe special register string
+            if arg == 'exec_lo':
+              return self.registers.exec_lo
+            elif arg == 'exec_hi':
+              return self.registers.exec_hi
         else:
             # Register, let the caller handle the type
             return get_reg_func(arg)

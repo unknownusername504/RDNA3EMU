@@ -175,6 +175,8 @@ class Registers:
         self._vgpr = [0] * 256
         self._sgpr = [0] * 106
         self._exec = 0  # 64-bit
+        self._exec_lo = self._exec & 0x00000000FFFFFFFF 
+        self._exec_hi = self._exec & 0xFFFFFFFF00000000 
         self._status = StatusRegister()
         self._vcc = 0  # 64-bit
         self._flat_scratch = 0  # 48-bit
@@ -205,6 +207,8 @@ class Registers:
     exec = property(
         lambda self: self._exec, lambda self, val: setattr(self, "_exec", val)
     )
+    exec_lo = property(lambda self: self._exec_lo, lambda self, val: setattr(self, "_exec_lo", val))
+    exec_hi = property(lambda self: self._exec_hi, lambda self, val: setattr(self, "_exec_hi", val))
     status = property(
         lambda self: self._status, lambda self, val: setattr(self, "_status", val)
     )
