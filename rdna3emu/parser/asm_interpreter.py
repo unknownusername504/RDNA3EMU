@@ -1,9 +1,3 @@
-# This file defines the instruction set for RNDA3.
-import sys
-
-# Add rdna3emu to path
-sys.path.append("../rdna3emu/")
-
 import os
 
 import ply.lex as lex
