@@ -7,8 +7,6 @@ class Operand:
     self.registers = []
     if type == 'SGPR' or type == 'VGPR':
       self.preprocess_register_token()
-    else:
-       pass
     
   def preprocess_register_token(self):
       token_str = str(self.value)
@@ -41,16 +39,7 @@ class Instruction:
         # Convert to uppercase string
       instr = op.upper()
       self.name = instr
-      # The register array parsing will mean we should treat anything higher than 1 dword as 1 dword ops
-      # so we can just set the size part of the instruction to 32
-      # TODO: Can we ignore?
-      # if "64" in instr:
-      #     instr = instr.replace("64", "32")
-      # elif "128" in instr:
-      #     instr = instr.replace("128", "32")
-      # elif "256" in instr:
-      #     instr = instr.replace("256", "32")
-      # Remove "_e32" or "_e64" from the end of the instruction since we don't care about that yet
+     # Remove "_e32" or "_e64" from the end of the instruction since we don't care about that yet
       if instr.endswith("_E32") or instr.endswith("_E64"):
           instr = instr[:-4]
       instruction_func = instr

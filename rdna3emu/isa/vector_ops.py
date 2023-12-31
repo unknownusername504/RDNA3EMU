@@ -1253,7 +1253,15 @@ class VectorOps:
 
     # VOP3SD instructions
     #
-    def v_mad_u64_u32(self):
+    def v_mad_u64_u32(self, vdst0, vdst1, sdst, src0, src1, src2, src3=0):
+        # src0_val, src1_val, src2_val, src3_val = src0, src1, src2, src3
+        # if src0 < 256:
+        #   src0_val = self.registers.vgpr_u32(src0)
+        # if src1 < 256:
+        #   src1_val = self.register.vgpr_u32(src1)
+        # if src2 < 256:
+            
+        # src1_val = src1
         pass  # raise Exception("OP... not implemented")
 
     # Add two unsigned inputs, store the result into a vector register and store the carry-out mask into a scalar register.

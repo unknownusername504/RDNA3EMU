@@ -47,16 +47,17 @@ Rule 19    operand -> EXEC_HI
 Rule 20    operand -> VCC_LO
 Rule 21    operand -> VCC_HI
 Rule 22    operand -> OCTAL
-Rule 23    operand -> MINUS operand
-Rule 24    operand -> func
-Rule 25    operand -> OR func
-Rule 26    operand -> modifier
-Rule 27    modifier -> LABEL DECIMAL
-Rule 28    func -> SYMBOL LPAREN SYMBOL RPAREN
-Rule 29    func -> SYMBOL LPAREN DECIMAL RPAREN
-Rule 30    func -> SYMBOL LPAREN OCTAL RPAREN
-Rule 31    func -> SYMBOL LPAREN FLOATING RPAREN
-Rule 32    func -> SYMBOL LPAREN HEX RPAREN
+Rule 23    operand -> NULL
+Rule 24    operand -> MINUS operand
+Rule 25    operand -> func
+Rule 26    operand -> OR func
+Rule 27    operand -> modifier
+Rule 28    modifier -> LABEL DECIMAL
+Rule 29    func -> SYMBOL LPAREN SYMBOL RPAREN
+Rule 30    func -> SYMBOL LPAREN DECIMAL RPAREN
+Rule 31    func -> SYMBOL LPAREN OCTAL RPAREN
+Rule 32    func -> SYMBOL LPAREN FLOATING RPAREN
+Rule 33    func -> SYMBOL LPAREN HEX RPAREN
 
 Terminals, with rules where they appear
 
@@ -67,31 +68,32 @@ COMMA                : 8
 COMMENT              : 
 DATA                 : 
 DBLCOLON             : 6
-DECIMAL              : 14 27 29
+DECIMAL              : 14 28 30
 DIRECTIVE            : 
 EXEC_HI              : 19
 EXEC_LO              : 18
-FLOATING             : 13 31
+FLOATING             : 13 32
 GLOBAL               : 
 HASH                 : 
-HEX                  : 17 32
+HEX                  : 17 33
 INSTRUCTION          : 4 5 6 6
 INTEGER              : 
 KERNEL_DESC          : 
-LABEL                : 27
+LABEL                : 28
 LDS_GLOBAL           : 
-LPAREN               : 28 29 30 31 32
-MINUS                : 23
-OCTAL                : 22 30
-OR                   : 12 12 25
+LPAREN               : 29 30 31 32 33
+MINUS                : 24
+NULL                 : 23
+OCTAL                : 22 31
+OR                   : 12 12 26
 P2ALIGN              : 
 PLUS                 : 
 REF                  : 
-RPAREN               : 28 29 30 31 32
+RPAREN               : 29 30 31 32 33
 SET                  : 
 SGPR                 : 10
 STRING               : 
-SYMBOL               : 15 28 28 29 30 31 32
+SYMBOL               : 15 29 29 30 31 32 33
 TARGET               : 
 TEXT                 : 
 TYPE                 : 
@@ -103,9 +105,9 @@ error                :
 
 Nonterminals, with rules where they appear
 
-func                 : 24 25
-modifier             : 26
-operand              : 7 8 9 23
+func                 : 25 26
+modifier             : 27
+operand              : 7 8 9 24
 operands             : 5 6 6 8 9
 program              : 0
 statement            : 2 3
@@ -177,16 +179,17 @@ state 4
     (20) operand -> . VCC_LO
     (21) operand -> . VCC_HI
     (22) operand -> . OCTAL
-    (23) operand -> . MINUS operand
-    (24) operand -> . func
-    (25) operand -> . OR func
-    (26) operand -> . modifier
-    (28) func -> . SYMBOL LPAREN SYMBOL RPAREN
-    (29) func -> . SYMBOL LPAREN DECIMAL RPAREN
-    (30) func -> . SYMBOL LPAREN OCTAL RPAREN
-    (31) func -> . SYMBOL LPAREN FLOATING RPAREN
-    (32) func -> . SYMBOL LPAREN HEX RPAREN
-    (27) modifier -> . LABEL DECIMAL
+    (23) operand -> . NULL
+    (24) operand -> . MINUS operand
+    (25) operand -> . func
+    (26) operand -> . OR func
+    (27) operand -> . modifier
+    (29) func -> . SYMBOL LPAREN SYMBOL RPAREN
+    (30) func -> . SYMBOL LPAREN DECIMAL RPAREN
+    (31) func -> . SYMBOL LPAREN OCTAL RPAREN
+    (32) func -> . SYMBOL LPAREN FLOATING RPAREN
+    (33) func -> . SYMBOL LPAREN HEX RPAREN
+    (28) modifier -> . LABEL DECIMAL
 
     INSTRUCTION     reduce using rule 4 (statement -> INSTRUCTION .)
     $end            reduce using rule 4 (statement -> INSTRUCTION .)
@@ -203,13 +206,14 @@ state 4
     VCC_LO          shift and go to state 18
     VCC_HI          shift and go to state 19
     OCTAL           shift and go to state 20
-    MINUS           shift and go to state 21
-    LABEL           shift and go to state 24
+    NULL            shift and go to state 21
+    MINUS           shift and go to state 22
+    LABEL           shift and go to state 25
 
     operands                       shift and go to state 6
     operand                        shift and go to state 7
-    func                           shift and go to state 22
-    modifier                       shift and go to state 23
+    func                           shift and go to state 23
+    modifier                       shift and go to state 24
 
 state 5
 
@@ -238,21 +242,22 @@ state 6
     (20) operand -> . VCC_LO
     (21) operand -> . VCC_HI
     (22) operand -> . OCTAL
-    (23) operand -> . MINUS operand
-    (24) operand -> . func
-    (25) operand -> . OR func
-    (26) operand -> . modifier
-    (28) func -> . SYMBOL LPAREN SYMBOL RPAREN
-    (29) func -> . SYMBOL LPAREN DECIMAL RPAREN
-    (30) func -> . SYMBOL LPAREN OCTAL RPAREN
-    (31) func -> . SYMBOL LPAREN FLOATING RPAREN
-    (32) func -> . SYMBOL LPAREN HEX RPAREN
-    (27) modifier -> . LABEL DECIMAL
+    (23) operand -> . NULL
+    (24) operand -> . MINUS operand
+    (25) operand -> . func
+    (26) operand -> . OR func
+    (27) operand -> . modifier
+    (29) func -> . SYMBOL LPAREN SYMBOL RPAREN
+    (30) func -> . SYMBOL LPAREN DECIMAL RPAREN
+    (31) func -> . SYMBOL LPAREN OCTAL RPAREN
+    (32) func -> . SYMBOL LPAREN FLOATING RPAREN
+    (33) func -> . SYMBOL LPAREN HEX RPAREN
+    (28) modifier -> . LABEL DECIMAL
 
     INSTRUCTION     reduce using rule 5 (statement -> INSTRUCTION operands .)
     $end            reduce using rule 5 (statement -> INSTRUCTION operands .)
-    DBLCOLON        shift and go to state 25
-    COMMA           shift and go to state 26
+    DBLCOLON        shift and go to state 26
+    COMMA           shift and go to state 27
     SGPR            shift and go to state 8
     VGPR            shift and go to state 9
     OR              shift and go to state 10
@@ -266,12 +271,13 @@ state 6
     VCC_LO          shift and go to state 18
     VCC_HI          shift and go to state 19
     OCTAL           shift and go to state 20
-    MINUS           shift and go to state 21
-    LABEL           shift and go to state 24
+    NULL            shift and go to state 21
+    MINUS           shift and go to state 22
+    LABEL           shift and go to state 25
 
-    operand                        shift and go to state 27
-    func                           shift and go to state 22
-    modifier                       shift and go to state 23
+    operand                        shift and go to state 28
+    func                           shift and go to state 23
+    modifier                       shift and go to state 24
 
 state 7
 
@@ -292,6 +298,7 @@ state 7
     VCC_LO          reduce using rule 7 (operands -> operand .)
     VCC_HI          reduce using rule 7 (operands -> operand .)
     OCTAL           reduce using rule 7 (operands -> operand .)
+    NULL            reduce using rule 7 (operands -> operand .)
     MINUS           reduce using rule 7 (operands -> operand .)
     LABEL           reduce using rule 7 (operands -> operand .)
     INSTRUCTION     reduce using rule 7 (operands -> operand .)
@@ -317,6 +324,7 @@ state 8
     VCC_LO          reduce using rule 10 (operand -> SGPR .)
     VCC_HI          reduce using rule 10 (operand -> SGPR .)
     OCTAL           reduce using rule 10 (operand -> SGPR .)
+    NULL            reduce using rule 10 (operand -> SGPR .)
     MINUS           reduce using rule 10 (operand -> SGPR .)
     LABEL           reduce using rule 10 (operand -> SGPR .)
     INSTRUCTION     reduce using rule 10 (operand -> SGPR .)
@@ -342,6 +350,7 @@ state 9
     VCC_LO          reduce using rule 11 (operand -> VGPR .)
     VCC_HI          reduce using rule 11 (operand -> VGPR .)
     OCTAL           reduce using rule 11 (operand -> VGPR .)
+    NULL            reduce using rule 11 (operand -> VGPR .)
     MINUS           reduce using rule 11 (operand -> VGPR .)
     LABEL           reduce using rule 11 (operand -> VGPR .)
     INSTRUCTION     reduce using rule 11 (operand -> VGPR .)
@@ -351,17 +360,17 @@ state 9
 state 10
 
     (12) operand -> OR . VGPR OR
-    (25) operand -> OR . func
-    (28) func -> . SYMBOL LPAREN SYMBOL RPAREN
-    (29) func -> . SYMBOL LPAREN DECIMAL RPAREN
-    (30) func -> . SYMBOL LPAREN OCTAL RPAREN
-    (31) func -> . SYMBOL LPAREN FLOATING RPAREN
-    (32) func -> . SYMBOL LPAREN HEX RPAREN
+    (26) operand -> OR . func
+    (29) func -> . SYMBOL LPAREN SYMBOL RPAREN
+    (30) func -> . SYMBOL LPAREN DECIMAL RPAREN
+    (31) func -> . SYMBOL LPAREN OCTAL RPAREN
+    (32) func -> . SYMBOL LPAREN FLOATING RPAREN
+    (33) func -> . SYMBOL LPAREN HEX RPAREN
 
-    VGPR            shift and go to state 28
-    SYMBOL          shift and go to state 30
+    VGPR            shift and go to state 29
+    SYMBOL          shift and go to state 31
 
-    func                           shift and go to state 29
+    func                           shift and go to state 30
 
 state 11
 
@@ -382,6 +391,7 @@ state 11
     VCC_LO          reduce using rule 13 (operand -> FLOATING .)
     VCC_HI          reduce using rule 13 (operand -> FLOATING .)
     OCTAL           reduce using rule 13 (operand -> FLOATING .)
+    NULL            reduce using rule 13 (operand -> FLOATING .)
     MINUS           reduce using rule 13 (operand -> FLOATING .)
     LABEL           reduce using rule 13 (operand -> FLOATING .)
     INSTRUCTION     reduce using rule 13 (operand -> FLOATING .)
@@ -407,6 +417,7 @@ state 12
     VCC_LO          reduce using rule 14 (operand -> DECIMAL .)
     VCC_HI          reduce using rule 14 (operand -> DECIMAL .)
     OCTAL           reduce using rule 14 (operand -> DECIMAL .)
+    NULL            reduce using rule 14 (operand -> DECIMAL .)
     MINUS           reduce using rule 14 (operand -> DECIMAL .)
     LABEL           reduce using rule 14 (operand -> DECIMAL .)
     INSTRUCTION     reduce using rule 14 (operand -> DECIMAL .)
@@ -416,11 +427,11 @@ state 12
 state 13
 
     (15) operand -> SYMBOL .
-    (28) func -> SYMBOL . LPAREN SYMBOL RPAREN
-    (29) func -> SYMBOL . LPAREN DECIMAL RPAREN
-    (30) func -> SYMBOL . LPAREN OCTAL RPAREN
-    (31) func -> SYMBOL . LPAREN FLOATING RPAREN
-    (32) func -> SYMBOL . LPAREN HEX RPAREN
+    (29) func -> SYMBOL . LPAREN SYMBOL RPAREN
+    (30) func -> SYMBOL . LPAREN DECIMAL RPAREN
+    (31) func -> SYMBOL . LPAREN OCTAL RPAREN
+    (32) func -> SYMBOL . LPAREN FLOATING RPAREN
+    (33) func -> SYMBOL . LPAREN HEX RPAREN
 
     DBLCOLON        reduce using rule 15 (operand -> SYMBOL .)
     COMMA           reduce using rule 15 (operand -> SYMBOL .)
@@ -437,11 +448,12 @@ state 13
     VCC_LO          reduce using rule 15 (operand -> SYMBOL .)
     VCC_HI          reduce using rule 15 (operand -> SYMBOL .)
     OCTAL           reduce using rule 15 (operand -> SYMBOL .)
+    NULL            reduce using rule 15 (operand -> SYMBOL .)
     MINUS           reduce using rule 15 (operand -> SYMBOL .)
     LABEL           reduce using rule 15 (operand -> SYMBOL .)
     INSTRUCTION     reduce using rule 15 (operand -> SYMBOL .)
     $end            reduce using rule 15 (operand -> SYMBOL .)
-    LPAREN          shift and go to state 31
+    LPAREN          shift and go to state 32
 
 
 state 14
@@ -463,6 +475,7 @@ state 14
     VCC_LO          reduce using rule 16 (operand -> BINARY .)
     VCC_HI          reduce using rule 16 (operand -> BINARY .)
     OCTAL           reduce using rule 16 (operand -> BINARY .)
+    NULL            reduce using rule 16 (operand -> BINARY .)
     MINUS           reduce using rule 16 (operand -> BINARY .)
     LABEL           reduce using rule 16 (operand -> BINARY .)
     INSTRUCTION     reduce using rule 16 (operand -> BINARY .)
@@ -488,6 +501,7 @@ state 15
     VCC_LO          reduce using rule 17 (operand -> HEX .)
     VCC_HI          reduce using rule 17 (operand -> HEX .)
     OCTAL           reduce using rule 17 (operand -> HEX .)
+    NULL            reduce using rule 17 (operand -> HEX .)
     MINUS           reduce using rule 17 (operand -> HEX .)
     LABEL           reduce using rule 17 (operand -> HEX .)
     INSTRUCTION     reduce using rule 17 (operand -> HEX .)
@@ -513,6 +527,7 @@ state 16
     VCC_LO          reduce using rule 18 (operand -> EXEC_LO .)
     VCC_HI          reduce using rule 18 (operand -> EXEC_LO .)
     OCTAL           reduce using rule 18 (operand -> EXEC_LO .)
+    NULL            reduce using rule 18 (operand -> EXEC_LO .)
     MINUS           reduce using rule 18 (operand -> EXEC_LO .)
     LABEL           reduce using rule 18 (operand -> EXEC_LO .)
     INSTRUCTION     reduce using rule 18 (operand -> EXEC_LO .)
@@ -538,6 +553,7 @@ state 17
     VCC_LO          reduce using rule 19 (operand -> EXEC_HI .)
     VCC_HI          reduce using rule 19 (operand -> EXEC_HI .)
     OCTAL           reduce using rule 19 (operand -> EXEC_HI .)
+    NULL            reduce using rule 19 (operand -> EXEC_HI .)
     MINUS           reduce using rule 19 (operand -> EXEC_HI .)
     LABEL           reduce using rule 19 (operand -> EXEC_HI .)
     INSTRUCTION     reduce using rule 19 (operand -> EXEC_HI .)
@@ -563,6 +579,7 @@ state 18
     VCC_LO          reduce using rule 20 (operand -> VCC_LO .)
     VCC_HI          reduce using rule 20 (operand -> VCC_LO .)
     OCTAL           reduce using rule 20 (operand -> VCC_LO .)
+    NULL            reduce using rule 20 (operand -> VCC_LO .)
     MINUS           reduce using rule 20 (operand -> VCC_LO .)
     LABEL           reduce using rule 20 (operand -> VCC_LO .)
     INSTRUCTION     reduce using rule 20 (operand -> VCC_LO .)
@@ -588,6 +605,7 @@ state 19
     VCC_LO          reduce using rule 21 (operand -> VCC_HI .)
     VCC_HI          reduce using rule 21 (operand -> VCC_HI .)
     OCTAL           reduce using rule 21 (operand -> VCC_HI .)
+    NULL            reduce using rule 21 (operand -> VCC_HI .)
     MINUS           reduce using rule 21 (operand -> VCC_HI .)
     LABEL           reduce using rule 21 (operand -> VCC_HI .)
     INSTRUCTION     reduce using rule 21 (operand -> VCC_HI .)
@@ -613,6 +631,7 @@ state 20
     VCC_LO          reduce using rule 22 (operand -> OCTAL .)
     VCC_HI          reduce using rule 22 (operand -> OCTAL .)
     OCTAL           reduce using rule 22 (operand -> OCTAL .)
+    NULL            reduce using rule 22 (operand -> OCTAL .)
     MINUS           reduce using rule 22 (operand -> OCTAL .)
     LABEL           reduce using rule 22 (operand -> OCTAL .)
     INSTRUCTION     reduce using rule 22 (operand -> OCTAL .)
@@ -621,7 +640,33 @@ state 20
 
 state 21
 
-    (23) operand -> MINUS . operand
+    (23) operand -> NULL .
+
+    DBLCOLON        reduce using rule 23 (operand -> NULL .)
+    COMMA           reduce using rule 23 (operand -> NULL .)
+    SGPR            reduce using rule 23 (operand -> NULL .)
+    VGPR            reduce using rule 23 (operand -> NULL .)
+    OR              reduce using rule 23 (operand -> NULL .)
+    FLOATING        reduce using rule 23 (operand -> NULL .)
+    DECIMAL         reduce using rule 23 (operand -> NULL .)
+    SYMBOL          reduce using rule 23 (operand -> NULL .)
+    BINARY          reduce using rule 23 (operand -> NULL .)
+    HEX             reduce using rule 23 (operand -> NULL .)
+    EXEC_LO         reduce using rule 23 (operand -> NULL .)
+    EXEC_HI         reduce using rule 23 (operand -> NULL .)
+    VCC_LO          reduce using rule 23 (operand -> NULL .)
+    VCC_HI          reduce using rule 23 (operand -> NULL .)
+    OCTAL           reduce using rule 23 (operand -> NULL .)
+    NULL            reduce using rule 23 (operand -> NULL .)
+    MINUS           reduce using rule 23 (operand -> NULL .)
+    LABEL           reduce using rule 23 (operand -> NULL .)
+    INSTRUCTION     reduce using rule 23 (operand -> NULL .)
+    $end            reduce using rule 23 (operand -> NULL .)
+
+
+state 22
+
+    (24) operand -> MINUS . operand
     (10) operand -> . SGPR
     (11) operand -> . VGPR
     (12) operand -> . OR VGPR OR
@@ -635,16 +680,17 @@ state 21
     (20) operand -> . VCC_LO
     (21) operand -> . VCC_HI
     (22) operand -> . OCTAL
-    (23) operand -> . MINUS operand
-    (24) operand -> . func
-    (25) operand -> . OR func
-    (26) operand -> . modifier
-    (28) func -> . SYMBOL LPAREN SYMBOL RPAREN
-    (29) func -> . SYMBOL LPAREN DECIMAL RPAREN
-    (30) func -> . SYMBOL LPAREN OCTAL RPAREN
-    (31) func -> . SYMBOL LPAREN FLOATING RPAREN
-    (32) func -> . SYMBOL LPAREN HEX RPAREN
-    (27) modifier -> . LABEL DECIMAL
+    (23) operand -> . NULL
+    (24) operand -> . MINUS operand
+    (25) operand -> . func
+    (26) operand -> . OR func
+    (27) operand -> . modifier
+    (29) func -> . SYMBOL LPAREN SYMBOL RPAREN
+    (30) func -> . SYMBOL LPAREN DECIMAL RPAREN
+    (31) func -> . SYMBOL LPAREN OCTAL RPAREN
+    (32) func -> . SYMBOL LPAREN FLOATING RPAREN
+    (33) func -> . SYMBOL LPAREN HEX RPAREN
+    (28) modifier -> . LABEL DECIMAL
 
     SGPR            shift and go to state 8
     VGPR            shift and go to state 9
@@ -659,78 +705,81 @@ state 21
     VCC_LO          shift and go to state 18
     VCC_HI          shift and go to state 19
     OCTAL           shift and go to state 20
-    MINUS           shift and go to state 21
-    LABEL           shift and go to state 24
+    NULL            shift and go to state 21
+    MINUS           shift and go to state 22
+    LABEL           shift and go to state 25
 
-    operand                        shift and go to state 32
-    func                           shift and go to state 22
-    modifier                       shift and go to state 23
-
-state 22
-
-    (24) operand -> func .
-
-    DBLCOLON        reduce using rule 24 (operand -> func .)
-    COMMA           reduce using rule 24 (operand -> func .)
-    SGPR            reduce using rule 24 (operand -> func .)
-    VGPR            reduce using rule 24 (operand -> func .)
-    OR              reduce using rule 24 (operand -> func .)
-    FLOATING        reduce using rule 24 (operand -> func .)
-    DECIMAL         reduce using rule 24 (operand -> func .)
-    SYMBOL          reduce using rule 24 (operand -> func .)
-    BINARY          reduce using rule 24 (operand -> func .)
-    HEX             reduce using rule 24 (operand -> func .)
-    EXEC_LO         reduce using rule 24 (operand -> func .)
-    EXEC_HI         reduce using rule 24 (operand -> func .)
-    VCC_LO          reduce using rule 24 (operand -> func .)
-    VCC_HI          reduce using rule 24 (operand -> func .)
-    OCTAL           reduce using rule 24 (operand -> func .)
-    MINUS           reduce using rule 24 (operand -> func .)
-    LABEL           reduce using rule 24 (operand -> func .)
-    INSTRUCTION     reduce using rule 24 (operand -> func .)
-    $end            reduce using rule 24 (operand -> func .)
-
+    operand                        shift and go to state 33
+    func                           shift and go to state 23
+    modifier                       shift and go to state 24
 
 state 23
 
-    (26) operand -> modifier .
+    (25) operand -> func .
 
-    DBLCOLON        reduce using rule 26 (operand -> modifier .)
-    COMMA           reduce using rule 26 (operand -> modifier .)
-    SGPR            reduce using rule 26 (operand -> modifier .)
-    VGPR            reduce using rule 26 (operand -> modifier .)
-    OR              reduce using rule 26 (operand -> modifier .)
-    FLOATING        reduce using rule 26 (operand -> modifier .)
-    DECIMAL         reduce using rule 26 (operand -> modifier .)
-    SYMBOL          reduce using rule 26 (operand -> modifier .)
-    BINARY          reduce using rule 26 (operand -> modifier .)
-    HEX             reduce using rule 26 (operand -> modifier .)
-    EXEC_LO         reduce using rule 26 (operand -> modifier .)
-    EXEC_HI         reduce using rule 26 (operand -> modifier .)
-    VCC_LO          reduce using rule 26 (operand -> modifier .)
-    VCC_HI          reduce using rule 26 (operand -> modifier .)
-    OCTAL           reduce using rule 26 (operand -> modifier .)
-    MINUS           reduce using rule 26 (operand -> modifier .)
-    LABEL           reduce using rule 26 (operand -> modifier .)
-    INSTRUCTION     reduce using rule 26 (operand -> modifier .)
-    $end            reduce using rule 26 (operand -> modifier .)
+    DBLCOLON        reduce using rule 25 (operand -> func .)
+    COMMA           reduce using rule 25 (operand -> func .)
+    SGPR            reduce using rule 25 (operand -> func .)
+    VGPR            reduce using rule 25 (operand -> func .)
+    OR              reduce using rule 25 (operand -> func .)
+    FLOATING        reduce using rule 25 (operand -> func .)
+    DECIMAL         reduce using rule 25 (operand -> func .)
+    SYMBOL          reduce using rule 25 (operand -> func .)
+    BINARY          reduce using rule 25 (operand -> func .)
+    HEX             reduce using rule 25 (operand -> func .)
+    EXEC_LO         reduce using rule 25 (operand -> func .)
+    EXEC_HI         reduce using rule 25 (operand -> func .)
+    VCC_LO          reduce using rule 25 (operand -> func .)
+    VCC_HI          reduce using rule 25 (operand -> func .)
+    OCTAL           reduce using rule 25 (operand -> func .)
+    NULL            reduce using rule 25 (operand -> func .)
+    MINUS           reduce using rule 25 (operand -> func .)
+    LABEL           reduce using rule 25 (operand -> func .)
+    INSTRUCTION     reduce using rule 25 (operand -> func .)
+    $end            reduce using rule 25 (operand -> func .)
 
 
 state 24
 
-    (27) modifier -> LABEL . DECIMAL
+    (27) operand -> modifier .
 
-    DECIMAL         shift and go to state 33
+    DBLCOLON        reduce using rule 27 (operand -> modifier .)
+    COMMA           reduce using rule 27 (operand -> modifier .)
+    SGPR            reduce using rule 27 (operand -> modifier .)
+    VGPR            reduce using rule 27 (operand -> modifier .)
+    OR              reduce using rule 27 (operand -> modifier .)
+    FLOATING        reduce using rule 27 (operand -> modifier .)
+    DECIMAL         reduce using rule 27 (operand -> modifier .)
+    SYMBOL          reduce using rule 27 (operand -> modifier .)
+    BINARY          reduce using rule 27 (operand -> modifier .)
+    HEX             reduce using rule 27 (operand -> modifier .)
+    EXEC_LO         reduce using rule 27 (operand -> modifier .)
+    EXEC_HI         reduce using rule 27 (operand -> modifier .)
+    VCC_LO          reduce using rule 27 (operand -> modifier .)
+    VCC_HI          reduce using rule 27 (operand -> modifier .)
+    OCTAL           reduce using rule 27 (operand -> modifier .)
+    NULL            reduce using rule 27 (operand -> modifier .)
+    MINUS           reduce using rule 27 (operand -> modifier .)
+    LABEL           reduce using rule 27 (operand -> modifier .)
+    INSTRUCTION     reduce using rule 27 (operand -> modifier .)
+    $end            reduce using rule 27 (operand -> modifier .)
 
 
 state 25
 
-    (6) statement -> INSTRUCTION operands DBLCOLON . INSTRUCTION operands
+    (28) modifier -> LABEL . DECIMAL
 
-    INSTRUCTION     shift and go to state 34
+    DECIMAL         shift and go to state 34
 
 
 state 26
+
+    (6) statement -> INSTRUCTION operands DBLCOLON . INSTRUCTION operands
+
+    INSTRUCTION     shift and go to state 35
+
+
+state 27
 
     (8) operands -> operands COMMA . operand
     (10) operand -> . SGPR
@@ -746,16 +795,17 @@ state 26
     (20) operand -> . VCC_LO
     (21) operand -> . VCC_HI
     (22) operand -> . OCTAL
-    (23) operand -> . MINUS operand
-    (24) operand -> . func
-    (25) operand -> . OR func
-    (26) operand -> . modifier
-    (28) func -> . SYMBOL LPAREN SYMBOL RPAREN
-    (29) func -> . SYMBOL LPAREN DECIMAL RPAREN
-    (30) func -> . SYMBOL LPAREN OCTAL RPAREN
-    (31) func -> . SYMBOL LPAREN FLOATING RPAREN
-    (32) func -> . SYMBOL LPAREN HEX RPAREN
-    (27) modifier -> . LABEL DECIMAL
+    (23) operand -> . NULL
+    (24) operand -> . MINUS operand
+    (25) operand -> . func
+    (26) operand -> . OR func
+    (27) operand -> . modifier
+    (29) func -> . SYMBOL LPAREN SYMBOL RPAREN
+    (30) func -> . SYMBOL LPAREN DECIMAL RPAREN
+    (31) func -> . SYMBOL LPAREN OCTAL RPAREN
+    (32) func -> . SYMBOL LPAREN FLOATING RPAREN
+    (33) func -> . SYMBOL LPAREN HEX RPAREN
+    (28) modifier -> . LABEL DECIMAL
 
     SGPR            shift and go to state 8
     VGPR            shift and go to state 9
@@ -770,14 +820,15 @@ state 26
     VCC_LO          shift and go to state 18
     VCC_HI          shift and go to state 19
     OCTAL           shift and go to state 20
-    MINUS           shift and go to state 21
-    LABEL           shift and go to state 24
+    NULL            shift and go to state 21
+    MINUS           shift and go to state 22
+    LABEL           shift and go to state 25
 
-    operand                        shift and go to state 35
-    func                           shift and go to state 22
-    modifier                       shift and go to state 23
+    operand                        shift and go to state 36
+    func                           shift and go to state 23
+    modifier                       shift and go to state 24
 
-state 27
+state 28
 
     (9) operands -> operands operand .
 
@@ -796,121 +847,125 @@ state 27
     VCC_LO          reduce using rule 9 (operands -> operands operand .)
     VCC_HI          reduce using rule 9 (operands -> operands operand .)
     OCTAL           reduce using rule 9 (operands -> operands operand .)
+    NULL            reduce using rule 9 (operands -> operands operand .)
     MINUS           reduce using rule 9 (operands -> operands operand .)
     LABEL           reduce using rule 9 (operands -> operands operand .)
     INSTRUCTION     reduce using rule 9 (operands -> operands operand .)
     $end            reduce using rule 9 (operands -> operands operand .)
 
 
-state 28
+state 29
 
     (12) operand -> OR VGPR . OR
 
-    OR              shift and go to state 36
-
-
-state 29
-
-    (25) operand -> OR func .
-
-    DBLCOLON        reduce using rule 25 (operand -> OR func .)
-    COMMA           reduce using rule 25 (operand -> OR func .)
-    SGPR            reduce using rule 25 (operand -> OR func .)
-    VGPR            reduce using rule 25 (operand -> OR func .)
-    OR              reduce using rule 25 (operand -> OR func .)
-    FLOATING        reduce using rule 25 (operand -> OR func .)
-    DECIMAL         reduce using rule 25 (operand -> OR func .)
-    SYMBOL          reduce using rule 25 (operand -> OR func .)
-    BINARY          reduce using rule 25 (operand -> OR func .)
-    HEX             reduce using rule 25 (operand -> OR func .)
-    EXEC_LO         reduce using rule 25 (operand -> OR func .)
-    EXEC_HI         reduce using rule 25 (operand -> OR func .)
-    VCC_LO          reduce using rule 25 (operand -> OR func .)
-    VCC_HI          reduce using rule 25 (operand -> OR func .)
-    OCTAL           reduce using rule 25 (operand -> OR func .)
-    MINUS           reduce using rule 25 (operand -> OR func .)
-    LABEL           reduce using rule 25 (operand -> OR func .)
-    INSTRUCTION     reduce using rule 25 (operand -> OR func .)
-    $end            reduce using rule 25 (operand -> OR func .)
+    OR              shift and go to state 37
 
 
 state 30
 
-    (28) func -> SYMBOL . LPAREN SYMBOL RPAREN
-    (29) func -> SYMBOL . LPAREN DECIMAL RPAREN
-    (30) func -> SYMBOL . LPAREN OCTAL RPAREN
-    (31) func -> SYMBOL . LPAREN FLOATING RPAREN
-    (32) func -> SYMBOL . LPAREN HEX RPAREN
+    (26) operand -> OR func .
 
-    LPAREN          shift and go to state 31
+    DBLCOLON        reduce using rule 26 (operand -> OR func .)
+    COMMA           reduce using rule 26 (operand -> OR func .)
+    SGPR            reduce using rule 26 (operand -> OR func .)
+    VGPR            reduce using rule 26 (operand -> OR func .)
+    OR              reduce using rule 26 (operand -> OR func .)
+    FLOATING        reduce using rule 26 (operand -> OR func .)
+    DECIMAL         reduce using rule 26 (operand -> OR func .)
+    SYMBOL          reduce using rule 26 (operand -> OR func .)
+    BINARY          reduce using rule 26 (operand -> OR func .)
+    HEX             reduce using rule 26 (operand -> OR func .)
+    EXEC_LO         reduce using rule 26 (operand -> OR func .)
+    EXEC_HI         reduce using rule 26 (operand -> OR func .)
+    VCC_LO          reduce using rule 26 (operand -> OR func .)
+    VCC_HI          reduce using rule 26 (operand -> OR func .)
+    OCTAL           reduce using rule 26 (operand -> OR func .)
+    NULL            reduce using rule 26 (operand -> OR func .)
+    MINUS           reduce using rule 26 (operand -> OR func .)
+    LABEL           reduce using rule 26 (operand -> OR func .)
+    INSTRUCTION     reduce using rule 26 (operand -> OR func .)
+    $end            reduce using rule 26 (operand -> OR func .)
 
 
 state 31
 
-    (28) func -> SYMBOL LPAREN . SYMBOL RPAREN
-    (29) func -> SYMBOL LPAREN . DECIMAL RPAREN
-    (30) func -> SYMBOL LPAREN . OCTAL RPAREN
-    (31) func -> SYMBOL LPAREN . FLOATING RPAREN
-    (32) func -> SYMBOL LPAREN . HEX RPAREN
+    (29) func -> SYMBOL . LPAREN SYMBOL RPAREN
+    (30) func -> SYMBOL . LPAREN DECIMAL RPAREN
+    (31) func -> SYMBOL . LPAREN OCTAL RPAREN
+    (32) func -> SYMBOL . LPAREN FLOATING RPAREN
+    (33) func -> SYMBOL . LPAREN HEX RPAREN
 
-    SYMBOL          shift and go to state 37
-    DECIMAL         shift and go to state 38
-    OCTAL           shift and go to state 39
-    FLOATING        shift and go to state 40
-    HEX             shift and go to state 41
+    LPAREN          shift and go to state 32
 
 
 state 32
 
-    (23) operand -> MINUS operand .
+    (29) func -> SYMBOL LPAREN . SYMBOL RPAREN
+    (30) func -> SYMBOL LPAREN . DECIMAL RPAREN
+    (31) func -> SYMBOL LPAREN . OCTAL RPAREN
+    (32) func -> SYMBOL LPAREN . FLOATING RPAREN
+    (33) func -> SYMBOL LPAREN . HEX RPAREN
 
-    DBLCOLON        reduce using rule 23 (operand -> MINUS operand .)
-    COMMA           reduce using rule 23 (operand -> MINUS operand .)
-    SGPR            reduce using rule 23 (operand -> MINUS operand .)
-    VGPR            reduce using rule 23 (operand -> MINUS operand .)
-    OR              reduce using rule 23 (operand -> MINUS operand .)
-    FLOATING        reduce using rule 23 (operand -> MINUS operand .)
-    DECIMAL         reduce using rule 23 (operand -> MINUS operand .)
-    SYMBOL          reduce using rule 23 (operand -> MINUS operand .)
-    BINARY          reduce using rule 23 (operand -> MINUS operand .)
-    HEX             reduce using rule 23 (operand -> MINUS operand .)
-    EXEC_LO         reduce using rule 23 (operand -> MINUS operand .)
-    EXEC_HI         reduce using rule 23 (operand -> MINUS operand .)
-    VCC_LO          reduce using rule 23 (operand -> MINUS operand .)
-    VCC_HI          reduce using rule 23 (operand -> MINUS operand .)
-    OCTAL           reduce using rule 23 (operand -> MINUS operand .)
-    MINUS           reduce using rule 23 (operand -> MINUS operand .)
-    LABEL           reduce using rule 23 (operand -> MINUS operand .)
-    INSTRUCTION     reduce using rule 23 (operand -> MINUS operand .)
-    $end            reduce using rule 23 (operand -> MINUS operand .)
+    SYMBOL          shift and go to state 38
+    DECIMAL         shift and go to state 39
+    OCTAL           shift and go to state 40
+    FLOATING        shift and go to state 41
+    HEX             shift and go to state 42
 
 
 state 33
 
-    (27) modifier -> LABEL DECIMAL .
+    (24) operand -> MINUS operand .
 
-    DBLCOLON        reduce using rule 27 (modifier -> LABEL DECIMAL .)
-    COMMA           reduce using rule 27 (modifier -> LABEL DECIMAL .)
-    SGPR            reduce using rule 27 (modifier -> LABEL DECIMAL .)
-    VGPR            reduce using rule 27 (modifier -> LABEL DECIMAL .)
-    OR              reduce using rule 27 (modifier -> LABEL DECIMAL .)
-    FLOATING        reduce using rule 27 (modifier -> LABEL DECIMAL .)
-    DECIMAL         reduce using rule 27 (modifier -> LABEL DECIMAL .)
-    SYMBOL          reduce using rule 27 (modifier -> LABEL DECIMAL .)
-    BINARY          reduce using rule 27 (modifier -> LABEL DECIMAL .)
-    HEX             reduce using rule 27 (modifier -> LABEL DECIMAL .)
-    EXEC_LO         reduce using rule 27 (modifier -> LABEL DECIMAL .)
-    EXEC_HI         reduce using rule 27 (modifier -> LABEL DECIMAL .)
-    VCC_LO          reduce using rule 27 (modifier -> LABEL DECIMAL .)
-    VCC_HI          reduce using rule 27 (modifier -> LABEL DECIMAL .)
-    OCTAL           reduce using rule 27 (modifier -> LABEL DECIMAL .)
-    MINUS           reduce using rule 27 (modifier -> LABEL DECIMAL .)
-    LABEL           reduce using rule 27 (modifier -> LABEL DECIMAL .)
-    INSTRUCTION     reduce using rule 27 (modifier -> LABEL DECIMAL .)
-    $end            reduce using rule 27 (modifier -> LABEL DECIMAL .)
+    DBLCOLON        reduce using rule 24 (operand -> MINUS operand .)
+    COMMA           reduce using rule 24 (operand -> MINUS operand .)
+    SGPR            reduce using rule 24 (operand -> MINUS operand .)
+    VGPR            reduce using rule 24 (operand -> MINUS operand .)
+    OR              reduce using rule 24 (operand -> MINUS operand .)
+    FLOATING        reduce using rule 24 (operand -> MINUS operand .)
+    DECIMAL         reduce using rule 24 (operand -> MINUS operand .)
+    SYMBOL          reduce using rule 24 (operand -> MINUS operand .)
+    BINARY          reduce using rule 24 (operand -> MINUS operand .)
+    HEX             reduce using rule 24 (operand -> MINUS operand .)
+    EXEC_LO         reduce using rule 24 (operand -> MINUS operand .)
+    EXEC_HI         reduce using rule 24 (operand -> MINUS operand .)
+    VCC_LO          reduce using rule 24 (operand -> MINUS operand .)
+    VCC_HI          reduce using rule 24 (operand -> MINUS operand .)
+    OCTAL           reduce using rule 24 (operand -> MINUS operand .)
+    NULL            reduce using rule 24 (operand -> MINUS operand .)
+    MINUS           reduce using rule 24 (operand -> MINUS operand .)
+    LABEL           reduce using rule 24 (operand -> MINUS operand .)
+    INSTRUCTION     reduce using rule 24 (operand -> MINUS operand .)
+    $end            reduce using rule 24 (operand -> MINUS operand .)
 
 
 state 34
+
+    (28) modifier -> LABEL DECIMAL .
+
+    DBLCOLON        reduce using rule 28 (modifier -> LABEL DECIMAL .)
+    COMMA           reduce using rule 28 (modifier -> LABEL DECIMAL .)
+    SGPR            reduce using rule 28 (modifier -> LABEL DECIMAL .)
+    VGPR            reduce using rule 28 (modifier -> LABEL DECIMAL .)
+    OR              reduce using rule 28 (modifier -> LABEL DECIMAL .)
+    FLOATING        reduce using rule 28 (modifier -> LABEL DECIMAL .)
+    DECIMAL         reduce using rule 28 (modifier -> LABEL DECIMAL .)
+    SYMBOL          reduce using rule 28 (modifier -> LABEL DECIMAL .)
+    BINARY          reduce using rule 28 (modifier -> LABEL DECIMAL .)
+    HEX             reduce using rule 28 (modifier -> LABEL DECIMAL .)
+    EXEC_LO         reduce using rule 28 (modifier -> LABEL DECIMAL .)
+    EXEC_HI         reduce using rule 28 (modifier -> LABEL DECIMAL .)
+    VCC_LO          reduce using rule 28 (modifier -> LABEL DECIMAL .)
+    VCC_HI          reduce using rule 28 (modifier -> LABEL DECIMAL .)
+    OCTAL           reduce using rule 28 (modifier -> LABEL DECIMAL .)
+    NULL            reduce using rule 28 (modifier -> LABEL DECIMAL .)
+    MINUS           reduce using rule 28 (modifier -> LABEL DECIMAL .)
+    LABEL           reduce using rule 28 (modifier -> LABEL DECIMAL .)
+    INSTRUCTION     reduce using rule 28 (modifier -> LABEL DECIMAL .)
+    $end            reduce using rule 28 (modifier -> LABEL DECIMAL .)
+
+
+state 35
 
     (6) statement -> INSTRUCTION operands DBLCOLON INSTRUCTION . operands
     (7) operands -> . operand
@@ -929,16 +984,17 @@ state 34
     (20) operand -> . VCC_LO
     (21) operand -> . VCC_HI
     (22) operand -> . OCTAL
-    (23) operand -> . MINUS operand
-    (24) operand -> . func
-    (25) operand -> . OR func
-    (26) operand -> . modifier
-    (28) func -> . SYMBOL LPAREN SYMBOL RPAREN
-    (29) func -> . SYMBOL LPAREN DECIMAL RPAREN
-    (30) func -> . SYMBOL LPAREN OCTAL RPAREN
-    (31) func -> . SYMBOL LPAREN FLOATING RPAREN
-    (32) func -> . SYMBOL LPAREN HEX RPAREN
-    (27) modifier -> . LABEL DECIMAL
+    (23) operand -> . NULL
+    (24) operand -> . MINUS operand
+    (25) operand -> . func
+    (26) operand -> . OR func
+    (27) operand -> . modifier
+    (29) func -> . SYMBOL LPAREN SYMBOL RPAREN
+    (30) func -> . SYMBOL LPAREN DECIMAL RPAREN
+    (31) func -> . SYMBOL LPAREN OCTAL RPAREN
+    (32) func -> . SYMBOL LPAREN FLOATING RPAREN
+    (33) func -> . SYMBOL LPAREN HEX RPAREN
+    (28) modifier -> . LABEL DECIMAL
 
     SGPR            shift and go to state 8
     VGPR            shift and go to state 9
@@ -953,15 +1009,16 @@ state 34
     VCC_LO          shift and go to state 18
     VCC_HI          shift and go to state 19
     OCTAL           shift and go to state 20
-    MINUS           shift and go to state 21
-    LABEL           shift and go to state 24
+    NULL            shift and go to state 21
+    MINUS           shift and go to state 22
+    LABEL           shift and go to state 25
 
-    operands                       shift and go to state 42
+    operands                       shift and go to state 43
     operand                        shift and go to state 7
-    func                           shift and go to state 22
-    modifier                       shift and go to state 23
+    func                           shift and go to state 23
+    modifier                       shift and go to state 24
 
-state 35
+state 36
 
     (8) operands -> operands COMMA operand .
 
@@ -980,13 +1037,14 @@ state 35
     VCC_LO          reduce using rule 8 (operands -> operands COMMA operand .)
     VCC_HI          reduce using rule 8 (operands -> operands COMMA operand .)
     OCTAL           reduce using rule 8 (operands -> operands COMMA operand .)
+    NULL            reduce using rule 8 (operands -> operands COMMA operand .)
     MINUS           reduce using rule 8 (operands -> operands COMMA operand .)
     LABEL           reduce using rule 8 (operands -> operands COMMA operand .)
     INSTRUCTION     reduce using rule 8 (operands -> operands COMMA operand .)
     $end            reduce using rule 8 (operands -> operands COMMA operand .)
 
 
-state 36
+state 37
 
     (12) operand -> OR VGPR OR .
 
@@ -1005,48 +1063,49 @@ state 36
     VCC_LO          reduce using rule 12 (operand -> OR VGPR OR .)
     VCC_HI          reduce using rule 12 (operand -> OR VGPR OR .)
     OCTAL           reduce using rule 12 (operand -> OR VGPR OR .)
+    NULL            reduce using rule 12 (operand -> OR VGPR OR .)
     MINUS           reduce using rule 12 (operand -> OR VGPR OR .)
     LABEL           reduce using rule 12 (operand -> OR VGPR OR .)
     INSTRUCTION     reduce using rule 12 (operand -> OR VGPR OR .)
     $end            reduce using rule 12 (operand -> OR VGPR OR .)
 
 
-state 37
-
-    (28) func -> SYMBOL LPAREN SYMBOL . RPAREN
-
-    RPAREN          shift and go to state 43
-
-
 state 38
 
-    (29) func -> SYMBOL LPAREN DECIMAL . RPAREN
+    (29) func -> SYMBOL LPAREN SYMBOL . RPAREN
 
     RPAREN          shift and go to state 44
 
 
 state 39
 
-    (30) func -> SYMBOL LPAREN OCTAL . RPAREN
+    (30) func -> SYMBOL LPAREN DECIMAL . RPAREN
 
     RPAREN          shift and go to state 45
 
 
 state 40
 
-    (31) func -> SYMBOL LPAREN FLOATING . RPAREN
+    (31) func -> SYMBOL LPAREN OCTAL . RPAREN
 
     RPAREN          shift and go to state 46
 
 
 state 41
 
-    (32) func -> SYMBOL LPAREN HEX . RPAREN
+    (32) func -> SYMBOL LPAREN FLOATING . RPAREN
 
     RPAREN          shift and go to state 47
 
 
 state 42
+
+    (33) func -> SYMBOL LPAREN HEX . RPAREN
+
+    RPAREN          shift and go to state 48
+
+
+state 43
 
     (6) statement -> INSTRUCTION operands DBLCOLON INSTRUCTION operands .
     (8) operands -> operands . COMMA operand
@@ -1064,20 +1123,21 @@ state 42
     (20) operand -> . VCC_LO
     (21) operand -> . VCC_HI
     (22) operand -> . OCTAL
-    (23) operand -> . MINUS operand
-    (24) operand -> . func
-    (25) operand -> . OR func
-    (26) operand -> . modifier
-    (28) func -> . SYMBOL LPAREN SYMBOL RPAREN
-    (29) func -> . SYMBOL LPAREN DECIMAL RPAREN
-    (30) func -> . SYMBOL LPAREN OCTAL RPAREN
-    (31) func -> . SYMBOL LPAREN FLOATING RPAREN
-    (32) func -> . SYMBOL LPAREN HEX RPAREN
-    (27) modifier -> . LABEL DECIMAL
+    (23) operand -> . NULL
+    (24) operand -> . MINUS operand
+    (25) operand -> . func
+    (26) operand -> . OR func
+    (27) operand -> . modifier
+    (29) func -> . SYMBOL LPAREN SYMBOL RPAREN
+    (30) func -> . SYMBOL LPAREN DECIMAL RPAREN
+    (31) func -> . SYMBOL LPAREN OCTAL RPAREN
+    (32) func -> . SYMBOL LPAREN FLOATING RPAREN
+    (33) func -> . SYMBOL LPAREN HEX RPAREN
+    (28) modifier -> . LABEL DECIMAL
 
     INSTRUCTION     reduce using rule 6 (statement -> INSTRUCTION operands DBLCOLON INSTRUCTION operands .)
     $end            reduce using rule 6 (statement -> INSTRUCTION operands DBLCOLON INSTRUCTION operands .)
-    COMMA           shift and go to state 26
+    COMMA           shift and go to state 27
     SGPR            shift and go to state 8
     VGPR            shift and go to state 9
     OR              shift and go to state 10
@@ -1091,134 +1151,140 @@ state 42
     VCC_LO          shift and go to state 18
     VCC_HI          shift and go to state 19
     OCTAL           shift and go to state 20
-    MINUS           shift and go to state 21
-    LABEL           shift and go to state 24
+    NULL            shift and go to state 21
+    MINUS           shift and go to state 22
+    LABEL           shift and go to state 25
 
-    operand                        shift and go to state 27
-    func                           shift and go to state 22
-    modifier                       shift and go to state 23
-
-state 43
-
-    (28) func -> SYMBOL LPAREN SYMBOL RPAREN .
-
-    DBLCOLON        reduce using rule 28 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
-    COMMA           reduce using rule 28 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
-    SGPR            reduce using rule 28 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
-    VGPR            reduce using rule 28 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
-    OR              reduce using rule 28 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
-    FLOATING        reduce using rule 28 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
-    DECIMAL         reduce using rule 28 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
-    SYMBOL          reduce using rule 28 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
-    BINARY          reduce using rule 28 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
-    HEX             reduce using rule 28 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
-    EXEC_LO         reduce using rule 28 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
-    EXEC_HI         reduce using rule 28 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
-    VCC_LO          reduce using rule 28 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
-    VCC_HI          reduce using rule 28 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
-    OCTAL           reduce using rule 28 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
-    MINUS           reduce using rule 28 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
-    LABEL           reduce using rule 28 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
-    INSTRUCTION     reduce using rule 28 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
-    $end            reduce using rule 28 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
-
+    operand                        shift and go to state 28
+    func                           shift and go to state 23
+    modifier                       shift and go to state 24
 
 state 44
 
-    (29) func -> SYMBOL LPAREN DECIMAL RPAREN .
+    (29) func -> SYMBOL LPAREN SYMBOL RPAREN .
 
-    DBLCOLON        reduce using rule 29 (func -> SYMBOL LPAREN DECIMAL RPAREN .)
-    COMMA           reduce using rule 29 (func -> SYMBOL LPAREN DECIMAL RPAREN .)
-    SGPR            reduce using rule 29 (func -> SYMBOL LPAREN DECIMAL RPAREN .)
-    VGPR            reduce using rule 29 (func -> SYMBOL LPAREN DECIMAL RPAREN .)
-    OR              reduce using rule 29 (func -> SYMBOL LPAREN DECIMAL RPAREN .)
-    FLOATING        reduce using rule 29 (func -> SYMBOL LPAREN DECIMAL RPAREN .)
-    DECIMAL         reduce using rule 29 (func -> SYMBOL LPAREN DECIMAL RPAREN .)
-    SYMBOL          reduce using rule 29 (func -> SYMBOL LPAREN DECIMAL RPAREN .)
-    BINARY          reduce using rule 29 (func -> SYMBOL LPAREN DECIMAL RPAREN .)
-    HEX             reduce using rule 29 (func -> SYMBOL LPAREN DECIMAL RPAREN .)
-    EXEC_LO         reduce using rule 29 (func -> SYMBOL LPAREN DECIMAL RPAREN .)
-    EXEC_HI         reduce using rule 29 (func -> SYMBOL LPAREN DECIMAL RPAREN .)
-    VCC_LO          reduce using rule 29 (func -> SYMBOL LPAREN DECIMAL RPAREN .)
-    VCC_HI          reduce using rule 29 (func -> SYMBOL LPAREN DECIMAL RPAREN .)
-    OCTAL           reduce using rule 29 (func -> SYMBOL LPAREN DECIMAL RPAREN .)
-    MINUS           reduce using rule 29 (func -> SYMBOL LPAREN DECIMAL RPAREN .)
-    LABEL           reduce using rule 29 (func -> SYMBOL LPAREN DECIMAL RPAREN .)
-    INSTRUCTION     reduce using rule 29 (func -> SYMBOL LPAREN DECIMAL RPAREN .)
-    $end            reduce using rule 29 (func -> SYMBOL LPAREN DECIMAL RPAREN .)
+    DBLCOLON        reduce using rule 29 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
+    COMMA           reduce using rule 29 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
+    SGPR            reduce using rule 29 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
+    VGPR            reduce using rule 29 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
+    OR              reduce using rule 29 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
+    FLOATING        reduce using rule 29 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
+    DECIMAL         reduce using rule 29 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
+    SYMBOL          reduce using rule 29 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
+    BINARY          reduce using rule 29 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
+    HEX             reduce using rule 29 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
+    EXEC_LO         reduce using rule 29 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
+    EXEC_HI         reduce using rule 29 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
+    VCC_LO          reduce using rule 29 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
+    VCC_HI          reduce using rule 29 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
+    OCTAL           reduce using rule 29 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
+    NULL            reduce using rule 29 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
+    MINUS           reduce using rule 29 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
+    LABEL           reduce using rule 29 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
+    INSTRUCTION     reduce using rule 29 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
+    $end            reduce using rule 29 (func -> SYMBOL LPAREN SYMBOL RPAREN .)
 
 
 state 45
 
-    (30) func -> SYMBOL LPAREN OCTAL RPAREN .
+    (30) func -> SYMBOL LPAREN DECIMAL RPAREN .
 
-    DBLCOLON        reduce using rule 30 (func -> SYMBOL LPAREN OCTAL RPAREN .)
-    COMMA           reduce using rule 30 (func -> SYMBOL LPAREN OCTAL RPAREN .)
-    SGPR            reduce using rule 30 (func -> SYMBOL LPAREN OCTAL RPAREN .)
-    VGPR            reduce using rule 30 (func -> SYMBOL LPAREN OCTAL RPAREN .)
-    OR              reduce using rule 30 (func -> SYMBOL LPAREN OCTAL RPAREN .)
-    FLOATING        reduce using rule 30 (func -> SYMBOL LPAREN OCTAL RPAREN .)
-    DECIMAL         reduce using rule 30 (func -> SYMBOL LPAREN OCTAL RPAREN .)
-    SYMBOL          reduce using rule 30 (func -> SYMBOL LPAREN OCTAL RPAREN .)
-    BINARY          reduce using rule 30 (func -> SYMBOL LPAREN OCTAL RPAREN .)
-    HEX             reduce using rule 30 (func -> SYMBOL LPAREN OCTAL RPAREN .)
-    EXEC_LO         reduce using rule 30 (func -> SYMBOL LPAREN OCTAL RPAREN .)
-    EXEC_HI         reduce using rule 30 (func -> SYMBOL LPAREN OCTAL RPAREN .)
-    VCC_LO          reduce using rule 30 (func -> SYMBOL LPAREN OCTAL RPAREN .)
-    VCC_HI          reduce using rule 30 (func -> SYMBOL LPAREN OCTAL RPAREN .)
-    OCTAL           reduce using rule 30 (func -> SYMBOL LPAREN OCTAL RPAREN .)
-    MINUS           reduce using rule 30 (func -> SYMBOL LPAREN OCTAL RPAREN .)
-    LABEL           reduce using rule 30 (func -> SYMBOL LPAREN OCTAL RPAREN .)
-    INSTRUCTION     reduce using rule 30 (func -> SYMBOL LPAREN OCTAL RPAREN .)
-    $end            reduce using rule 30 (func -> SYMBOL LPAREN OCTAL RPAREN .)
+    DBLCOLON        reduce using rule 30 (func -> SYMBOL LPAREN DECIMAL RPAREN .)
+    COMMA           reduce using rule 30 (func -> SYMBOL LPAREN DECIMAL RPAREN .)
+    SGPR            reduce using rule 30 (func -> SYMBOL LPAREN DECIMAL RPAREN .)
+    VGPR            reduce using rule 30 (func -> SYMBOL LPAREN DECIMAL RPAREN .)
+    OR              reduce using rule 30 (func -> SYMBOL LPAREN DECIMAL RPAREN .)
+    FLOATING        reduce using rule 30 (func -> SYMBOL LPAREN DECIMAL RPAREN .)
+    DECIMAL         reduce using rule 30 (func -> SYMBOL LPAREN DECIMAL RPAREN .)
+    SYMBOL          reduce using rule 30 (func -> SYMBOL LPAREN DECIMAL RPAREN .)
+    BINARY          reduce using rule 30 (func -> SYMBOL LPAREN DECIMAL RPAREN .)
+    HEX             reduce using rule 30 (func -> SYMBOL LPAREN DECIMAL RPAREN .)
+    EXEC_LO         reduce using rule 30 (func -> SYMBOL LPAREN DECIMAL RPAREN .)
+    EXEC_HI         reduce using rule 30 (func -> SYMBOL LPAREN DECIMAL RPAREN .)
+    VCC_LO          reduce using rule 30 (func -> SYMBOL LPAREN DECIMAL RPAREN .)
+    VCC_HI          reduce using rule 30 (func -> SYMBOL LPAREN DECIMAL RPAREN .)
+    OCTAL           reduce using rule 30 (func -> SYMBOL LPAREN DECIMAL RPAREN .)
+    NULL            reduce using rule 30 (func -> SYMBOL LPAREN DECIMAL RPAREN .)
+    MINUS           reduce using rule 30 (func -> SYMBOL LPAREN DECIMAL RPAREN .)
+    LABEL           reduce using rule 30 (func -> SYMBOL LPAREN DECIMAL RPAREN .)
+    INSTRUCTION     reduce using rule 30 (func -> SYMBOL LPAREN DECIMAL RPAREN .)
+    $end            reduce using rule 30 (func -> SYMBOL LPAREN DECIMAL RPAREN .)
 
 
 state 46
 
-    (31) func -> SYMBOL LPAREN FLOATING RPAREN .
+    (31) func -> SYMBOL LPAREN OCTAL RPAREN .
 
-    DBLCOLON        reduce using rule 31 (func -> SYMBOL LPAREN FLOATING RPAREN .)
-    COMMA           reduce using rule 31 (func -> SYMBOL LPAREN FLOATING RPAREN .)
-    SGPR            reduce using rule 31 (func -> SYMBOL LPAREN FLOATING RPAREN .)
-    VGPR            reduce using rule 31 (func -> SYMBOL LPAREN FLOATING RPAREN .)
-    OR              reduce using rule 31 (func -> SYMBOL LPAREN FLOATING RPAREN .)
-    FLOATING        reduce using rule 31 (func -> SYMBOL LPAREN FLOATING RPAREN .)
-    DECIMAL         reduce using rule 31 (func -> SYMBOL LPAREN FLOATING RPAREN .)
-    SYMBOL          reduce using rule 31 (func -> SYMBOL LPAREN FLOATING RPAREN .)
-    BINARY          reduce using rule 31 (func -> SYMBOL LPAREN FLOATING RPAREN .)
-    HEX             reduce using rule 31 (func -> SYMBOL LPAREN FLOATING RPAREN .)
-    EXEC_LO         reduce using rule 31 (func -> SYMBOL LPAREN FLOATING RPAREN .)
-    EXEC_HI         reduce using rule 31 (func -> SYMBOL LPAREN FLOATING RPAREN .)
-    VCC_LO          reduce using rule 31 (func -> SYMBOL LPAREN FLOATING RPAREN .)
-    VCC_HI          reduce using rule 31 (func -> SYMBOL LPAREN FLOATING RPAREN .)
-    OCTAL           reduce using rule 31 (func -> SYMBOL LPAREN FLOATING RPAREN .)
-    MINUS           reduce using rule 31 (func -> SYMBOL LPAREN FLOATING RPAREN .)
-    LABEL           reduce using rule 31 (func -> SYMBOL LPAREN FLOATING RPAREN .)
-    INSTRUCTION     reduce using rule 31 (func -> SYMBOL LPAREN FLOATING RPAREN .)
-    $end            reduce using rule 31 (func -> SYMBOL LPAREN FLOATING RPAREN .)
+    DBLCOLON        reduce using rule 31 (func -> SYMBOL LPAREN OCTAL RPAREN .)
+    COMMA           reduce using rule 31 (func -> SYMBOL LPAREN OCTAL RPAREN .)
+    SGPR            reduce using rule 31 (func -> SYMBOL LPAREN OCTAL RPAREN .)
+    VGPR            reduce using rule 31 (func -> SYMBOL LPAREN OCTAL RPAREN .)
+    OR              reduce using rule 31 (func -> SYMBOL LPAREN OCTAL RPAREN .)
+    FLOATING        reduce using rule 31 (func -> SYMBOL LPAREN OCTAL RPAREN .)
+    DECIMAL         reduce using rule 31 (func -> SYMBOL LPAREN OCTAL RPAREN .)
+    SYMBOL          reduce using rule 31 (func -> SYMBOL LPAREN OCTAL RPAREN .)
+    BINARY          reduce using rule 31 (func -> SYMBOL LPAREN OCTAL RPAREN .)
+    HEX             reduce using rule 31 (func -> SYMBOL LPAREN OCTAL RPAREN .)
+    EXEC_LO         reduce using rule 31 (func -> SYMBOL LPAREN OCTAL RPAREN .)
+    EXEC_HI         reduce using rule 31 (func -> SYMBOL LPAREN OCTAL RPAREN .)
+    VCC_LO          reduce using rule 31 (func -> SYMBOL LPAREN OCTAL RPAREN .)
+    VCC_HI          reduce using rule 31 (func -> SYMBOL LPAREN OCTAL RPAREN .)
+    OCTAL           reduce using rule 31 (func -> SYMBOL LPAREN OCTAL RPAREN .)
+    NULL            reduce using rule 31 (func -> SYMBOL LPAREN OCTAL RPAREN .)
+    MINUS           reduce using rule 31 (func -> SYMBOL LPAREN OCTAL RPAREN .)
+    LABEL           reduce using rule 31 (func -> SYMBOL LPAREN OCTAL RPAREN .)
+    INSTRUCTION     reduce using rule 31 (func -> SYMBOL LPAREN OCTAL RPAREN .)
+    $end            reduce using rule 31 (func -> SYMBOL LPAREN OCTAL RPAREN .)
 
 
 state 47
 
-    (32) func -> SYMBOL LPAREN HEX RPAREN .
+    (32) func -> SYMBOL LPAREN FLOATING RPAREN .
 
-    DBLCOLON        reduce using rule 32 (func -> SYMBOL LPAREN HEX RPAREN .)
-    COMMA           reduce using rule 32 (func -> SYMBOL LPAREN HEX RPAREN .)
-    SGPR            reduce using rule 32 (func -> SYMBOL LPAREN HEX RPAREN .)
-    VGPR            reduce using rule 32 (func -> SYMBOL LPAREN HEX RPAREN .)
-    OR              reduce using rule 32 (func -> SYMBOL LPAREN HEX RPAREN .)
-    FLOATING        reduce using rule 32 (func -> SYMBOL LPAREN HEX RPAREN .)
-    DECIMAL         reduce using rule 32 (func -> SYMBOL LPAREN HEX RPAREN .)
-    SYMBOL          reduce using rule 32 (func -> SYMBOL LPAREN HEX RPAREN .)
-    BINARY          reduce using rule 32 (func -> SYMBOL LPAREN HEX RPAREN .)
-    HEX             reduce using rule 32 (func -> SYMBOL LPAREN HEX RPAREN .)
-    EXEC_LO         reduce using rule 32 (func -> SYMBOL LPAREN HEX RPAREN .)
-    EXEC_HI         reduce using rule 32 (func -> SYMBOL LPAREN HEX RPAREN .)
-    VCC_LO          reduce using rule 32 (func -> SYMBOL LPAREN HEX RPAREN .)
-    VCC_HI          reduce using rule 32 (func -> SYMBOL LPAREN HEX RPAREN .)
-    OCTAL           reduce using rule 32 (func -> SYMBOL LPAREN HEX RPAREN .)
-    MINUS           reduce using rule 32 (func -> SYMBOL LPAREN HEX RPAREN .)
-    LABEL           reduce using rule 32 (func -> SYMBOL LPAREN HEX RPAREN .)
-    INSTRUCTION     reduce using rule 32 (func -> SYMBOL LPAREN HEX RPAREN .)
-    $end            reduce using rule 32 (func -> SYMBOL LPAREN HEX RPAREN .)
+    DBLCOLON        reduce using rule 32 (func -> SYMBOL LPAREN FLOATING RPAREN .)
+    COMMA           reduce using rule 32 (func -> SYMBOL LPAREN FLOATING RPAREN .)
+    SGPR            reduce using rule 32 (func -> SYMBOL LPAREN FLOATING RPAREN .)
+    VGPR            reduce using rule 32 (func -> SYMBOL LPAREN FLOATING RPAREN .)
+    OR              reduce using rule 32 (func -> SYMBOL LPAREN FLOATING RPAREN .)
+    FLOATING        reduce using rule 32 (func -> SYMBOL LPAREN FLOATING RPAREN .)
+    DECIMAL         reduce using rule 32 (func -> SYMBOL LPAREN FLOATING RPAREN .)
+    SYMBOL          reduce using rule 32 (func -> SYMBOL LPAREN FLOATING RPAREN .)
+    BINARY          reduce using rule 32 (func -> SYMBOL LPAREN FLOATING RPAREN .)
+    HEX             reduce using rule 32 (func -> SYMBOL LPAREN FLOATING RPAREN .)
+    EXEC_LO         reduce using rule 32 (func -> SYMBOL LPAREN FLOATING RPAREN .)
+    EXEC_HI         reduce using rule 32 (func -> SYMBOL LPAREN FLOATING RPAREN .)
+    VCC_LO          reduce using rule 32 (func -> SYMBOL LPAREN FLOATING RPAREN .)
+    VCC_HI          reduce using rule 32 (func -> SYMBOL LPAREN FLOATING RPAREN .)
+    OCTAL           reduce using rule 32 (func -> SYMBOL LPAREN FLOATING RPAREN .)
+    NULL            reduce using rule 32 (func -> SYMBOL LPAREN FLOATING RPAREN .)
+    MINUS           reduce using rule 32 (func -> SYMBOL LPAREN FLOATING RPAREN .)
+    LABEL           reduce using rule 32 (func -> SYMBOL LPAREN FLOATING RPAREN .)
+    INSTRUCTION     reduce using rule 32 (func -> SYMBOL LPAREN FLOATING RPAREN .)
+    $end            reduce using rule 32 (func -> SYMBOL LPAREN FLOATING RPAREN .)
+
+
+state 48
+
+    (33) func -> SYMBOL LPAREN HEX RPAREN .
+
+    DBLCOLON        reduce using rule 33 (func -> SYMBOL LPAREN HEX RPAREN .)
+    COMMA           reduce using rule 33 (func -> SYMBOL LPAREN HEX RPAREN .)
+    SGPR            reduce using rule 33 (func -> SYMBOL LPAREN HEX RPAREN .)
+    VGPR            reduce using rule 33 (func -> SYMBOL LPAREN HEX RPAREN .)
+    OR              reduce using rule 33 (func -> SYMBOL LPAREN HEX RPAREN .)
+    FLOATING        reduce using rule 33 (func -> SYMBOL LPAREN HEX RPAREN .)
+    DECIMAL         reduce using rule 33 (func -> SYMBOL LPAREN HEX RPAREN .)
+    SYMBOL          reduce using rule 33 (func -> SYMBOL LPAREN HEX RPAREN .)
+    BINARY          reduce using rule 33 (func -> SYMBOL LPAREN HEX RPAREN .)
+    HEX             reduce using rule 33 (func -> SYMBOL LPAREN HEX RPAREN .)
+    EXEC_LO         reduce using rule 33 (func -> SYMBOL LPAREN HEX RPAREN .)
+    EXEC_HI         reduce using rule 33 (func -> SYMBOL LPAREN HEX RPAREN .)
+    VCC_LO          reduce using rule 33 (func -> SYMBOL LPAREN HEX RPAREN .)
+    VCC_HI          reduce using rule 33 (func -> SYMBOL LPAREN HEX RPAREN .)
+    OCTAL           reduce using rule 33 (func -> SYMBOL LPAREN HEX RPAREN .)
+    NULL            reduce using rule 33 (func -> SYMBOL LPAREN HEX RPAREN .)
+    MINUS           reduce using rule 33 (func -> SYMBOL LPAREN HEX RPAREN .)
+    LABEL           reduce using rule 33 (func -> SYMBOL LPAREN HEX RPAREN .)
+    INSTRUCTION     reduce using rule 33 (func -> SYMBOL LPAREN HEX RPAREN .)
+    $end            reduce using rule 33 (func -> SYMBOL LPAREN HEX RPAREN .)
 
