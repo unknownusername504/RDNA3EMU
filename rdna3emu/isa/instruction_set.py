@@ -390,6 +390,7 @@ class InstructionSet:
             "LDS": {
                 "DS_STORE_B32": self.memory.ds_store_b32,  # 13
                 "DS_LOAD_B32": self.memory.ds_load_b32,  # 54
+                "DS_LOAD_B128": self.memory.ds_load_b128
             },
         }
 
