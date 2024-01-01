@@ -407,16 +407,16 @@ class InstructionSet:
                 )
         return instruction_func
 
-    def dump_registers(self, non_zero=False):
+    def dump_registers(self, non_zero=False, print_all=True):
         self.registers.dump_registers(non_zero)
 
     def dump_memory(self, non_zero=False):
         self.memory.dump_memory(non_zero)
 
     def get_results(self):
-        # TODO: Actually parse the registers and memory to get the results, for now return an empty numpy array
-        # return np.array([])
-        return None
+        # TODO: Actually parse the registers and memory to get the results, for now return an zero numpy array of float16 size 4x4
+        return np.zeros((4, 4), dtype=np.float16)
+        # return None
 
     def reset(self):
         del self.registers

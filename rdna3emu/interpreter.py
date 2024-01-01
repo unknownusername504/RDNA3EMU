@@ -78,12 +78,12 @@ def run(executable, print_instr=True, dump=True):
             instr[0](*instr[1])
             if print_instr:
                 print(instr[0], instr[1])
-            if dump:
-                isa.dump_memory()
-                isa.dump_registers()
         except Exception as e:
             # Re-raise the exception with the instruction appended
             e.args = e.args + (instr,)
             raise e
+    if dump:
+        isa.dump_memory(non_zero=True)
+        isa.dump_registers(non_zero=True, print_all=False)
     emulated_result = isa.get_results()
     return emulated_result

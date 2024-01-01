@@ -278,6 +278,7 @@ class Memory:
         self.set_global_memory(address + 4, 4, reg_d1_value)
 
     def global_preload_b64(self, data, offset):
+        print("!!!lobal_preload_b64!!! data: ", data, "offset: ", offset)
         if not isinstance(offset, int):
             offset = int(offset)
             # Print a warning

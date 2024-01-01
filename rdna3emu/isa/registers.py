@@ -410,37 +410,38 @@ class Registers:
         # Call the appropriate method to get the register value
         return getattr(self, method_name)(reg_id)
 
-    def dump_registers(self, non_zero=False):
+    def dump_registers(self, non_zero=False, print_all=False):
         # Lambda function to output to file using the same format as the print statements
         # fprint = lambda x: print(x, file=open("registers.txt", "a"))
         """
         Dump the register values to the console.
         """
-        print("==== State Registers: ====")
-        print("PC: ", self.pc)
-        print("Exec: ", self.exec)
-        print("VCC: ", self.vcc)
-        print("Flat Scratch: ", self.flat_scratch)
-        print("M0: ", self.m0)
-        print("TBA: ", self.tba)
-        print("TMA: ", self.tma)
-        print("Ttmp: ", self.ttmp)
-        print("Flush IB: ", self.flush_ib)
-        print("SH_MEM_BASES: ", self.sh_mem_bases)
-        print("Flat Scratch Lo: ", self.flat_scratch_lo)
-        print("Flat Scratch Hi: ", self.flat_scratch_hi)
-        print("HW_ID1: ", self.hw_id1)
-        print("HW_ID2: ", self.hw_id2)
-        print("Shader Cycles: ", self.shader_cycles)
-        print("VMCNT: ", self.vmcnt)
-        print("VSCNT: ", self.vscnt)
-        print("EXPCNT: ", self.expcnt)
-        print("LGRMCNT: ", self.lgrmcnt)
+        if print_all:
+            print("==== State Registers: ====")
+            print("PC: ", self.pc)
+            print("Exec: ", self.exec)
+            print("VCC: ", self.vcc)
+            print("Flat Scratch: ", self.flat_scratch)
+            print("M0: ", self.m0)
+            print("TBA: ", self.tba)
+            print("TMA: ", self.tma)
+            print("Ttmp: ", self.ttmp)
+            print("Flush IB: ", self.flush_ib)
+            print("SH_MEM_BASES: ", self.sh_mem_bases)
+            print("Flat Scratch Lo: ", self.flat_scratch_lo)
+            print("Flat Scratch Hi: ", self.flat_scratch_hi)
+            print("HW_ID1: ", self.hw_id1)
+            print("HW_ID2: ", self.hw_id2)
+            print("Shader Cycles: ", self.shader_cycles)
+            print("VMCNT: ", self.vmcnt)
+            print("VSCNT: ", self.vscnt)
+            print("EXPCNT: ", self.expcnt)
+            print("LGRMCNT: ", self.lgrmcnt)
 
-        print("==== Field Registers: ====")
-        print("Status: ", self.status.get_all())
-        print("Mode: ", self.mode.get_all())
-        print("Trap Status: ", self.trap_sts.get_all())
+            print("==== Field Registers: ====")
+            print("Status: ", self.status.get_all())
+            print("Mode: ", self.mode.get_all())
+            print("Trap Status: ", self.trap_sts.get_all())
 
         print("==== VGPRs: ====")
         # Sort the accesses by register ID

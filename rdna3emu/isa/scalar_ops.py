@@ -922,7 +922,7 @@ class ScalarOps:
     # the scalar destination register.
     # The original EXEC mask is saved to the destination SGPRs before the bitwise operation is performed.
     def s_and_not1_saveexec_b32(self, reg_d, reg_s0):
-        original_exec = ~self.registers.exec & 0xFFFFFFFF00000000
+        original_exec = ~int(self.registers.exec) & 0xFFFFFFFF00000000
         s0_val = self.registers.sgpr_u32(reg_s0) & 0xFFFFFFFF
         new_exec = original_exec | (s0_val & 0xFFFFFFFF)
         self.registers.exec = new_exec
@@ -930,7 +930,7 @@ class ScalarOps:
         self.registers._status.set_scc(1 if new_exec != 0 else 0)
 
     def s_and_not1_saveexec_b64(self, reg_d, reg_s0):
-        original_exec = ~self.registers.exec
+        original_exec = ~int(self.registers.exec)
         s0_val = self.registers.sgpr_u64(reg_s0)
         new_exec = original_exec & s0_val
         self.registers.exec = new_exec
@@ -938,7 +938,7 @@ class ScalarOps:
         self.registers._status.set_scc(1 if new_exec != 0 else 0)
 
     def s_or_not1_saveexec_b32(self, reg_d, reg_s0):
-        original_exec = ~self.registers.exec & 0xFFFFFFFF00000000
+        original_exec = ~int(self.registers.exec) & 0xFFFFFFFF00000000
         s0_val = self.registers.sgpr_u32(reg_s0) & 0xFFFFFFFF
         new_exec = original_exec | (s0_val | 0xFFFFFFFF)
         self.registers.exec = new_exec
@@ -946,7 +946,7 @@ class ScalarOps:
         self.registers._status.set_scc(1 if new_exec != 0 else 0)
 
     def s_or_not1_saveexec_b64(self, reg_d, reg_s0):
-        original_exec = ~self.registers.exec
+        original_exec = ~int(self.registers.exec)
         s0_val = self.registers.sgpr_u64(reg_s0)
         new_exec = original_exec | s0_val
         self.registers.exec = new_exec
@@ -971,14 +971,16 @@ class ScalarOps:
 
     def s_and_not1_wrexec_b32(self, reg_d, reg_s0):
         s0_val = self.registers.sgpr_u32(reg_s0) & 0xFFFFFFFF
-        new_exec = (~self.registers.exec & 0xFFFFFFFF00000000) | (s0_val & 0xFFFFFFFF)
+        new_exec = (~int(self.registers.exec) & 0xFFFFFFFF00000000) | (
+            s0_val & 0xFFFFFFFF
+        )
         self.registers.exec = new_exec
         self.registers.set_sgpr_u32(reg_d, new_exec & 0xFFFFFFFF)
         self.registers._status.set_scc(1 if new_exec != 0 else 0)
 
     def s_and_not1_wrexec_b64(self, reg_d, reg_s0):
         s0_val = self.registers.sgpr_u64(reg_s0)
-        new_exec = ~self.registers.exec & s0_val
+        new_exec = ~int(self.registers.exec) & s0_val
         self.registers.exec = new_exec
         self.registers.set_sgpr_u64(reg_d, new_exec)
         self.registers._status.set_scc(1 if new_exec != 0 else 0)
