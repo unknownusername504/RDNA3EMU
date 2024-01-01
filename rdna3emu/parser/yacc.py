@@ -55,6 +55,7 @@ def p_operand(p):
     | VCC_LO
     | VCC_HI
     | OCTAL
+    | NULL
     | MINUS operand
     | func
     | OR func 

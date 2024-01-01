@@ -280,6 +280,7 @@ class ScalarOps:
         reg_scc_value = 1 if (reg_d_value != 0) else 0
         self.registers._status.set_scc(reg_scc_value)
         self.registers.set_sgpr_i32(reg_d, reg_d_value)
+        self.registers.set_sgpr_i32(reg_d, reg_d_value)
 
     # Calculate bitwise OR on two scalar inputs, store the result into a scalar register and set SCC iff the result is nonzero.
     # Reg s0 could just indicate to use 'exec_lo' or 'exec_hi' instead of a register
@@ -300,6 +301,7 @@ class ScalarOps:
         reg_d_value = reg_s0_value ^ reg_s1_value
         reg_scc_value = 1 if (reg_d_value != 0) else 0
         self.registers._status.set_scc(reg_scc_value)
+        self.registers.set_sgpr_i32(reg_d, reg_d_value)
         self.registers.set_sgpr_i32(reg_d, reg_d_value)
 
     # Calculate bitwise XOR on two scalar inputs, store the result into a scalar register and set SCC iff the result is nonzero.
@@ -1145,13 +1147,6 @@ class ScalarOps:
         reg_s0_value = self.registers.sgpr_u64(reg_s0)
         reg_d_value = self.memory.get_memory(reg_s0_value + imm, 8)
         self.registers.set_sgpr_u64(reg_d, reg_d_value)
-
-    # # Load a 128-bit value from memory into a scalar register.
-    # def s_load_b128(self, reg_d, reg_s0, reg_s1):
-    #     reg_s0_value = self.registers.sgpr_u64(reg_s0)
-    #     reg_s1_value = self.registers.sgpr_u64(reg_s1)
-    #     reg_d_value = self.memory.get_memory(reg_s0_value + reg_s1_value, 16)
-    #     self.registers.set_sgpr_u128(reg_d, reg_d_value)
 
     def s_load_b128(
         self,

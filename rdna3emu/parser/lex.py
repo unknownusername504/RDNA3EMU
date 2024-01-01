@@ -44,6 +44,7 @@ tokens = (
     "EXEC_HI",
     "VCC_LO",
     "VCC_HI",
+    "NULL",
 ) + tuple(reserved.values())
 
 # Regular expression rules for simple tokens
@@ -55,14 +56,6 @@ t_MINUS = r"-"
 t_AT = r"@"
 t_OR = r"\|"
 t_HASH = r"\#"
-
-"""
-    "vcc_lo": "VCC_LO" ,
-    "vcc_hi": "VCC_HI", 
-    "exec_lo": "EXEC_LO",
-    "exec_hi": "EXEC_HI", 
-    "m0": "M0",
-"""
 
 
 def t_HEX(t):
@@ -94,6 +87,10 @@ def t_DECIMAL(t):
     t.value = ir.Operand(type="Decimal", value=int(t.value))
     return t
 
+def t_NULL(t):
+   r"null"
+   t.value = ir.Operand(type="NULL", value=0)
+   return t
 
 def t_EXEC_LO(t):
     r"exec_lo"
@@ -114,7 +111,7 @@ def t_VCC_LO(t):
 
 
 def t_VCC_HI(t):
-    r"vccc_hi"
+    r"vcc_hi"
     t.value = ir.Operand(type="VCC_HI", value=t.value)
     return t
 
