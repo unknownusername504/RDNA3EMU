@@ -413,6 +413,9 @@ class InstructionSet:
     def dump_memory(self, non_zero=False):
         self.memory.dump_memory(non_zero)
 
+    def dump_result(self):
+        self.memory.dump_result()
+
     def get_results(self):
         # TODO: Actually parse the registers and memory to get the results, for now return an zero numpy array of float16 size 4x4
         return np.zeros((4, 4), dtype=np.float16)

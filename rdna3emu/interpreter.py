@@ -85,5 +85,6 @@ def run(executable, print_instr=True, dump=True):
     if dump:
         isa.dump_memory(non_zero=True)
         isa.dump_registers(non_zero=True, print_all=False)
+        isa.dump_result()
     emulated_result = isa.get_results()
     return emulated_result
