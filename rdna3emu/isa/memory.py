@@ -301,12 +301,17 @@ class Memory:
         self.set_global_memory(address + 4, 4, reg_d1_value)
 
     def global_preload_b64(self, data, offset):
+        print("global_preload_b64", "\ndata:", data, "\noffset:", offset)
         if not isinstance(offset, int):
             offset = int(offset)
             # Print a warning
             print("Warning: Offset is not an integer")
         address = offset
-        self.set_global_memory(address, 8, data)
+        data_bits = format(data, "064b")
+        data_0 = int(data_bits[0:32], 2)
+        data_1 = int(data_bits[32:64], 2)
+        self.set_global_memory(address, 4, data_0)
+        self.set_global_memory(address + 4, 4, data_1)
 
     # Store 32-bit data from a vector register into a given memory location.
     def ds_load_b32(self, reg_d, reg_s0, offset=0):
