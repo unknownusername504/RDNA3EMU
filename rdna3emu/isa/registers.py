@@ -175,10 +175,12 @@ class Registers:
         self._vgpr = [0] * 256
         self._sgpr = [0] * 106
         self._exec = 0  # 64-bit
-        self._exec_lo = self._exec & 0x00000000FFFFFFFF 
-        self._exec_hi = self._exec & 0xFFFFFFFF00000000 
+        self._exec_lo = self._exec & 0x00000000FFFFFFFF
+        self._exec_hi = self._exec & 0xFFFFFFFF00000000
         self._status = StatusRegister()
         self._vcc = 0  # 64-bit
+        self._vcc_lo = self._vcc & 0x00000000FFFFFFFF
+        self._vcc_hi = self._vcc & 0xFFFFFFFF00000000
         self._flat_scratch = 0  # 48-bit
         self._mode = ModeRegister()
         self._m0 = 0  # 32-bit
@@ -207,8 +209,12 @@ class Registers:
     exec = property(
         lambda self: self._exec, lambda self, val: setattr(self, "_exec", val)
     )
-    exec_lo = property(lambda self: self._exec_lo, lambda self, val: setattr(self, "_exec_lo", val))
-    exec_hi = property(lambda self: self._exec_hi, lambda self, val: setattr(self, "_exec_hi", val))
+    exec_lo = property(
+        lambda self: self._exec_lo, lambda self, val: setattr(self, "_exec_lo", val)
+    )
+    exec_hi = property(
+        lambda self: self._exec_hi, lambda self, val: setattr(self, "_exec_hi", val)
+    )
     status = property(
         lambda self: self._status, lambda self, val: setattr(self, "_status", val)
     )
@@ -219,6 +225,12 @@ class Registers:
         lambda self: self._trap_sts, lambda self, val: setattr(self, "_trap_sts", val)
     )
     vcc = property(lambda self: self._vcc, lambda self, val: setattr(self, "_vcc", val))
+    vcc_lo = property(
+        lambda self: self._vcc_lo, lambda self, val: setattr(self, "_vcc_lo", val)
+    )
+    vcc_hi = property(
+        lambda self: self._vcc_hi, lambda self, val: setattr(self, "_vcc_hi", val)
+    )
     flat_scratch = property(
         lambda self: self._flat_scratch,
         lambda self, val: setattr(self, "_flat_scratch", val),

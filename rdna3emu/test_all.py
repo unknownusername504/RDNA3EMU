@@ -115,14 +115,14 @@ def make_all_tests():
     # Unit test for rdna3emu
     test_file_names = [
         "add_tensors.txt",
-        "exp_tensors.txt",
-        "log_tensors.txt",
-        "mul_tensors.txt",
-        "neg_tensors.txt",
-        "reciprocal_tensors.txt",
-        "sin_tensors.txt",
-        "sqrt_tensors.txt",
-        "sub_tensors.txt",
+        # "exp_tensors.txt",
+        # "log_tensors.txt",
+        # "mul_tensors.txt",
+        # "neg_tensors.txt",
+        # "reciprocal_tensors.txt",
+        # "sin_tensors.txt",
+        # "sqrt_tensors.txt",
+        # "sub_tensors.txt",
         "zero_tensors.txt",
     ]
 

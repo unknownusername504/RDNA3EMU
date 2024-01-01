@@ -385,12 +385,13 @@ class InstructionSet:
                 "GLOBAL_STORE_I16": self.memory.global_store_i16,
                 "GLOBAL_STORE_B32": self.memory.global_store_b32,
                 "GLOBAL_STORE_B64": self.memory.global_store_b64,
+                "GLOBAL_PRELOAD_B64": self.memory.global_preload_b64,
             },
             "SCRATCH": {},
             "LDS": {
                 "DS_STORE_B32": self.memory.ds_store_b32,  # 13
                 "DS_LOAD_B32": self.memory.ds_load_b32,  # 54
-                "DS_LOAD_B128": self.memory.ds_load_b128
+                "DS_LOAD_B128": self.memory.ds_load_b128,
             },
         }
 
@@ -414,7 +415,8 @@ class InstructionSet:
 
     def get_results(self):
         # TODO: Actually parse the registers and memory to get the results, for now return an empty numpy array
-        return np.array([])
+        # return np.array([])
+        return None
 
     def reset(self):
         del self.registers
