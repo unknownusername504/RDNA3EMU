@@ -37,11 +37,43 @@ class ScalarOps:
 
     # Preprocessing for instructions to parse the input arguments
     # TODO: Parse the get_reg_func from type of input
-    def preprocess_inputs(self, inputs):
+    def process_inputs(self, inputs):
         processed_inputs = []
         for input, get_reg_func in inputs:
             processed_inputs.append(self.try_get_input(input, get_reg_func))
         return processed_inputs
+
+    def try_set_output(self, output, value, set_reg_func):
+        # Argument could be a register or a literal
+        if isinstance(output, int) or isinstance(output, float):
+            # Literal
+            Exception("Cannot set literal")
+        elif isinstance(output, str):
+            # Maybe special register string
+            if output == "exec_lo":
+                self.registers.exec_lo = value
+            elif output == "exec_hi":
+                self.registers.exec_hi = value
+            elif output == "exec":
+                self.registers.exec = value
+            elif output == "vcc_lo":
+                self.registers.vcc_lo = value
+            elif output == "vcc_hi":
+                self.registers.vcc_hi = value
+            elif output == "vcc":
+                self.registers.vcc = value
+            elif output == "scc":
+                self.registers._status.set_scc(value)
+            else:
+                Exception("Invalid register string")
+        else:
+            # Register, let the caller handle the type
+            return set_reg_func(value)
+
+    def process_outputs(self, outputs):
+        for output, value, set_reg_func in outputs:
+            self.try_set_output(output, value, set_reg_func)
+        return
 
     # PRG_CTRL instructions
     def s_code_end(self):
@@ -55,7 +87,7 @@ class ScalarOps:
         reg_d_value = reg_s0_value + reg_s1_value
         reg_scc_value = 1 if (reg_d_value >= 2**32) else 0
         self.registers._status.set_scc(reg_scc_value)
-        self.registers.set_sgpr_u32(reg_d, reg_d_value)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u32)])
 
     # Subtract the second unsigned input from the first input, store the result into a scalar register and store the carry-out bit into SCC.
     def s_sub_u32(self, reg_d, reg_s0, reg_s1):
@@ -64,7 +96,7 @@ class ScalarOps:
         reg_d_value = reg_s0_value - reg_s1_value
         reg_scc_value = 1 if (reg_d_value < 0) else 0
         self.registers._status.set_scc(reg_scc_value)
-        self.registers.set_sgpr_u32(reg_d, reg_d_value)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u32)])
 
     # Add two signed inputs, store the result into a scalar register and store the carry-out bit into SCC.
     def s_add_i32(self, reg_d, reg_s0, reg_s1):
@@ -94,7 +126,7 @@ class ScalarOps:
         reg_d_value = reg_s0_value + reg_s1_value + reg_scc_value
         reg_scc_value = 1 if (reg_d_value >= 2**32) else 0
         self.registers._status.set_scc(reg_scc_value)
-        self.registers.set_sgpr_u32(reg_d, reg_d_value)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u32)])
 
     # Subtract the second unsigned input from the first input, subtract the carry-in bit, store the result into a scalar register and store the carry-out bit into SCC.
     def s_subb_u32(self, reg_d, reg_s0, reg_s1):
@@ -105,7 +137,7 @@ class ScalarOps:
         reg_d_value = reg_s0_value - reg_s1_value - reg_scc_value
         reg_scc_value = 1 if (reg_d_value < 0) else 0
         self.registers._status.set_scc(reg_scc_value)
-        self.registers.set_sgpr_u32(reg_d, reg_d_value)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u32)])
 
     # Calculate the absolute value of difference between two scalar inputs, store the result into a scalar register and set SCC iff the result is nonzero.
     def s_absdiff_i32(self, reg_d, reg_s0, reg_s1):
@@ -123,7 +155,7 @@ class ScalarOps:
         reg_d_value = reg_s0_value << reg_s1_value
         reg_scc_value = 1 if (reg_d_value != 0) else 0
         self.registers._status.set_scc(reg_scc_value)
-        self.registers.set_sgpr_u32(reg_d, reg_d_value)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u32)])
 
     # Given a shift count in the second scalar input, calculate the logical shift left of the first scalar input, store the result into a scalar register and set SCC iff the result is nonzero.
     def s_lshl_b64(self, reg_d_hi, reg_d_lo, reg_s_hi, reg_s_lo, imm):
@@ -146,7 +178,7 @@ class ScalarOps:
         reg_d_value = reg_s0_value >> reg_s1_value
         reg_scc_value = 1 if (reg_d_value != 0) else 0
         self.registers._status.set_scc(reg_scc_value)
-        self.registers.set_sgpr_u32(reg_d, reg_d_value)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u32)])
 
     # Given a shift count in the second scalar input, calculate the logical shift right of the first scalar input, store the result into a scalar register and set SCC iff the result is nonzero.
     def s_lshr_b64(self, reg_d, reg_s0, reg_s1):
@@ -155,7 +187,7 @@ class ScalarOps:
         reg_d_value = reg_s0_value >> reg_s1_value
         reg_scc_value = 1 if (reg_d_value != 0) else 0
         self.registers._status.set_scc(reg_scc_value)
-        self.registers.set_sgpr_u64(reg_d, reg_d_value)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u64)])
 
     # Given a shift count in the second scalar input, calculate the arithmetic shift right (preserving sign bit) of the first scalar input, store the result into a scalar register and set SCC iff the result is nonzero.
     def s_ashr_i32(self, reg_d, reg_s0, reg_s1):
@@ -182,7 +214,7 @@ class ScalarOps:
         reg_d_value = (reg_s0_value << 1) + reg_s1_value
         reg_scc_value = 1 if (reg_d_value >= 2**32) else 0
         self.registers._status.set_scc(reg_scc_value)
-        self.registers.set_sgpr_u32(reg_d, reg_d_value)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u32)])
 
     # Calculate the logical shift left of the first input by 2, then add the second input, store the result into a scalar register and set SCC iff the summation results in an unsigned overflow.
     def s_lshl2_add_u32(self, reg_d, reg_s0, reg_s1):
@@ -191,7 +223,7 @@ class ScalarOps:
         reg_d_value = (reg_s0_value << 2) + reg_s1_value
         reg_scc_value = 1 if (reg_d_value >= 2**32) else 0
         self.registers._status.set_scc(reg_scc_value)
-        self.registers.set_sgpr_u32(reg_d, reg_d_value)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u32)])
 
     # Calculate the logical shift left of the first input by 3, then add the second input, store the result into a scalar register and set SCC iff the summation results in an unsigned overflow.
     def s_lshl3_add_u32(self, reg_d, reg_s0, reg_s1):
@@ -200,7 +232,7 @@ class ScalarOps:
         reg_d_value = (reg_s0_value << 3) + reg_s1_value
         reg_scc_value = 1 if (reg_d_value >= 2**32) else 0
         self.registers._status.set_scc(reg_scc_value)
-        self.registers.set_sgpr_u32(reg_d, reg_d_value)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u32)])
 
     # Calculate the logical shift left of the first input by 4, then add the second input, store the result into a scalar register and set SCC iff the summation results in an unsigned overflow.
     def s_lshl4_add_u32(self, reg_d, reg_s0, reg_s1):
@@ -253,170 +285,169 @@ class ScalarOps:
 
     # Calculate bitwise AND on two scalar inputs, store the result into a scalar register and set SCC iff the result is nonzero.
     def s_and_b32(self, reg_d, reg_s0, reg_s1):
-        reg_s0_value, reg_s1_value = self.preprocess_inputs(
+        reg_s0_value, reg_s1_value = self.process_inputs(
             [(reg_s0, self.registers.sgpr_u32), (reg_s1, self.registers.sgpr_u32)]
         )
         reg_d_value = reg_s0_value & reg_s1_value
         reg_scc_value = 1 if (reg_d_value != 0) else 0
         self.registers._status.set_scc(reg_scc_value)
-        self.registers.set_sgpr_i32(reg_d, reg_d_value)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u32)])
 
     # Calculate bitwise AND on two scalar inputs, store the result into a scalar register and set SCC iff the result is nonzero.
     def s_and_b64(self, reg_d, reg_s0, reg_s1):
-        reg_s0_value, reg_s1_value = self.preprocess_inputs(
+        reg_s0_value, reg_s1_value = self.process_inputs(
             [(reg_s0, self.registers.sgpr_u64), (reg_s1, self.registers.sgpr_u64)]
         )
         reg_d_value = reg_s0_value & reg_s1_value
         reg_scc_value = 1 if (reg_d_value != 0) else 0
         self.registers._status.set_scc(reg_scc_value)
-        self.registers.set_sgpr_i64(reg_d, reg_d_value)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u64)])
 
     # Calculate bitwise OR on two scalar inputs, store the result into a scalar register and set SCC iff the result is nonzero.
     def s_or_b32(self, reg_d, reg_s0, reg_s1):
-        reg_s0_value, reg_s1_value = self.preprocess_inputs(
+        reg_s0_value, reg_s1_value = self.process_inputs(
             [(reg_s0, self.registers.sgpr_u32), (reg_s1, self.registers.sgpr_u32)]
         )
         reg_d_value = reg_s0_value | reg_s1_value
         reg_scc_value = 1 if (reg_d_value != 0) else 0
         self.registers._status.set_scc(reg_scc_value)
-        self.registers.set_sgpr_i32(reg_d, reg_d_value)
-        self.registers.set_sgpr_i32(reg_d, reg_d_value)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u32)])
 
     # Calculate bitwise OR on two scalar inputs, store the result into a scalar register and set SCC iff the result is nonzero.
     # Reg s0 could just indicate to use 'exec_lo' or 'exec_hi' instead of a register
     def s_or_b64(self, reg_d, reg_s0, reg_s1):
-        reg_s0_value, reg_s1_value = self.preprocess_inputs(
+        reg_s0_value, reg_s1_value = self.process_inputs(
             [(reg_s0, self.registers.sgpr_u64), (reg_s1, self.registers.sgpr_u64)]
         )
         reg_d_value = reg_s0_value | reg_s1_value
         reg_scc_value = 1 if (reg_d_value != 0) else 0
         self.registers._status.set_scc(reg_scc_value)
-        self.registers.set_sgpr_i64(reg_d, reg_d_value)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u64)])
 
     # Calculate bitwise XOR on two scalar inputs, store the result into a scalar register and set SCC iff the result is nonzero.
     def s_xor_b32(self, reg_d, reg_s0, reg_s1):
-        reg_s0_value, reg_s1_value = self.preprocess_inputs(
+        reg_s0_value, reg_s1_value = self.process_inputs(
             [(reg_s0, self.registers.sgpr_u32), (reg_s1, self.registers.sgpr_u32)]
         )
         reg_d_value = reg_s0_value ^ reg_s1_value
         reg_scc_value = 1 if (reg_d_value != 0) else 0
         self.registers._status.set_scc(reg_scc_value)
-        self.registers.set_sgpr_i32(reg_d, reg_d_value)
-        self.registers.set_sgpr_i32(reg_d, reg_d_value)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u32)])
 
     # Calculate bitwise XOR on two scalar inputs, store the result into a scalar register and set SCC iff the result is nonzero.
     def s_xor_b64(self, reg_d, reg_s0, reg_s1):
-        reg_s0_value, reg_s1_value = self.preprocess_inputs(
+        reg_s0_value, reg_s1_value = self.process_inputs(
             [(reg_s0, self.registers.sgpr_u64), (reg_s1, self.registers.sgpr_u64)]
         )
         reg_d_value = reg_s0_value ^ reg_s1_value
         reg_scc_value = 1 if (reg_d_value != 0) else 0
         self.registers._status.set_scc(reg_scc_value)
-        self.registers.set_sgpr_i64(reg_d, reg_d_value)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u64)])
 
     # Calculate bitwise NAND on two scalar inputs, store the result into a scalar register and set SCC if the result is nonzero.
     def s_nand_b32(self, reg_d, reg_s0, reg_s1):
-        reg_s0_value, reg_s1_value = self.preprocess_inputs(
+        reg_s0_value, reg_s1_value = self.process_inputs(
             [(reg_s0, self.registers.sgpr_u32), (reg_s1, self.registers.sgpr_u32)]
         )
         reg_d_value = ~(reg_s0_value & reg_s1_value)
         reg_scc_value = 1 if (reg_d_value == 0) else 0
         self.registers._status.set_scc(reg_scc_value)
-        self.registers.set_sgpr_u32(reg_d, reg_d_value)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u32)])
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u32)])
 
     # Calculate bitwise NAND on two scalar inputs, store the result into a scalar register and set SCC if the result is nonzero.
     def s_nand_b64(self, reg_d, reg_s0, reg_s1):
-        reg_s0_value, reg_s1_value = self.preprocess_inputs(
+        reg_s0_value, reg_s1_value = self.process_inputs(
             [(reg_s0, self.registers.sgpr_u64), (reg_s1, self.registers.sgpr_u64)]
         )
         reg_d_value = ~(reg_s0_value & reg_s1_value)
         reg_scc_value = 1 if (reg_d_value == 0) else 0
         self.registers._status.set_scc(reg_scc_value)
-        self.registers.set_sgpr_u64(reg_d, reg_d_value)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u64)])
 
     # Calculate bitwise NOR on two scalar inputs, store the result into a scalar register and set SCC if the result is nonzero.
     def s_nor_b32(self, reg_d, reg_s0, reg_s1):
-        reg_s0_value, reg_s1_value = self.preprocess_inputs(
+        reg_s0_value, reg_s1_value = self.process_inputs(
             [(reg_s0, self.registers.sgpr_u32), (reg_s1, self.registers.sgpr_u32)]
         )
         reg_d_value = ~(reg_s0_value | reg_s1_value)
         reg_scc_value = 1 if (reg_d_value == 0) else 0
         self.registers._status.set_scc(reg_scc_value)
-        self.registers.set_sgpr_u32(reg_d, reg_d_value)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u32)])
 
     # Calculate bitwise NOR on two scalar inputs, store the result into a scalar register and set SCC if the result is nonzero.
     def s_nor_b64(self, reg_d, reg_s0, reg_s1):
-        reg_s0_value, reg_s1_value = self.preprocess_inputs(
+        reg_s0_value, reg_s1_value = self.process_inputs(
             [(reg_s0, self.registers.sgpr_u64), (reg_s1, self.registers.sgpr_u64)]
         )
         reg_d_value = ~(reg_s0_value | reg_s1_value)
         reg_scc_value = 1 if (reg_d_value == 0) else 0
         self.registers._status.set_scc(reg_scc_value)
-        self.registers.set_sgpr_u64(reg_d, reg_d_value)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u64)])
 
     # Calculate bitwise XNOR on two scalar inputs, store the result into a scalar register and set SCC if the result is nonzero.
     def s_xnor_b32(self, reg_d, reg_s0, reg_s1):
-        reg_s0_value, reg_s1_value = self.preprocess_inputs(
+        reg_s0_value, reg_s1_value = self.process_inputs(
             [(reg_s0, self.registers.sgpr_u32), (reg_s1, self.registers.sgpr_u32)]
         )
         reg_d_value = ~(reg_s0_value ^ reg_s1_value)
         reg_scc_value = 1 if (reg_d_value == 0) else 0
         self.registers._status.set_scc(reg_scc_value)
-        self.registers.set_sgpr_u32(reg_d, reg_d_value)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u32)])
 
     # Calculate bitwise XNOR on two scalar inputs, store the result into a scalar register and set SCC if the result is nonzero.
     def s_xnor_b64(self, reg_d, reg_s0, reg_s1):
-        reg_s0_value, reg_s1_value = self.preprocess_inputs(
+        reg_s0_value, reg_s1_value = self.process_inputs(
             [(reg_s0, self.registers.sgpr_u64), (reg_s1, self.registers.sgpr_u64)]
         )
         reg_d_value = ~(reg_s0_value ^ reg_s1_value)
         reg_scc_value = 1 if (reg_d_value == 0) else 0
         self.registers._status.set_scc(reg_scc_value)
-        self.registers.set_sgpr_u64(reg_d, reg_d_value)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u64)])
 
     # Calculate bitwise AND with the first input and the negation of the second input, store the result into a scalar register and set SCC if the result is nonzero.
     def s_and_not1_b32(self, reg_d, reg_s0, reg_s1):
-        reg_s0_value, reg_s1_value = self.preprocess_inputs(
+        reg_s0_value, reg_s1_value = self.process_inputs(
             [(reg_s0, self.registers.sgpr_u32), (reg_s1, self.registers.sgpr_u32)]
         )
         reg_d_value = reg_s0_value & ~reg_s1_value
         reg_scc_value = 1 if (reg_d_value != 0) else 0
         self.registers._status.set_scc(reg_scc_value)
-        self.registers.set_sgpr_u32(reg_d, reg_d_value)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u32)])
 
     # Calculate bitwise AND with the first input and the negation of the second input, store the result into a scalar register and set SCC if the result is nonzero.
     def s_and_not1_b64(self, reg_d, reg_s0, reg_s1):
-        reg_s0_value, reg_s1_value = self.preprocess_inputs(
+        reg_s0_value, reg_s1_value = self.process_inputs(
             [(reg_s0, self.registers.sgpr_u64), (reg_s1, self.registers.sgpr_u64)]
         )
         reg_d_value = reg_s0_value & ~reg_s1_value
         reg_scc_value = 1 if (reg_d_value != 0) else 0
         self.registers._status.set_scc(reg_scc_value)
-        self.registers.set_sgpr_u64(reg_d, reg_d_value)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u64)])
 
     # Calculate bitwise OR with the first input and the negation of the second input, store the result into a scalar register and set SCC if the result is nonzero.
     def s_or_not1_b32(self, reg_d, reg_s0, reg_s1):
-        reg_s0_value, reg_s1_value = self.preprocess_inputs(
+        reg_s0_value, reg_s1_value = self.process_inputs(
             [(reg_s0, self.registers.sgpr_u32), (reg_s1, self.registers.sgpr_u32)]
         )
         reg_d_value = reg_s0_value | ~reg_s1_value
         reg_scc_value = 1 if (reg_d_value != -1) else 0
         self.registers._status.set_scc(reg_scc_value)
-        self.registers.set_sgpr_u32(reg_d, reg_d_value)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u32)])
 
     # Calculate bitwise OR with the first input and the negation of the second input, store the result into a scalar register and set SCC if the result is nonzero.
     def s_or_not1_b64(self, reg_d, reg_s0, reg_s1):
-        reg_s0_value, reg_s1_value = self.preprocess_inputs(
+        reg_s0_value, reg_s1_value = self.process_inputs(
             [(reg_s0, self.registers.sgpr_u64), (reg_s1, self.registers.sgpr_u64)]
         )
         reg_d_value = reg_s0_value | ~reg_s1_value
         reg_scc_value = 1 if (reg_d_value != -1) else 0
         self.registers._status.set_scc(reg_scc_value)
-        self.registers.set_sgpr_u64(reg_d, reg_d_value)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u64)])
 
     # Extract an unsigned bitfield from the first input using field offset and size encoded in the second input, store the result into a scalar register and set SCC iff the result is nonzero
     def s_bfe_u32(self, reg_d, reg_s0, reg_s1):
-        reg_s0_value, reg_s1_value = self.preprocess_inputs(
+        reg_s0_value, reg_s1_value = self.process_inputs(
             [(reg_s0, self.registers.sgpr_u32), (reg_s1, self.registers.sgpr_u32)]
         )
         # Field offset is [4:0] of reg_s1
@@ -426,11 +457,11 @@ class ScalarOps:
         reg_d_value = (reg_s0_value >> field_offset) & ((1 << field_size) - 1)
         reg_scc_value = 1 if (reg_d_value != 0) else 0
         self.registers._status.set_scc(reg_scc_value)
-        self.registers.set_sgpr_u32(reg_d, reg_d_value)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u32)])
 
     # Extract a signed bitfield from the first input using field offset and size encoded in the second input, store the result into a scalar register and set SCC iff the result is nonzero.
     def s_bfe_i32(self, reg_d, reg_s0, reg_s1):
-        reg_s0_value, reg_s1_value = self.preprocess_inputs(
+        reg_s0_value, reg_s1_value = self.process_inputs(
             [(reg_s0, self.registers.sgpr_i32), (reg_s1, self.registers.sgpr_u32)]
         )
         # Field offset is [4:0] of reg_s1
@@ -444,7 +475,7 @@ class ScalarOps:
 
     # Extract an unsigned bitfield from the first input using field offset and size encoded in the second input, store the result into a scalar register and set SCC iff the result is nonzero.
     def s_bfe_u64(self, reg_d, reg_s0, reg_s1):
-        reg_s0_value, reg_s1_value = self.preprocess_inputs(
+        reg_s0_value, reg_s1_value = self.process_inputs(
             [(reg_s0, self.registers.sgpr_u64), (reg_s1, self.registers.sgpr_u64)]
         )
         # Field offset is [5:0] of reg_s1
@@ -454,11 +485,11 @@ class ScalarOps:
         reg_d_value = (reg_s0_value >> field_offset) & ((1 << field_size) - 1)
         reg_scc_value = 1 if (reg_d_value != 0) else 0
         self.registers._status.set_scc(reg_scc_value)
-        self.registers.set_sgpr_u64(reg_d, reg_d_value)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u64)])
 
     # Extract a signed bitfield from the first input using field offset and size encoded in the second input, store the result into a scalar register and set SCC iff the result is nonzero.
     def s_bfe_i64(self, reg_d, reg_s0, reg_s1):
-        reg_s0_value, reg_s1_value = self.preprocess_inputs(
+        reg_s0_value, reg_s1_value = self.process_inputs(
             [(reg_s0, self.registers.sgpr_i64), (reg_s1, self.registers.sgpr_u64)]
         )
         # Field offset is [5:0] of reg_s1
@@ -474,7 +505,7 @@ class ScalarOps:
 
     # Calculate a bitfield mask given a field offset and size and store the result in a scalar register.
     def s_bfm_b32(self, reg_d, reg_s0, reg_s1):
-        reg_s0_value, reg_s1_value = self.preprocess_inputs(
+        reg_s0_value, reg_s1_value = self.process_inputs(
             [(reg_s0, self.registers.sgpr_u32), (reg_s1, self.registers.sgpr_u32)]
         )
         # Field offset is [4:0] of reg_s1
@@ -482,11 +513,11 @@ class ScalarOps:
         # Field size is [4:0] of reg_s0
         field_size = reg_s0_value & 0x1F
         reg_d_value = ((1 << field_size) - 1) << field_offset
-        self.registers.set_sgpr_u32(reg_d, reg_d_value)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u32)])
 
     # Calculate a bitfield mask given a field offset and size and store the result in a scalar register.
     def s_bfm_b64(self, reg_d, reg_s0, reg_s1):
-        reg_s0_value, reg_s1_value = self.preprocess_inputs(
+        reg_s0_value, reg_s1_value = self.process_inputs(
             [(reg_s0, self.registers.sgpr_u64), (reg_s1, self.registers.sgpr_u64)]
         )
         # Field offset is [5:0] of reg_s1
@@ -494,11 +525,11 @@ class ScalarOps:
         # Field size is [5:0] of reg_s0
         field_size = reg_s0_value & 0x3F
         reg_d_value = ((1 << field_size) - 1) << field_offset
-        self.registers.set_sgpr_u64(reg_d, reg_d_value)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u64)])
 
     # Multiply two signed integers and store the result into a scalar register.
     def s_mul_i32(self, reg_d, reg_s0, reg_s1):
-        reg_s0_value, reg_s1_value = self.preprocess_inputs(
+        reg_s0_value, reg_s1_value = self.process_inputs(
             [(reg_s0, self.registers.sgpr_i32), (reg_s1, self.registers.sgpr_i32)]
         )
         reg_d_value = reg_s0_value * reg_s1_value
@@ -509,7 +540,7 @@ class ScalarOps:
         reg_s0_value = self.registers.sgpr_u32(reg_s0)
         reg_s1_value = self.registers.sgpr_u32(reg_s1)
         reg_d_value = (reg_s0_value * reg_s1_value) >> 32
-        self.registers.set_sgpr_u32(reg_d, reg_d_value)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u32)])
 
     # Multiply two signed integers and store the high 32 bits of the result into a scalar register.
     def s_mul_hi_i32(self, reg_d, reg_s0, reg_s1):
@@ -523,45 +554,45 @@ class ScalarOps:
         reg_scc_value = self.registers._status.scc
         ()
         reg_d_value = reg_s0 if reg_scc_value == 1 else reg_s1
-        self.registers.set_sgpr_u32(reg_d, reg_d_value)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u32)])
 
     # Select the first input if SCC is true otherwise select the second input, then store the selected input into a scalar register.
     def s_cselect_b64(self, reg_d, reg_s0, reg_s1):
         reg_scc_value = self.registers._status.scc
         ()
         reg_d_value = reg_s0 if reg_scc_value == 1 else reg_s1
-        self.registers.set_sgpr_u64(reg_d, reg_d_value)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u64)])
 
     # Pack two 16-bit scalar values into a scalar register.
     def s_pack_ll_b32_b16(self, reg_d, reg_s0, reg_s1):
         reg_s0_value = self.registers.sgpr_u16(reg_s0)
         reg_s1_value = self.registers.sgpr_u32(reg_s1)
         reg_d_value = (reg_s1_value << 16) | reg_s0_value
-        self.registers.set_sgpr_u32(reg_d, reg_d_value)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u32)])
 
     # Pack two 16-bit scalar values into a scalar register.
     def s_pack_lh_b32_b16(self, reg_d, reg_s0, reg_s1):
         reg_s0_value = self.registers.sgpr_u16(reg_s0)
         reg_s1_value = self.registers.sgpr_u32(reg_s1)
         reg_d_value = (reg_s1_value & 0xFFFF0000) | reg_s0_value
-        self.registers.set_sgpr_u32(reg_d, reg_d_value)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u32)])
 
     # Pack two 16-bit scalar values into a scalar register.
     def s_pack_hh_b32_b16(self, reg_d, reg_s0, reg_s1):
         reg_s0_value = self.registers.sgpr_u16(reg_s0)
         reg_s1_value = self.registers.sgpr_u32(reg_s1)
         reg_d_value = (reg_s1_value & 0xFFFF0000) | (reg_s0_value >> 16)
-        self.registers.set_sgpr_u32(reg_d, reg_d_value)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u32)])
 
     # Pack two 16-bit scalar values into a scalar register.
     def s_pack_hl_b32_b16(self, reg_d, reg_s0, reg_s1):
         reg_s0_value = self.registers.sgpr_u16(reg_s0)
         reg_s1_value = self.registers.sgpr_u32(reg_s1)
         reg_d_value = (reg_s1_value << 16) | (reg_s0_value >> 16)
-        self.registers.set_sgpr_u32(reg_d, reg_d_value)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u32)])
 
     def s_mov_b32(self, reg_d, arg_0):
-        arg_0_val = self.preprocess_inputs([(arg_0, self.registers.sgpr_u32)])
+        arg_0_val = self.process_inputs([(arg_0, self.registers.sgpr_u32)])
         self.registers.set_sgpr_u32(reg_d, arg_0_val)
 
     # mov scalar input into a scalar register. (64-bit)
@@ -1115,16 +1146,19 @@ class ScalarOps:
     # Load a 32-bit value from memory into a scalar register.
     # If the offset is specified as an SGPR, the SGPR contains an UNSIGNED BYTE offset (the 2 LSBs are ignored).
     # If the offset is specified as an immediate 21-bit constant, the constant is a SIGNED BYTE offset.
-    def s_load_b32(self, reg_d, reg_s0, reg_s1):
+    def s_load_b32(self, reg_d, reg_s0, reg_s1, imm=None):
         reg_s0_value = self.registers.sgpr_u64(reg_s0)
         reg_s1_value = self.registers.sgpr_u64(reg_s1)
-        reg_d_value = self.memory.get_memory(reg_s0_value + reg_s1_value, 4)
-        self.registers.set_sgpr_u32(reg_d, reg_d_value)
+        addr = reg_s0_value + reg_s1_value
+        if imm:
+            addr += imm
+        reg_d_value = self.memory.get_memory(addr, 4)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u32)])
 
     def s_load_b32_imm(self, reg_d, reg_s0, imm):
         reg_s0_value = self.registers.sgpr_u64(reg_s0)
         reg_d_value = self.memory.get_memory(reg_s0_value + imm, 4)
-        self.registers.set_sgpr_u32(reg_d, reg_d_value)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u32)])
 
     # TODO: Imm can be a scalar (ignore 2 LSBs in that case)
     def s_load_b64(self, reg_d_upper, reg_d_lower, reg_s_upper, reg_s_lower, imm=None):
@@ -1145,7 +1179,7 @@ class ScalarOps:
     def s_load_b64_imm(self, reg_d, reg_s0, imm):
         reg_s0_value = self.registers.sgpr_u64(reg_s0)
         reg_d_value = self.memory.get_memory(reg_s0_value + imm, 8)
-        self.registers.set_sgpr_u64(reg_d, reg_d_value)
+        self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u64)])
 
     def s_load_b128(
         self,

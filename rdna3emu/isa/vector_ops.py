@@ -1185,28 +1185,32 @@ class VectorOps:
     # Fused-multiply-add of single-precision values with MIX encoding.
     # Size and location of S0, S1 and S2 controlled by OPSEL: 0=src[31:0], 1=src[31:0], 2=src[15:0], 3=src[31:16]. Also,
     # for FMA_MIX, the NEG_HI field acts instead as an absolute-value modifier.
-    def v_fma_mix_f32(self, reg_d, arg_0, arg_1, arg_2, opsel=0):
-        inputs = [arg_0, arg_1, arg_2]
-        opsel_lo = opsel & 0x1
-        opsel_hi = (opsel >> 1) & 0x1
+    def v_fma_mix_f32(
+        self, reg_d, arg_0, arg_1, arg_2, opsel_0=0, opsel_1=0, opsel_2=0
+    ):
+        arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_f32)
+        arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_f32)
+        arg_2_value = self.try_get_literal(arg_2, self.registers.vgpr_f32)
+        inputs = [arg_0_value, arg_1_value, arg_2_value]
+        opsels = [opsel_0, opsel_1, opsel_2]
         for i in range(3):
             # Unpack the literal or register.
             imm_value_lo, imm_value_hi = self.unpack_f32(inputs[i])
+            opsel_lo = opsels[i] & 0x1
+            opsel_hi = (opsels[i] >> 1) & 0x1
             if not opsel_hi:
-                inputs[i] = imm_value_hi
-            elif opsel_lo:
+                # 00, 01: Use the packed value.
+                inputs[i] = self.pack_f32(imm_value_lo, imm_value_hi)
+            elif not opsel_lo:
+                # 10: Use the lower half.
                 inputs[i] = imm_value_lo
             else:
-                inputs[i] = self.pack_f32(imm_value_lo, imm_value_hi)
-
-        # Unpack the destination register.
-        reg_d_value_lo, reg_d_value_hi = self.unpack_f32(reg_d)
+                # 11: Use the upper half.
+                inputs[i] = imm_value_hi
 
         # Perform the fused multiply add.
-        reg_d_value_lo = inputs[0] * inputs[1] + inputs[2]
-        reg_d_value_hi = reg_d_value_hi
+        reg_d_value = inputs[0] * inputs[1] + inputs[2]
 
-        reg_d_value = self.pack_f32(reg_d_value_lo, reg_d_value_hi)
         self.registers.set_vgpr_f32(reg_d, reg_d_value)
 
     # VOP3P instructions
@@ -1225,31 +1229,35 @@ class VectorOps:
     #   endif
     # endfor;
     # D0[15 : 0].f16 = f32_to_f16(fma(in[0], in[1], in[2]))
-    def v_fma_mixlo_f16(self, reg_d, arg_0, arg_1, arg_2, opsel=0):
-        inputs = [arg_0, arg_1, arg_2]
-        opsel_lo = opsel & 0x1
-        opsel_hi = (opsel >> 1) & 0x1
+    def v_fma_mixlo_f16(
+        self, reg_d, arg_0, arg_1, arg_2, opsel_0=0, opsel_1=0, opsel_2=0
+    ):
+        arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_f32)
+        arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_f32)
+        arg_2_value = self.try_get_literal(arg_2, self.registers.vgpr_f32)
+        inputs = [arg_0_value, arg_1_value, arg_2_value]
+        opsels = [opsel_0, opsel_1, opsel_2]
         for i in range(3):
             # Unpack the literal or register.
             imm_value_lo, imm_value_hi = self.unpack_f32(inputs[i])
+            opsel_lo = opsels[i] & 0x1
+            opsel_hi = (opsels[i] >> 1) & 0x1
             if not opsel_hi:
-                inputs[i] = imm_value_hi
-            elif opsel_lo:
+                # 00, 01: Use the packed value.
+                inputs[i] = self.pack_f32(imm_value_lo, imm_value_hi)
+            elif not opsel_lo:
+                # 10: Use the lower half.
                 inputs[i] = imm_value_lo
             else:
-                inputs[i] = self.pack_f32(imm_value_lo, imm_value_hi)
-
-        # Unpack the destination register.
-        reg_d_value_lo, reg_d_value_hi = self.unpack_f32(reg_d)
+                # 11: Use the upper half.
+                inputs[i] = imm_value_hi
 
         # Perform the fused multiply add.
-        reg_d_value_lo = inputs[0] * inputs[1] + inputs[2]
-        reg_d_value_hi = reg_d_value_hi
-
-        reg_d_value = self.pack_f32(reg_d_value_lo, reg_d_value_hi)
+        reg_d_value = inputs[0] * inputs[1] + inputs[2]
         # Convert to half precision.
         reg_d_value = utils.fp32_to_fp16(reg_d_value)
-        self.registers.set_vgpr_f32(reg_d, reg_d_value)
+
+        self.registers.set_vgpr_f16(reg_d, reg_d_value)
 
     # VOP3SD instructions
     #
@@ -1260,7 +1268,7 @@ class VectorOps:
         # if src1 < 256:
         #   src1_val = self.register.vgpr_u32(src1)
         # if src2 < 256:
-            
+
         # src1_val = src1
         pass  # raise Exception("OP... not implemented")
 
