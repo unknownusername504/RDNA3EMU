@@ -561,7 +561,6 @@ class ScalarOps:
         self.registers.set_sgpr_u32(reg_d, reg_d_value)
 
     def s_mov_b32(self, reg_d, arg_0):
-        # TODO: DEAL WITH ARG WHEN EXEC_LO, EXEC_HI, VCC etc.
         arg_0_val = self.preprocess_inputs([(arg_0, self.registers.sgpr_u32)])
         self.registers.set_sgpr_u32(reg_d, arg_0_val)
 
