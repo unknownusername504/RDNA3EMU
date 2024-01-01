@@ -898,7 +898,7 @@ class VectorOps:
     # S1.u[8] -- value is a positive normal value.
     # S1.u[9] -- value is positive infinity.
     def v_cmp_class_f32(self, arg_0, arg_1, arg_2):
-        arg_1_value = self.try_get_literal(arg_1, self.registers.vgpr_f32)
+        arg_1_value = np.uint32(self.try_get_literal(arg_1, self.registers.vgpr_f32))
         arg_2_value = self.try_get_literal(arg_2, self.registers.vgpr_u32)
         result = 0
 

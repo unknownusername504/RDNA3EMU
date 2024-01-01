@@ -1,5 +1,6 @@
 import rdna3emu.isa.utils as utils
 from rdna3emu.isa.registers import Registers as Re
+from rdna3emu.isa.registers import VectorRegister, ScalarRegister
 from rdna3emu.isa.memory import Memory as Me
 
 
@@ -66,9 +67,11 @@ class ScalarOps:
                 self.registers._status.set_scc(value)
             else:
                 Exception("Invalid register string")
-        else:
+        elif isinstance(output, VectorRegister) or isinstance(output, ScalarRegister):
             # Register, let the caller handle the type
-            return set_reg_func(value)
+            return set_reg_func(output, value)
+        else:
+            Exception("Invalid register type")
 
     def process_outputs(self, outputs):
         for output, value, set_reg_func in outputs:

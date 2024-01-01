@@ -2,6 +2,23 @@ from functools import partialmethod
 import numpy as np
 
 
+# Define register class that will behave like int so that we can subtype it and isinstance(reg, int) will return false
+class VectorRegister:
+    def __init__(self, value):
+        self.value = value
+
+    def __int__(self):
+        return self.value
+
+
+class ScalarRegister:
+    def __init__(self, value):
+        self.value = value
+
+    def __int__(self):
+        return self.value
+
+
 class Bitfield:
     def __init__(self):
         self._bitfield = 0
@@ -315,6 +332,8 @@ class Registers:
         return int(val)
 
     def _get(self, reg_id, attr=None, signed=False, size=None, f=False):
+        # Cast to int so that we can use native Python functions
+        reg_id = int(reg_id)
         attr_value = getattr(self, attr)
         if reg_id < len(attr_value):
             val = attr_value[reg_id]
@@ -328,6 +347,8 @@ class Registers:
             return Registers.integer(val, size, signed)
 
     def _set(self, reg_id, val, attr=None, signed=None, size=None, f=False):
+        # Cast to int so that we can use native Python functions
+        reg_id = int(reg_id)
         attr_value = getattr(self, attr)
         if reg_id < len(attr_value):
             val = attr_value[reg_id]

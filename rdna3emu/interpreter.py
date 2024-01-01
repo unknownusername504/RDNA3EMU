@@ -1,4 +1,5 @@
 from rdna3emu.parser.ir import Instruction, isa
+from rdna3emu.isa.registers import VectorRegister, ScalarRegister
 
 
 def build_executable(stmts):
@@ -50,7 +51,13 @@ def extract_exec(instr, operands):
                     continue
                 elif sub_operand.registers:
                     for reg in sub_operand.registers:
-                        args.append(int(reg[1:]))
+                        # Add the register to the tokens list as an int (without the 's' or 'v') and subtype it as a register
+                        reg_type = reg[0]
+                        reg_value = int(reg[1:])
+                        if reg_type == "s":
+                            args.append(ScalarRegister(reg_value))
+                        elif reg_type == "v":
+                            args.append(VectorRegister(reg_value))
                 else:
                     args.append(sub_operand.value)
         else:
