@@ -501,11 +501,11 @@ class TestOps(unittest.TestCase):
             self.fail(f"Failed to reset the ISA.\n")
 
         # Create the executable
-        # global_preload_b64 0x1800000000000000 offset:0x5c8
+        # global_preload_b64 0xDEADDEADDEADDEAD offset:0x5c8
         executable = [
             (
                 self.isa.memory.global_preload_b64,
-                [int("0x1800000000000000", 16), int("0x5c8", 16)],
+                [int("0xDEADDEADDEADDEAD", 16), int("0x5c8", 16)],
             ),
             # End the program
             (self.isa.scalar_ops.s_endpgm, []),
@@ -529,8 +529,8 @@ class TestOps(unittest.TestCase):
         except Exception as _:
             self.fail(f"Failed to run global_preload_b64 through interpreter.\n")
 
-        # Define the expected result which we know to be [0x1800000000000000]
-        expected_result = np.array([0x1800000000000000], dtype=np.uint64)
+        # Define the expected result which we know to be [0xDEADDEADDEADDEAD]
+        expected_result = np.array([0xDEADDEADDEADDEAD], dtype=np.uint64)
 
         # Compare the results
         np.testing.assert_allclose(
