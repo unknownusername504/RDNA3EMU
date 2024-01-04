@@ -449,9 +449,12 @@ class VectorOps:
         pass  # raise Exception("OP... not implemented")
 
     # mov data from a vector input into a vector register.
-    def v_mov_b32(self, reg_d, reg_v0):
-        reg_v0_value = self.registers.vgpr_u32(reg_v0)
-        self.registers.set_vgpr_u32(reg_d, reg_v0_value)
+    def v_mov_b32(self, reg_d, arg_0):
+        arg_0_value = self.try_get_literal(arg_0, self.registers.vgpr_u32)
+        if isinstance(arg_0_value, float):
+            self.registers.set_vgpr_f32(reg_d, arg_0_value)
+        else:
+            self.registers.set_vgpr_u32(reg_d, arg_0_value)
 
     # Read the scalar value in the lowest active lane of the input vector register and store it into a scalar register.
     def v_readfirstlane_b32(self, reg_d, reg_v0):

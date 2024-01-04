@@ -350,10 +350,10 @@ class Registers:
             return Registers.integer(val, size, signed)
 
     def _set(self, reg_id, val, attr=None, signed=None, size=None, f=False):
-        # Print the register access
-        print(f"Setting {attr} register {reg_id} to {val}.")
         # Cast to int so that we can use native Python functions
         reg_id = int(reg_id)
+        # Print the register access
+        print(f"Setting {attr} register {reg_id} to {val}.")
         attr_value = getattr(self, attr)
         if reg_id >= len(attr_value):
             # Handle the case where reg_id is out of range

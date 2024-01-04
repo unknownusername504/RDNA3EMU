@@ -93,8 +93,6 @@ class ScalarOps:
         reg_scc_value = 1 if (reg_d_value >= 2**32) else 0
         self.registers._status.set_scc(reg_scc_value)
         self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u32)])
-        # Print the value of the register
-        print("s_add_u32: " + str(self.registers.sgpr_u32(reg_d)))
 
     # Subtract the second unsigned input from the first input, store the result into a scalar register and store the carry-out bit into SCC.
     def s_sub_u32(self, reg_d, reg_s0, reg_s1):
@@ -601,8 +599,6 @@ class ScalarOps:
     def s_mov_b32(self, reg_d, arg_0):
         arg_0_val = self.process_inputs([(arg_0, self.registers.sgpr_u32)])
         self.registers.set_sgpr_u32(reg_d, arg_0_val)
-        # Print the value of the register
-        print("s_mov_b32: " + str(self.registers.sgpr_u32(reg_d)))
 
     # mov scalar input into a scalar register. (64-bit)
     def s_mov_b64(self, reg_d, reg_s0):

@@ -31,10 +31,10 @@ if "%~1"=="reinstall" (
     for %%f in (dist\*.whl) do (
         python -m installer %%f
     )
-
-    REM Add the pythonpath
-    set PYTHONPATH=%PYTHONPATH%;%CD%\op_unittests
 )
+
+REM Add the pythonpath
+set PYTHONPATH=%PYTHONPATH%;%CD%\op_unittests
 
 REM Run all the unittests
 python op_unittests\run_op_unittests.py
