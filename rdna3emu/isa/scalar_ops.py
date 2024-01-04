@@ -598,7 +598,10 @@ class ScalarOps:
 
     def s_mov_b32(self, reg_d, arg_0):
         arg_0_val = self.process_inputs([(arg_0, self.registers.sgpr_u32)])
-        self.registers.set_sgpr_u32(reg_d, arg_0_val)
+        if arg_0_val < 0:
+            self.registers.set_sgpr_i32(reg_d, arg_0_val)
+        else:
+            self.registers.set_sgpr_u32(reg_d, arg_0_val)
 
     # mov scalar input into a scalar register. (64-bit)
     def s_mov_b64(self, reg_d, reg_s0):
