@@ -556,15 +556,13 @@ class ScalarOps:
 
     # Select the first input if SCC is true otherwise select the second input, then store the selected input into a scalar register.
     def s_cselect_b32(self, reg_d, reg_s0, reg_s1):
-        reg_scc_value = self.registers._status.scc
-        ()
+        reg_scc_value = self.registers._status.scc()
         reg_d_value = reg_s0 if reg_scc_value == 1 else reg_s1
         self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u32)])
 
     # Select the first input if SCC is true otherwise select the second input, then store the selected input into a scalar register.
     def s_cselect_b64(self, reg_d, reg_s0, reg_s1):
-        reg_scc_value = self.registers._status.scc
-        ()
+        reg_scc_value = self.registers._status.scc()
         reg_d_value = reg_s0 if reg_scc_value == 1 else reg_s1
         self.process_outputs([(reg_d, reg_d_value, self.registers.set_sgpr_u64)])
 

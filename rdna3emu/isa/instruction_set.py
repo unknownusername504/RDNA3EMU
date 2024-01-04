@@ -417,7 +417,7 @@ class InstructionSet:
     def get_result_from_registers(self, reg_id_list, signed, size, floating):
         if reg_id_list is None:
             return None
-        result = []
+        results = []
         for reg_id in reg_id_list:
             if isinstance(reg_id, ScalarRegister):
                 attr = "_sgpr"
@@ -425,12 +425,32 @@ class InstructionSet:
                 attr = "_vgpr"
             else:
                 raise Exception("Unknown register type")
-            result.append(
+            results.append(
                 self.registers._get(
                     reg_id, attr=attr, signed=signed, size=size, f=floating
                 )
             )
-        return result
+        return results
+
+    def get_result_from_memory(self, address_list, size):
+        if (address_list is None) or (size is None):
+            return None
+        results = []
+        for address in address_list:
+            if address is None:
+                return None
+            if not isinstance(address, int):
+                raise Exception("Address must be an integer")
+            if not isinstance(size, int):
+                raise Exception("Size must be an integer")
+            if size == 8:
+                result_hi = self.memory.get_global_memory(address, 4)
+                result_lo = self.memory.get_global_memory(address + 4, 4)
+                result = result_hi << 32 | result_lo
+                results.append(result)
+            else:
+                results.append(self.memory.get_global_memory(address, size))
+        return results
 
     def reset(self):
         print("Resetting registers and memory")

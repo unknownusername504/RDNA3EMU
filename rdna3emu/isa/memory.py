@@ -22,6 +22,16 @@ class Memory:
         # Track the memory accesses
         self.accesses = set()
 
+    def print_global_memory_location(self, address, size):
+        if size == 8:
+            value_hi = self.get_global_memory(address, 4)
+            value_lo = self.get_global_memory(address + 4, 4)
+            value = value_hi << 32 | value_lo
+            print(f"Address: {address:#x} Value: {value:#x}")
+        else:
+            value = self.get_global_memory(address, size)
+            print(f"Address: {address:#x} Value: {value:#x}")
+
     def dump_memory(self, non_zero=False):
         # Lambda function to output to file using the same format as the print statements
         # fprint = lambda x: print(x, file=open("memory.txt", "a"))
@@ -281,7 +291,7 @@ class Memory:
         self.set_global_memory(address + 4, 4, reg_d1_value)
 
     def global_preload_b64(self, data, offset):
-        print("global_preload_b64", "\ndata:", data, "\noffset:", offset)
+        # print("global_preload_b64", "\ndata:", data, "\noffset:", offset)
         if not isinstance(offset, int):
             offset = int(offset)
             # Print a warning
