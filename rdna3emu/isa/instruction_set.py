@@ -1,7 +1,7 @@
 import numpy as np
 from rdna3emu.isa.scalar_ops import ScalarOps
 from rdna3emu.isa.vector_ops import VectorOps
-from rdna3emu.isa.registers import Registers
+from rdna3emu.isa.registers import Registers, ScalarRegister, VectorRegister
 from rdna3emu.isa.memory import Memory
 from rdna3emu.isa.utils import populate_instruction_usage
 
@@ -408,24 +408,34 @@ class InstructionSet:
         return instruction_func
 
     def dump_registers(self, non_zero=False, print_all=True):
-        self.registers.dump_registers(non_zero)
+        self.registers.dump_registers(non_zero, print_all)
 
     def dump_memory(self, non_zero=False):
         self.memory.dump_memory(non_zero)
 
-    def dump_result(self):
-        self.memory.dump_result()
-
-    def get_results(self):
-        # TODO: Actually parse the registers and memory to get the results, for now return an zero numpy array of float16 size 4x4
-        return np.zeros((4, 4), dtype=np.float16)
-        # return None
+    # Array of registers with register type and register number
+    def get_result_from_registers(self, reg_id_list, signed, size, floating):
+        if reg_id_list is None:
+            return None
+        result = []
+        for reg_id in reg_id_list:
+            if isinstance(reg_id, ScalarRegister):
+                attr = "_sgpr"
+            elif isinstance(reg_id, VectorRegister):
+                attr = "_vgpr"
+            else:
+                raise Exception("Unknown register type")
+            result.append(
+                self.registers._get(
+                    reg_id, attr=attr, signed=signed, size=size, f=floating
+                )
+            )
+        return result
 
     def reset(self):
-        del self.registers
-        del self.memory
-        self.registers = Registers()
-        self.memory = Memory(self.registers)
+        print("Resetting registers and memory")
+        self.registers.reset()
+        self.memory.reset(self.registers)
 
 
 if __name__ == "__main__":

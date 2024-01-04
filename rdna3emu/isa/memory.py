@@ -5,6 +5,9 @@ from rdna3emu.isa.registers import Registers as Re
 
 class Memory:
     def __init__(self, registers: Re, size=2**32):
+        self.reset(registers, size)
+
+    def reset(self, registers: Re, size=2**32):
         self.registers = registers
         self.size = size
         self.data = bytearray(size)
@@ -18,14 +21,6 @@ class Memory:
 
         # Track the memory accesses
         self.accesses = set()
-
-        # Result is probably the last global_store_b64 instruction but this is only able to store 1 row of data which
-        # a 1x4 numpy array of float16s
-        self.result = np.zeros((1, 4), dtype=np.float16)
-
-    def dump_result(self):
-        print("==== Result: ====")
-        print(self.result)
 
     def dump_memory(self, non_zero=False):
         # Lambda function to output to file using the same format as the print statements
@@ -269,19 +264,6 @@ class Memory:
 
         self.set_global_memory(address, 4, reg_d_value)
 
-    def decode_result(self, reg_v0_value, reg_v1_value):
-        # Decode the result
-        result_bits_0 = format(reg_v0_value, "032b")
-        result_bits_1 = format(reg_v1_value, "032b")
-        result_0lobits = int(result_bits_0[0:16], 2)
-        result_0hibits = int(result_bits_0[16:32], 2)
-        result_1lobits = int(result_bits_1[0:16], 2)
-        result_1hibits = int(result_bits_1[16:32], 2)
-        self.result[0][0] = np.float16(result_0lobits)
-        self.result[0][1] = np.float16(result_0hibits)
-        self.result[0][2] = np.float16(result_1lobits)
-        self.result[0][3] = np.float16(result_1hibits)
-
     # global_store_b64 v[0:1], v[2:3], off
     def global_store_b64(self, reg_d1, reg_d0, reg_v0, reg_v1, offset=0):
         if not isinstance(offset, int):
@@ -292,8 +274,6 @@ class Memory:
         reg_d1_value = self.registers.vgpr_u32(reg_d1)
         reg_v0_value = self.registers.vgpr_u32(reg_v0)
         reg_v1_value = self.registers.vgpr_u32(reg_v1)
-
-        self.decode_result(reg_v0_value, reg_v1_value)
 
         address = reg_v0_value + reg_v1_value + offset
 

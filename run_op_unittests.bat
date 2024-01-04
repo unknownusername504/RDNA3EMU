@@ -31,13 +31,13 @@ if "%~1"=="reinstall" (
     for %%f in (dist\*.whl) do (
         python -m installer %%f
     )
+
+    REM Add the pythonpath
+    set PYTHONPATH=%PYTHONPATH%;%CD%\op_unittests
 )
 
-REM Add the pythonpath
-set PYTHONPATH=%PYTHONPATH%;%CD%\op_unittests
-
 REM Run all the unittests
-python -m unittest op_unittests\run_op_unittests.py
+python op_unittests\run_op_unittests.py
 
 REM Deactivate the virtual environment
 deactivate

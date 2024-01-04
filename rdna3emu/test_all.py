@@ -75,7 +75,8 @@ def make_test_func(test_file_name, isa):
                         data = f.read()
 
                     instructions = parse(data)
-                    emulated_result = run(build_executable(instructions), False, False)
+                    run(build_executable(instructions), False, False)
+                    emulated_result = isa.get_result_from_registers(None)
         except Exception as _:
             self.fail(f"Failed to run {test_file_name} through interpreter.\n")
 

@@ -188,6 +188,9 @@ class TrapStatusRegister(Bitfield):
 
 class Registers:
     def __init__(self):
+        self.reset()
+
+    def reset(self):
         self._pc = 0
         self._vgpr = [0] * 256
         self._sgpr = [0] * 106
@@ -347,12 +350,12 @@ class Registers:
             return Registers.integer(val, size, signed)
 
     def _set(self, reg_id, val, attr=None, signed=None, size=None, f=False):
+        # Print the register access
+        print(f"Setting {attr} register {reg_id} to {val}.")
         # Cast to int so that we can use native Python functions
         reg_id = int(reg_id)
         attr_value = getattr(self, attr)
-        if reg_id < len(attr_value):
-            val = attr_value[reg_id]
-        else:
+        if reg_id >= len(attr_value):
             # Handle the case where reg_id is out of range
             raise IndexError(f"Register {reg_id} is out of range for attribute {attr}.")
         if f:

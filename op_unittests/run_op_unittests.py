@@ -9,7 +9,7 @@ def run_tests():
     # Find all the test cases in this folder
     test_loader = unittest.TestLoader()
     test_loader.testMethodPrefix = "op_unittest_"
-    tests = test_loader.discover("./op_unittests", pattern="op_unittest_*.py")
+    tests = test_loader.discover("./op_unittests", pattern="op_unittests.py")
 
     # Add the tests to the suite
     suite.addTests(tests)
@@ -19,6 +19,7 @@ def run_tests():
     runner.run(suite)
 
 
-print("Running all tests...")
-run_tests()
-print("Done.")
+if __name__ == "__main__":
+    print("Running all tests...")
+    run_tests()
+    print("Done.")

@@ -70,8 +70,11 @@ def extract_exec(instr, operands):
     return (instr.fx, args)
 
 
+def get_isa():
+    return isa
+
+
 def run(executable, print_instr=True, dump=True):
-    emulated_result = None
     for instr in executable:
         try:
             # s_endpgm and s_code_end are the only instructions that don't take any arguments and are not arrays but are callable methods
@@ -92,6 +95,3 @@ def run(executable, print_instr=True, dump=True):
     if dump:
         isa.dump_memory(non_zero=True)
         isa.dump_registers(non_zero=True, print_all=False)
-        isa.dump_result()
-    emulated_result = isa.get_results()
-    return emulated_result
