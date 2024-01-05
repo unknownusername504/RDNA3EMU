@@ -34,8 +34,8 @@ class TestOps(unittest.TestCase):
             run(executable, print_instr=False, dump=False)
 
             # Print the result of sgpr1,2 as a uint32
-            print(self.isa.registers.sgpr_u32(1))
-            print(self.isa.registers.sgpr_u32(2))
+            print(hex(self.isa.registers.sgpr_u32(1)))
+            print(hex(self.isa.registers.sgpr_u32(2)))
 
             results_arr = self.isa.get_result_from_registers(
                 reg_id_list=[ScalarRegister(1), ScalarRegister(2)],
@@ -82,8 +82,8 @@ class TestOps(unittest.TestCase):
             run(executable, print_instr=False, dump=False)
 
             # Print the result of vgpr1,2 as a uint32
-            print(self.isa.registers.vgpr_u32(1))
-            print(self.isa.registers.vgpr_u32(2))
+            print(hex(self.isa.registers.vgpr_u32(1)))
+            print(hex(self.isa.registers.vgpr_u32(2)))
 
             results_arr = self.isa.get_result_from_registers(
                 reg_id_list=[VectorRegister(1), VectorRegister(2)],
@@ -134,9 +134,9 @@ class TestOps(unittest.TestCase):
             run(executable, print_instr=False, dump=False)
 
             # Print the result of sgpr1,2,3 as a uint32
-            print(self.isa.registers.sgpr_u32(1))
-            print(self.isa.registers.sgpr_u32(2))
-            print(self.isa.registers.sgpr_u32(3))
+            print(hex(self.isa.registers.sgpr_u32(1)))
+            print(hex(self.isa.registers.sgpr_u32(2)))
+            print(hex(self.isa.registers.sgpr_u32(3)))
 
             results_arr = self.isa.get_result_from_registers(
                 reg_id_list=[ScalarRegister(3)],
@@ -288,15 +288,15 @@ class TestOps(unittest.TestCase):
             run(executable, print_instr=False, dump=False)
 
             # Print the result of sgpr1,2,3,4,5,6,7,8,9 as a int32
-            print(self.isa.registers.sgpr_i32(1))
-            print(self.isa.registers.sgpr_i32(2))
-            print(self.isa.registers.sgpr_i32(3))
-            print(self.isa.registers.sgpr_i32(4))
-            print(self.isa.registers.sgpr_i32(5))
-            print(self.isa.registers.sgpr_i32(6))
-            print(self.isa.registers.sgpr_i32(7))
-            print(self.isa.registers.sgpr_i32(8))
-            print(self.isa.registers.sgpr_i32(9))
+            print(hex(self.isa.registers.sgpr_i32(1)))
+            print(hex(self.isa.registers.sgpr_i32(2)))
+            print(hex(self.isa.registers.sgpr_i32(3)))
+            print(hex(self.isa.registers.sgpr_i32(4)))
+            print(hex(self.isa.registers.sgpr_i32(5)))
+            print(hex(self.isa.registers.sgpr_i32(6)))
+            print(hex(self.isa.registers.sgpr_i32(7)))
+            print(hex(self.isa.registers.sgpr_i32(8)))
+            print(hex(self.isa.registers.sgpr_i32(9)))
 
             results_arr = self.isa.get_result_from_registers(
                 reg_id_list=[
@@ -371,8 +371,8 @@ class TestOps(unittest.TestCase):
             run(executable, print_instr=False, dump=False)
 
             # Print the result of sgpr5,6 as a uint32
-            print(self.isa.registers.sgpr_u32(5))
-            print(self.isa.registers.sgpr_u32(6))
+            print(hex(self.isa.registers.sgpr_u32(5)))
+            print(hex(self.isa.registers.sgpr_u32(6)))
 
             results_arr = self.isa.get_result_from_registers(
                 reg_id_list=[ScalarRegister(5), ScalarRegister(6)],
@@ -459,13 +459,13 @@ class TestOps(unittest.TestCase):
             run(executable, print_instr=False, dump=False)
 
             # Print the result of vgpr4,5,6 as a uint32
-            print(self.isa.registers.vgpr_u32(4))
-            print(self.isa.registers.vgpr_u32(5))
-            print(self.isa.registers.vgpr_u32(6))
+            print(hex(self.isa.registers.vgpr_u32(4)))
+            print(hex(self.isa.registers.vgpr_u32(5)))
+            print(hex(self.isa.registers.vgpr_u32(6)))
 
             # Print the result of sgpr1,3 as a uint32
-            print(self.isa.registers.sgpr_u32(1))
-            print(self.isa.registers.sgpr_u32(3))
+            print(hex(self.isa.registers.sgpr_u32(1)))
+            print(hex(self.isa.registers.sgpr_u32(3)))
 
             results_arr = self.isa.get_result_from_registers(
                 reg_id_list=[
@@ -531,6 +531,153 @@ class TestOps(unittest.TestCase):
 
         # Define the expected result which we know to be [0xDEADDEADDEADDEAD]
         expected_result = np.array([0xDEADDEADDEADDEAD], dtype=np.uint64)
+
+        # Compare the results
+        np.testing.assert_allclose(
+            emulated_result, expected_result, atol=1e-6, rtol=1e-6
+        )
+
+    def op_unittest_global_store_b64(self):
+        print("Running test op_unittest_global_store_b64...")
+        try:
+            # Reset the isa
+            self.isa.reset()
+        except Exception as _:
+            self.fail(f"Failed to reset the ISA.\n")
+
+        from rdna3emu.isa.registers import VectorRegister
+
+        # Create the executable
+        # global_store_b64 v[0:1], v[2:3], off
+        executable = [
+            # Create the data
+            (self.isa.vector_ops.v_mov_b32, [VectorRegister(0), 0xDEADFFFF]),
+            (self.isa.vector_ops.v_mov_b32, [VectorRegister(1), 0x1111DEAD]),
+            # Set the destination address
+            (self.isa.vector_ops.v_mov_b32, [VectorRegister(2), 0xFFFFFFFF]),
+            (self.isa.vector_ops.v_mov_b32, [VectorRegister(3), 0x11111111]),
+            # Store the data
+            (
+                self.isa.memory.global_store_b64,
+                [
+                    VectorRegister(0),
+                    VectorRegister(1),
+                    VectorRegister(2),
+                    VectorRegister(3),
+                    0x1,
+                ],
+            ),
+            # End the program
+            (self.isa.scalar_ops.s_endpgm, []),
+            (self.isa.scalar_ops.s_code_end, []),
+        ]
+
+        # Run the executable
+        from rdna3emu.interpreter import run
+
+        try:
+            run(executable, print_instr=False, dump=False)
+            # Print the result of global_memory_location(0xFFFFFFFF11111112, 8) as a uint64
+            self.isa.memory.print_global_memory_location(0xFFFFFFFF11111112, 8)
+
+            results_arr = self.isa.get_result_from_memory(
+                address_list=[0xFFFFFFFF11111112], size=8
+            )
+            # Convert the results to a numpy array of uint64 and 1d shape
+            emulated_result = np.array(results_arr, dtype=np.uint64).flatten()
+        except Exception as _:
+            self.fail(f"Failed to run global_store_b64 through interpreter.\n")
+
+        # Define the expected result which we know to be [0xDEADFFFF1111DEAD]
+        expected_result = np.array([0xDEADFFFF1111DEAD], dtype=np.uint64)
+
+        # Compare the results
+        np.testing.assert_allclose(
+            emulated_result, expected_result, atol=1e-6, rtol=1e-6
+        )
+
+    def op_unittest_global_load_b128(self):
+        print("Running test op_unittest_global_load_b128...")
+        try:
+            # Reset the isa
+            self.isa.reset()
+        except Exception as _:
+            self.fail(f"Failed to reset the ISA.\n")
+        from rdna3emu.isa.registers import ScalarRegister, VectorRegister
+
+        # Create the executable
+        # global_load_b128 v[13:16], v1, s[6:7]
+        # # Global: use the SGPR to provide a base address and the VGPR provides a 32-bit byte offset.
+        # global_load_b128(reg_d3, reg_d2, reg_d1, reg_d0, regv_offset, reg_s_hi, reg_s_lo, offset=0)
+        executable = [
+            # Preload the data
+            (
+                self.isa.memory.global_preload_b64,
+                [0xDEAD11112222DEAD, 0xFFFFFFFF11111113],
+            ),
+            (
+                self.isa.memory.global_preload_b64,
+                [0xDEAD33334444DEAD, 0xFFFFFFFF1111111B],
+            ),
+            # Set the base address
+            (self.isa.scalar_ops.s_mov_b32, [ScalarRegister(6), 0xFFFFFFFF]),
+            (self.isa.scalar_ops.s_mov_b32, [ScalarRegister(7), 0x11111111]),
+            # Set the offset
+            (self.isa.vector_ops.v_mov_b32, [VectorRegister(1), 0x1]),
+            # Load the data
+            (
+                self.isa.memory.global_load_b128,
+                [
+                    VectorRegister(13),
+                    VectorRegister(14),
+                    VectorRegister(15),
+                    VectorRegister(16),
+                    VectorRegister(1),
+                    ScalarRegister(6),
+                    ScalarRegister(7),
+                    0x1,
+                ],
+            ),
+            # End the program
+            (self.isa.scalar_ops.s_endpgm, []),
+            (self.isa.scalar_ops.s_code_end, []),
+        ]
+
+        # Run the executable
+        from rdna3emu.interpreter import run
+
+        try:
+            run(executable, print_instr=False, dump=False)
+            # Print the result of global_memory_location(0xFFFFFFFF11111113, 8) as a uint64
+            self.isa.memory.print_global_memory_location(0xFFFFFFFF11111113, 8)
+            # Print the result of global_memory_location(0xFFFFFFFF1111111B, 8) as a uint64
+            self.isa.memory.print_global_memory_location(0xFFFFFFFF1111111B, 8)
+            # Print the result of vgpr13,14,15,16 as a uint64
+            print(hex(self.isa.registers.vgpr_u64(13)))
+            print(hex(self.isa.registers.vgpr_u64(14)))
+            print(hex(self.isa.registers.vgpr_u64(15)))
+            print(hex(self.isa.registers.vgpr_u64(16)))
+
+            results_arr = self.isa.get_result_from_registers(
+                reg_id_list=[
+                    VectorRegister(13),
+                    VectorRegister(14),
+                    VectorRegister(15),
+                    VectorRegister(16),
+                ],
+                size=32,
+                signed=False,
+                floating=False,
+            )
+            # Convert the results to a numpy array of uint64 and 1d shape
+            emulated_result = np.array(results_arr, dtype=np.uint32).flatten()
+        except Exception as _:
+            self.fail(f"Failed to run global_load_b128 through interpreter.\n")
+
+        # Define the expected result which we know to be [0xDEAD1111, 0x2222DEAD, 0xDEAD3333, 0x4444DEAD]
+        expected_result = np.array(
+            [0xDEAD1111, 0x2222DEAD, 0xDEAD3333, 0x4444DEAD], dtype=np.uint32
+        )
 
         # Compare the results
         np.testing.assert_allclose(

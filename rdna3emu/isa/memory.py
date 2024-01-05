@@ -4,18 +4,14 @@ from rdna3emu.isa.registers import Registers as Re
 
 
 class Memory:
-    def __init__(self, registers: Re, size=2**32):
+    def __init__(self, registers: Re, size=2**64):
         self.reset(registers, size)
 
-    def reset(self, registers: Re, size=2**32):
+    def reset(self, registers: Re, size=2**64):
         self.registers = registers
         self.size = size
-        self.data = bytearray(size)
-        self._data = np.zeros(size, dtype=np.uint8)
-        # CAUSING SOME KIND OF OOM and crashes vscode
-        self._data[:] = self.data[:]
-        self._data = self._data.view(dtype=np.uint32)
-        self._data = self._data.reshape(size // 4)
+        # Create the memory structure as a dictionary of 32-bit values
+        self.data = {}
 
         self.legal_sizes = [1, 2, 4, 8, 16, 32]
 
@@ -83,41 +79,102 @@ class Memory:
         # Check that the address is a valid integer
         if not isinstance(address, int):
             raise Exception("Invalid memory access address type")
+        if not isinstance(size, int):
+            raise Exception("Invalid memory access size type")
+
         # Check that the address is within the memory range
         if address < 0 or address > self.size:
             raise Exception(f"Invalid memory access address {address:#x} is invalid")
-        if size == 1:
-            return address
-        elif size in self.legal_sizes:
-            return address & 0xFFFFFFFC
-        else:
+
+        # Check that the size is valid
+        if size not in self.legal_sizes:
             raise Exception("Invalid memory access size")
+
+        # Align the address to the payload size
+        return address & (~(size - 1))
 
     # Write to the memory structure
     def set_memory(self, address, size, value):
         address = self.sanitize_address(address, size)
         if size == 1:
-            self.data[address] = value
+            # Word aligned
+            word_address = address // 4
+            # Check if the word exists
+            if word_address not in self.data:
+                self.data[word_address] = 0
+            byte_offset = address % 4
+            word = self.data[word_address]
+            # Clear the byte
+            word &= ~(0xFF << (byte_offset * 8))
+            # Set the byte
+            word |= (value & 0xFF) << (byte_offset * 8)
+            # Check if the word is zero and delete it if it is
+            if word == 0:
+                del self.data[word_address]
+            else:
+                self.data[word_address] = word
         elif size == 2:
-            self.data[address] = value & 0xFF
-            self.data[address + 1] = (value >> 8) & 0xFF
-        elif size in self.legal_sizes:
-            self._data[address // 4] = value
+            # Word aligned
+            word_address = address // 4
+            # Check if the word exists
+            if word_address not in self.data:
+                self.data[word_address] = 0
+            byte_offset = address % 4
+            word = self.data[word_address]
+            # Clear the byte
+            word &= ~(0xFFFF << (byte_offset * 8))
+            # Set the byte
+            word |= (value & 0xFFFF) << (byte_offset * 8)
+            # Check if the word is zero and delete it if it is
+            if word == 0:
+                del self.data[word_address]
+            else:
+                self.data[word_address] = word
         else:
-            raise Exception("Invalid memory access size")
-        self.add_access(address, size)
+            # Split the value into words
+            num_words = size // 4
+            for i in range(num_words):
+                word_address = (address // 4) + i
+                word = (value >> (i * 32)) & 0xFFFFFFFF
+                # Check if the word is zero and delete it if it is
+                if word == 0:
+                    if word_address in self.data:
+                        del self.data[word_address]
+                else:
+                    self.data[word_address] = word
 
     # Write to the memory structure
     def get_memory(self, address, size):
         address = self.sanitize_address(address, size)
         if size == 1:
-            return self.data[address]
+            # Word aligned
+            word_address = address // 4
+            # Check if the word exists
+            if word_address not in self.data:
+                return 0
+            byte_offset = address % 4
+            word = self.data[word_address]
+            return (word >> (byte_offset * 8)) & 0xFF
         elif size == 2:
-            return self.data[address] | (self.data[address + 1] << 8)
-        elif size in self.legal_sizes:
-            return self._data[address // 4]
+            # Word aligned
+            word_address = address // 4
+            # Check if the word exists
+            if word_address not in self.data:
+                return 0
+            byte_offset = address % 4
+            word = self.data[word_address]
+            return (word >> (byte_offset * 8)) & 0xFFFF
         else:
-            raise Exception("Invalid memory access size")
+            # Combine the words
+            num_words = size // 4
+            value = 0
+            for i in range(num_words):
+                word_address = (address // 4) + i
+                # Check if the word exists
+                if word_address not in self.data:
+                    continue
+                value |= self.data[word_address] << (i * 32)
+            return value
 
     def get_global_memory(self, address, size):
         return self.get_memory(address, size)
@@ -188,7 +245,6 @@ class Memory:
             offset = int(offset)
             # Print a warning
             print("Warning: Offset is not an integer")
-        reg_d_value = self.registers.vgpr_u32(reg_d)
         reg_v0_value = self.registers.vgpr_u32(reg_v0)
         reg_s0_value = self.registers.sgpr_u32(reg_s0)
         reg_s1_value = self.registers.sgpr_u32(reg_s1)
@@ -270,12 +326,13 @@ class Memory:
         reg_s0_value = self.registers.sgpr_u32(reg_s0)
         reg_s1_value = self.registers.sgpr_u32(reg_s1)
 
-        address = reg_v0_value + reg_s0_value + reg_s1_value + offset
+        address = (reg_s0_value << 32) | reg_s1_value
+        address += reg_v0_value + offset
 
         self.set_global_memory(address, 4, reg_d_value)
 
     # global_store_b64 v[0:1], v[2:3], off
-    def global_store_b64(self, reg_d1, reg_d0, reg_v0, reg_v1, offset=0):
+    def global_store_b64(self, reg_d0, reg_d1, reg_v0, reg_v1, offset=0):
         if not isinstance(offset, int):
             offset = int(offset)
             # Print a warning
@@ -285,7 +342,8 @@ class Memory:
         reg_v0_value = self.registers.vgpr_u32(reg_v0)
         reg_v1_value = self.registers.vgpr_u32(reg_v1)
 
-        address = reg_v0_value + reg_v1_value + offset
+        address = (reg_v0_value << 32) | reg_v1_value
+        address += offset
 
         self.set_global_memory(address, 4, reg_d0_value)
         self.set_global_memory(address + 4, 4, reg_d1_value)
