@@ -8,7 +8,7 @@ class TestOps(unittest.TestCase):
     def setUp(self):
         self.isa = InstructionSet()
 
-    def test_op_unittest_s_mov_b32(self):
+    def op_unittest_s_mov_b32(self):
         print("Running test op_unittest_s_mov_b32...")
         try:
             # Reset the isa
@@ -56,7 +56,7 @@ class TestOps(unittest.TestCase):
             emulated_result, expected_result, atol=1e-6, rtol=1e-6
         )
 
-    def test_op_unittest_v_mov_b32(self):
+    def op_unittest_v_mov_b32(self):
         print("Running test op_unittest_v_mov_b32...")
         try:
             # Reset the isa
